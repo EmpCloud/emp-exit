@@ -26,7 +26,9 @@ import { ktRoutes } from "./api/routes/kt.routes";
 import { letterRoutes } from "./api/routes/letter.routes";
 import { alumniRoutes } from "./api/routes/alumni.routes";
 import { analyticsRoutes } from "./api/routes/analytics.routes";
+import { predictionRoutes } from "./api/routes/prediction.routes";
 import { settingsRoutes } from "./api/routes/settings.routes";
+import { buyoutRoutes } from "./api/routes/buyout.routes";
 import { errorHandler } from "./api/middleware/error.middleware";
 import { apiLimiter } from "./api/middleware/rate-limit.middleware";
 
@@ -87,7 +89,9 @@ v1.use("/kt", ktRoutes);
 v1.use("/letters", letterRoutes);
 v1.use("/alumni", alumniRoutes);
 v1.use("/analytics", analyticsRoutes);
+v1.use("/predictions", predictionRoutes);
 v1.use("/settings", settingsRoutes);
+v1.use("/buyout", buyoutRoutes);
 
 app.use("/api/v1", v1);
 

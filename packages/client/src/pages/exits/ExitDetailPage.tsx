@@ -9,11 +9,14 @@ import {
   XCircle,
   MessageSquare,
   DollarSign,
+  Calculator,
   Package,
   BookOpen,
   FileSignature,
   ArrowLeft,
+  Clock,
 } from "lucide-react";
+import { Link as RouterLink } from "react-router-dom";
 import { apiGet, apiPost, apiPatch } from "@/api/client";
 import { cn, formatDate } from "@/lib/utils";
 
@@ -60,7 +63,7 @@ const CLEARANCE_STATUS_COLORS: Record<string, string> = {
   waived: "bg-amber-100 text-amber-700",
 };
 
-type Tab = "overview" | "checklist" | "clearance" | "interview" | "fnf" | "assets" | "kt" | "letters";
+type Tab = "overview" | "checklist" | "clearance" | "interview" | "fnf" | "buyout" | "assets" | "kt" | "letters";
 
 const TABS: { key: Tab; label: string; icon: React.ElementType }[] = [
   { key: "overview", label: "Overview", icon: UserMinus },
@@ -68,6 +71,7 @@ const TABS: { key: Tab; label: string; icon: React.ElementType }[] = [
   { key: "clearance", label: "Clearance", icon: Shield },
   { key: "interview", label: "Interview", icon: MessageSquare },
   { key: "fnf", label: "FnF", icon: DollarSign },
+  { key: "buyout", label: "Buyout", icon: Calculator },
   { key: "assets", label: "Assets", icon: Package },
   { key: "kt", label: "KT", icon: BookOpen },
   { key: "letters", label: "Letters", icon: FileSignature },
@@ -80,6 +84,7 @@ export function ExitDetailPage() {
   const [activeTab, setActiveTab] = useState<Tab>("overview");
   const [checklist, setChecklist] = useState<any>(null);
   const [clearance, setClearance] = useState<any>(null);
+  const [buyout, setBuyout] = useState<any>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
@@ -90,6 +95,7 @@ export function ExitDetailPage() {
     if (!id || !exit) return;
     if (activeTab === "checklist") loadChecklist();
     if (activeTab === "clearance") loadClearance();
+    if (activeTab === "buyout") loadBuyout();
   }, [activeTab, id, exit]);
 
   async function loadExit() {
@@ -119,6 +125,15 @@ export function ExitDetailPage() {
       setClearance(res.data);
     } catch {
       setClearance(null);
+    }
+  }
+
+  async function loadBuyout() {
+    try {
+      const res = await apiGet<any>(`/buyout/exit/${id}`);
+      setBuyout(res.data);
+    } catch {
+      setBuyout(null);
     }
   }
 
@@ -275,6 +290,7 @@ export function ExitDetailPage() {
         )}
         {activeTab === "interview" && <PlaceholderTab name="Exit Interview" />}
         {activeTab === "fnf" && <PlaceholderTab name="Full & Final Settlement" />}
+        {activeTab === "buyout" && <BuyoutTab buyout={buyout} exitId={id!} onReload={loadBuyout} />}
         {activeTab === "assets" && <PlaceholderTab name="Asset Returns" />}
         {activeTab === "kt" && <PlaceholderTab name="Knowledge Transfer" />}
         {activeTab === "letters" && <PlaceholderTab name="Exit Letters" />}
@@ -494,6 +510,189 @@ function ClearanceTab({
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function formatINR(amountPaise: number): string {
+  const rupees = amountPaise / 100;
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(rupees);
+}
+
+const BUYOUT_STATUS_COLORS: Record<string, string> = {
+  pending: "bg-amber-100 text-amber-700",
+  approved: "bg-green-100 text-green-700",
+  rejected: "bg-red-100 text-red-700",
+};
+
+function BuyoutTab({
+  buyout,
+  exitId,
+  onReload,
+}: {
+  buyout: any;
+  exitId: string;
+  onReload: () => void;
+}) {
+  const [actionLoading, setActionLoading] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+  const [showReject, setShowReject] = useState(false);
+
+  async function handleApprove() {
+    if (!buyout) return;
+    if (!confirm("Approve this buyout? The employee's last working date will be updated.")) return;
+    setActionLoading(true);
+    try {
+      await apiPost(`/buyout/${buyout.id}/approve`);
+      onReload();
+    } catch {
+      // handled
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  async function handleReject() {
+    if (!buyout || !rejectReason.trim()) return;
+    setActionLoading(true);
+    try {
+      await apiPost(`/buyout/${buyout.id}/reject`, { reason: rejectReason });
+      setShowReject(false);
+      setRejectReason("");
+      onReload();
+    } catch {
+      // handled
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  if (!buyout) {
+    return (
+      <div className="text-center py-8">
+        <Calculator className="mx-auto h-10 w-10 text-gray-300 mb-3" />
+        <p className="text-sm text-gray-500 mb-4">No buyout request for this exit.</p>
+        <p className="text-xs text-gray-400">
+          The employee can submit a buyout request from their self-service portal.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Calculator className="h-5 w-5 text-rose-500" />
+          <h3 className="text-sm font-semibold text-gray-900">Notice Buyout Request</h3>
+          <span
+            className={cn(
+              "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize",
+              BUYOUT_STATUS_COLORS[buyout.status] || "bg-gray-100 text-gray-600",
+            )}
+          >
+            {buyout.status}
+          </span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wider text-gray-500">Original Last Date</p>
+          <p className="mt-0.5 text-sm text-gray-900">{formatDate(buyout.original_last_date)}</p>
+        </div>
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wider text-gray-500">Requested Last Date</p>
+          <p className="mt-0.5 text-sm font-medium text-gray-900">{formatDate(buyout.requested_last_date)}</p>
+        </div>
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wider text-gray-500">Original Notice</p>
+          <p className="mt-0.5 text-sm text-gray-900">{buyout.original_notice_days} days</p>
+        </div>
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wider text-gray-500">Days Served</p>
+          <p className="mt-0.5 text-sm text-gray-900">{buyout.served_days} days</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        <div className="rounded-lg bg-amber-50 border border-amber-100 p-3">
+          <p className="text-xs text-amber-600 font-medium">Days to Buy Out</p>
+          <p className="text-lg font-bold text-amber-700">{buyout.remaining_days} days</p>
+        </div>
+        <div className="rounded-lg bg-gray-50 border border-gray-100 p-3">
+          <p className="text-xs text-gray-500">Daily Rate</p>
+          <p className="text-lg font-semibold text-gray-900">{formatINR(buyout.daily_rate)}</p>
+        </div>
+        <div className="rounded-lg bg-rose-50 border border-rose-200 p-3">
+          <p className="text-xs text-rose-500 font-medium">Buyout Amount</p>
+          <p className="text-2xl font-bold text-rose-600">{formatINR(buyout.buyout_amount)}</p>
+        </div>
+      </div>
+
+      {buyout.status === "rejected" && buyout.rejected_reason && (
+        <div className="rounded-lg bg-red-50 border border-red-200 p-3">
+          <p className="text-xs font-medium text-red-600 mb-1">Rejection Reason</p>
+          <p className="text-sm text-red-700">{buyout.rejected_reason}</p>
+        </div>
+      )}
+
+      {buyout.status === "approved" && (
+        <div className="rounded-lg bg-green-50 border border-green-200 p-3 text-sm text-green-700">
+          Approved on {buyout.approved_at ? formatDate(buyout.approved_at) : "--"}.
+          The buyout amount will be added to the notice period recovery in the F&F settlement.
+        </div>
+      )}
+
+      {buyout.status === "pending" && (
+        <div className="flex items-center gap-3 pt-2">
+          <button
+            onClick={handleApprove}
+            disabled={actionLoading}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+          >
+            {actionLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
+            Approve Buyout
+          </button>
+          {!showReject ? (
+            <button
+              onClick={() => setShowReject(true)}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50"
+            >
+              <XCircle className="h-4 w-4" />
+              Reject
+            </button>
+          ) : (
+            <div className="flex-1 flex items-center gap-2">
+              <input
+                type="text"
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder="Rejection reason..."
+                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-200 focus:outline-none"
+              />
+              <button
+                onClick={handleReject}
+                disabled={!rejectReason.trim() || actionLoading}
+                className="rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                Confirm
+              </button>
+              <button
+                onClick={() => { setShowReject(false); setRejectReason(""); }}
+                className="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

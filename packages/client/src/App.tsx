@@ -104,9 +104,23 @@ const MyKTPage = lazy(() =>
   import("@/pages/kt/MyKTPage").then((m) => ({ default: m.MyKTPage })),
 );
 
+// Buyout
+const BuyoutCalculatorPage = lazy(() =>
+  import("@/pages/buyout/BuyoutCalculatorPage").then((m) => ({ default: m.BuyoutCalculatorPage })),
+);
+const BuyoutListPage = lazy(() =>
+  import("@/pages/buyout/BuyoutListPage").then((m) => ({ default: m.BuyoutListPage })),
+);
+
 // Analytics
 const AnalyticsPage = lazy(() =>
   import("@/pages/analytics/AnalyticsPage").then((m) => ({ default: m.AnalyticsPage })),
+);
+const AttritionPredictionPage = lazy(() =>
+  import("@/pages/analytics/AttritionPredictionPage").then((m) => ({ default: m.AttritionPredictionPage })),
+);
+const EmployeeRiskDetailPage = lazy(() =>
+  import("@/pages/analytics/EmployeeRiskDetailPage").then((m) => ({ default: m.EmployeeRiskDetailPage })),
 );
 
 // Settings
@@ -219,6 +233,10 @@ export default function App() {
           <Route path="/fnf" element={<FnFListPage />} />
           <Route path="/fnf/:id" element={<FnFDetailPage />} />
 
+          {/* Buyout */}
+          <Route path="/buyout" element={<BuyoutListPage />} />
+          <Route path="/buyout/calculator" element={<BuyoutCalculatorPage />} />
+
           {/* Assets */}
           <Route path="/assets" element={<AssetListPage />} />
 
@@ -237,6 +255,8 @@ export default function App() {
 
           {/* Analytics */}
           <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/analytics/flight-risk" element={<AttritionPredictionPage />} />
+          <Route path="/analytics/flight-risk/:employeeId" element={<EmployeeRiskDetailPage />} />
 
           {/* Settings */}
           <Route path="/settings" element={<SettingsPage />} />

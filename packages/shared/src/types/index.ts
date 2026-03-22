@@ -351,6 +351,34 @@ export interface AlumniProfile {
   updated_at: string;
 }
 
+export enum BuyoutStatus {
+  PENDING = "pending",
+  APPROVED = "approved",
+  REJECTED = "rejected",
+}
+
+export interface NoticeBuyoutRequest {
+  id: string;
+  organization_id: number;
+  exit_request_id: string;
+  employee_id: number;
+  original_last_date: string;
+  requested_last_date: string;
+  original_notice_days: number;
+  served_days: number;
+  remaining_days: number;
+  daily_rate: number;
+  buyout_amount: number;
+  currency: string;
+  status: BuyoutStatus;
+  approved_by: number | null;
+  approved_at: string | null;
+  rejected_by: number | null;
+  rejected_reason: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface AuditLog {
   id: string;
   organization_id: number;
@@ -363,6 +391,74 @@ export interface AuditLog {
   new_value: string | null;
   ip_address: string | null;
   created_at: string;
+}
+
+// ---------------------------------------------------------------------------
+// Flight Risk / Attrition Prediction
+// ---------------------------------------------------------------------------
+
+export type RiskLevel = "low" | "medium" | "high" | "critical";
+
+export interface RiskFactor {
+  name: string;
+  value: number;
+  impact: number;
+  description: string;
+}
+
+export interface FlightRiskScore {
+  id: string;
+  organization_id: number;
+  employee_id: number;
+  score: number;
+  risk_level: RiskLevel;
+  factors: RiskFactor[];
+  calculated_at: string;
+}
+
+export interface AttritionPrediction {
+  id: string;
+  organization_id: number;
+  department_id: number;
+  month: string;
+  predicted_exits: number;
+  actual_exits: number | null;
+  confidence: number;
+  created_at: string;
+}
+
+export interface HighRiskEmployee {
+  employee_id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  designation: string | null;
+  department_name: string | null;
+  date_of_joining: string | null;
+  score: number;
+  risk_level: RiskLevel;
+  factors: RiskFactor[];
+  calculated_at: string;
+}
+
+export interface FlightRiskDashboard {
+  totalEmployees: number;
+  riskDistribution: { name: string; value: number; color: string }[];
+  highRiskCount: number;
+  departmentBreakdown: {
+    department: string;
+    avgScore: number;
+    employeeCount: number;
+    riskLevel: RiskLevel;
+  }[];
+  topRiskFactors: { name: string; count: number }[];
+}
+
+export interface PredictionTrend {
+  month: string;
+  predicted_exits: number;
+  actual_exits: number | null;
+  confidence: number;
 }
 
 // ---------------------------------------------------------------------------

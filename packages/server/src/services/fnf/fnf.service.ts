@@ -8,7 +8,7 @@ import { getDB } from "../../db/adapters";
 import { findUserById } from "../../db/empcloud";
 import { NotFoundError, ValidationError, ConflictError } from "../../utils/errors";
 import { logger } from "../../utils/logger";
-import type { FnFSettlement, ExitRequest } from "@emp-exit/shared";
+import type { FnFSettlement, ExitRequest, NoticeBuyoutRequest } from "@emp-exit/shared";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -114,7 +114,7 @@ export async function calculateFnF(
   const gratuity = lastBasic > 0 && employee.date_of_joining
     ? calculateGratuity(lastBasic, employee.date_of_joining, lwd)
     : 0;
-  const noticePayRecovery = lastBasic > 0
+  let noticePayRecovery = lastBasic > 0
     ? noticeRecovery(
         lastBasic,
         exitReq.notice_period_days,
@@ -123,6 +123,18 @@ export async function calculateFnF(
         exitReq.notice_period_waived,
       )
     : 0;
+
+  // If an approved buyout exists, add the buyout amount to notice recovery
+  const approvedBuyout = await db.findOne<NoticeBuyoutRequest>("notice_buyout_requests", {
+    exit_request_id: exitRequestId,
+    status: "approved",
+  });
+  if (approvedBuyout) {
+    noticePayRecovery += approvedBuyout.buyout_amount;
+    logger.info(
+      `FnF includes buyout recovery of ${approvedBuyout.buyout_amount} for exit ${exitRequestId}`,
+    );
+  }
 
   // Carry forward any previously set values
   const leaveEncashment = existing?.leave_encashment || 0;

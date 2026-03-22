@@ -7,6 +7,7 @@ import {
   Shield,
   CheckCircle,
   DollarSign,
+  Calculator,
 } from "lucide-react";
 import { apiGet } from "@/api/client";
 import { cn, formatDate } from "@/lib/utils";
@@ -164,6 +165,30 @@ export function MyExitPage() {
           </div>
         </div>
       </div>
+
+      {/* Notice Buyout Card */}
+      {exit && exit.status !== "completed" && exit.status !== "cancelled" && (
+        <div className="rounded-xl border border-gray-200 bg-white p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-100">
+                <Calculator className="h-5 w-5 text-rose-600" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">Notice Period Buyout</h3>
+                <p className="text-xs text-gray-500">Want to leave before your notice period ends?</p>
+              </div>
+            </div>
+            <Link
+              to="/buyout/calculator"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+            >
+              <Calculator className="h-4 w-4" />
+              Calculate Buyout
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
