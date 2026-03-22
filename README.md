@@ -46,6 +46,28 @@ EMP Exit is the offboarding and exit management module of the EmpCloud ecosystem
 
 ---
 
+## Screenshots
+
+### Dashboard
+![Dashboard](screenshots/exit-01-dashboard.png)
+
+### Exit Requests
+![Exits](screenshots/exit-02-exits.png)
+
+### Checklist Templates
+![Checklists](screenshots/exit-03-checklists.png)
+
+### Clearance Management
+![Clearance](screenshots/exit-04-clearance.png)
+
+### Exit Analytics
+![Analytics](screenshots/exit-05-analytics.png)
+
+### Settings
+![Settings](screenshots/exit-06-settings.png)
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
