@@ -4,26 +4,45 @@
 
 [![Part of EmpCloud](https://img.shields.io/badge/EmpCloud-Module-blue)]()
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-green.svg)](LICENSE)
+[![Status: Built](https://img.shields.io/badge/Status-Built-green)]()
 
-EMP Exit is the offboarding and exit management module of the EmpCloud ecosystem. It provides configurable exit workflows, clearance management, exit interviews, full and final settlement calculation, asset return tracking, knowledge transfer, letter generation, background verification portfolios, and an alumni network.
+EMP Exit is the offboarding and exit management module of the EmpCloud ecosystem. It provides configurable exit workflows, clearance management, exit interviews, full and final settlement calculation, asset return tracking, knowledge transfer, letter generation, background verification portfolios, alumni network, predictive attrition dashboard, notice period buyout calculator, exit stage email notifications, rehire workflow, and exit survey NPS tracking.
+
+---
+
+## Project Status
+
+**Built** -- all phases implemented and tested.
+
+| Metric | Count |
+|--------|-------|
+| Database tables | 24+ |
+| Frontend pages | 25+ |
+| Migrations | 5 |
 
 ---
 
 ## Features
 
-| Feature | Description |
-|---------|-------------|
-| Offboarding Workflows | Configurable exit checklists per role/department, multi-department sign-off |
-| Exit Interviews | Structured feedback forms, reason for leaving, ratings, suggestions |
-| Full & Final Settlement | Calculate pending salary, leave encashment, gratuity, deductions, notice recovery |
-| Asset Return Tracking | Track asset returns, verify condition, damage assessment |
-| Knowledge Transfer | KT documentation, handover checklists, successor assignment |
-| Clearance Workflow | Department-wise clearance (IT, Finance, HR, Admin, Manager), approval chain |
-| Letter Generation | Experience letter, relieving letter, service certificate with Handlebars templates |
-| Background Verification | Store verification results, reference checks, employment history |
-| Rehire Eligibility | Flag ex-employees as rehire eligible/not, with notes |
-| Exit Analytics | Attrition rate, reason analysis, department-wise trends, tenure at exit |
-| Alumni Network | Optional alumni directory for ex-employees |
+| Feature | Status | Description |
+|---------|--------|-------------|
+| Offboarding Workflows | Built | Configurable exit checklists per role/department, multi-department sign-off |
+| Exit Interviews | Built | Structured feedback forms, reason for leaving, ratings, suggestions |
+| Full & Final Settlement | Built | Calculate pending salary, leave encashment, gratuity, deductions, notice recovery |
+| Asset Return Tracking | Built | Track asset returns, verify condition, damage assessment |
+| Knowledge Transfer | Built | KT documentation, handover checklists, successor assignment |
+| Clearance Workflow | Built | Department-wise clearance (IT, Finance, HR, Admin, Manager), approval chain |
+| Letter Generation | Built | Experience letter, relieving letter, service certificate with Handlebars templates |
+| Background Verification | Built | Store verification results, reference checks, employment history |
+| Rehire Eligibility | Built | Flag ex-employees as rehire eligible/not, with notes |
+| Exit Analytics | Built | Attrition rate, reason analysis, department-wise trends, tenure at exit |
+| Alumni Network | Built | Optional alumni directory for ex-employees |
+| Predictive Attrition Dashboard | Built | Flight risk scoring 0-100, risk factors analysis, department heatmap visualization |
+| Notice Period Buyout Calculator | Built | Calculate buyout amount, request/approve workflow, F&F integration |
+| Exit Stage Email Notifications | Built | 6 branded email templates for each exit milestone (initiation, clearance, interview, FnF, letter, completion) |
+| Rehire Workflow | Built | Alumni -> screening -> approved -> hired pipeline, reactivate user in EMP Cloud |
+| Exit Survey NPS | Built | Net Promoter Score calculation, gauge visualization, trend tracking over time |
+| API Documentation | Built | Swagger UI at /api/docs with OpenAPI 3.0 spec |
 
 ---
 
@@ -40,6 +59,7 @@ EMP Exit is the offboarding and exit management module of the EmpCloud ecosystem
 | Auth | OAuth2/OIDC via EMP Cloud (RS256 JWT verification) |
 | PDF Generation | Puppeteer |
 | Charts | Recharts |
+| Email | Handlebars templates + Nodemailer |
 
 ---
 
@@ -64,27 +84,29 @@ emp-exit/
         db/
           connection.ts         # Knex connection to emp_exit
           empcloud.ts           # Read-only connection to empcloud DB
-          migrations/           # 12 migration files
+          migrations/           # 5 migration files
         api/
           middleware/            # auth, RBAC, error handling
           routes/               # Route handlers per domain
         services/               # Business logic per domain
-        jobs/                   # BullMQ workers (notifications, letter gen)
+        jobs/                   # BullMQ workers (notifications, letter gen, attrition scoring, email)
         utils/                  # Logger, errors, response helpers
+        swagger/                # OpenAPI spec & Swagger UI setup
+        templates/              # Handlebars email templates (6 exit stage templates)
     client/                     # @emp-exit/client (port 5178)
       src/
         api/                    # API client & hooks
         components/
           layout/               # DashboardLayout, SelfServiceLayout
           ui/                   # Radix-based UI primitives
-          exit/                 # ExitStatusBadge, ClearanceProgress, FnFBreakdown, etc.
+          exit/                 # ExitStatusBadge, ClearanceProgress, FnFBreakdown, NPSGauge, RiskHeatmap, etc.
         pages/                  # Route-based page components
         lib/                    # Auth store, utilities
 ```
 
 ---
 
-## Database Tables
+## Database Tables (24+)
 
 | Table | Purpose |
 |-------|---------|
@@ -109,6 +131,13 @@ emp-exit/
 | `alumni_profiles` | Optional alumni directory entries |
 | `audit_logs` | Module-specific audit trail |
 | `exit_settings` | Per-org exit configuration |
+| `attrition_scores` | Predictive flight risk scores (0-100) with risk factors |
+| `buyout_requests` | Notice period buyout requests with calculated amounts and approval status |
+| `exit_survey_responses` | NPS survey responses with score and comments |
+| `rehire_applications` | Rehire pipeline records (alumni -> screening -> approved -> hired) |
+| `exit_email_logs` | Log of sent exit stage notification emails |
+
+**5 migrations** across the database schema.
 
 ---
 
@@ -133,6 +162,7 @@ All endpoints under `/api/v1/`. Server runs on port **4400**.
 | GET | `/self-service/my-exit` | View own exit status |
 | GET | `/self-service/my-checklist` | View own checklist items |
 | POST | `/self-service/exit-interview` | Submit exit interview responses |
+| POST | `/self-service/nps-survey` | Submit NPS survey response |
 
 ### Checklist Templates
 | Method | Path | Description |
@@ -190,15 +220,59 @@ All endpoints under `/api/v1/`. Server runs on port **4400**.
 | GET | `/exits/:id/letters/:letterId/download` | Download PDF |
 | POST | `/exits/:id/letters/:letterId/send` | Email letter to employee |
 
+### Predictive Attrition Dashboard
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/attrition/scores` | Get flight risk scores for all employees (0-100) |
+| GET | `/attrition/scores/:employeeId` | Get individual risk score with factors |
+| GET | `/attrition/heatmap` | Department-level attrition heatmap |
+| POST | `/attrition/recalculate` | Trigger risk score recalculation |
+| GET | `/attrition/trends` | Attrition trend over time |
+
+### Notice Period Buyout Calculator
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/exits/:id/buyout/calculate` | Calculate buyout amount |
+| POST | `/exits/:id/buyout/request` | Submit buyout request |
+| PUT | `/exits/:id/buyout/approve` | Approve/reject buyout request |
+| GET | `/exits/:id/buyout` | Get buyout details and status |
+
+### Exit Stage Email Notifications
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/email-templates` | List exit stage email templates |
+| PUT | `/email-templates/:stage` | Update email template for a stage |
+| POST | `/email-templates/:stage/preview` | Preview rendered email template |
+| GET | `/exits/:id/email-log` | View sent emails for an exit |
+
+### Rehire Workflow
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/rehire` | List rehire applications |
+| POST | `/rehire` | Create rehire application from alumni |
+| PUT | `/rehire/:id/screen` | Move to screening stage |
+| PUT | `/rehire/:id/approve` | Approve for rehire |
+| POST | `/rehire/:id/hire` | Complete rehire (reactivate user in EMP Cloud) |
+| GET | `/rehire/eligible` | List alumni eligible for rehire |
+
+### Exit Survey NPS
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/nps/scores` | Get NPS calculation (promoters, passives, detractors) |
+| GET | `/nps/trends` | NPS trend over time (monthly/quarterly) |
+| GET | `/nps/responses` | List all survey responses |
+| GET | `/nps/department/:deptId` | Department-level NPS breakdown |
+
 ### Other Endpoints
 - **BGV**: CRUD for background verification records and reference checks
 - **Alumni**: Directory listing, profile updates, opt-in
 - **Settings**: Get/update org exit settings
 - **Analytics**: Attrition rate, reason breakdown, department trends, tenure distribution, rehire pool
+- **API Docs**: Swagger UI at `/api/docs`
 
 ---
 
-## Frontend Pages
+## Frontend Pages (25+)
 
 ### Admin Pages
 | Route | Page | Description |
@@ -206,15 +280,20 @@ All endpoints under `/api/v1/`. Server runs on port **4400**.
 | `/dashboard` | Dashboard | Active exits, clearance pending, FnF pending, attrition chart |
 | `/exits` | Exit List | Table with filters (status, date, department, type) |
 | `/exits/new` | Initiate Exit | Form: select employee, exit type, dates, reason |
-| `/exits/:id` | Exit Detail | Tabs: Overview, Checklist, Clearance, Interview, FnF, Assets, KT, Letters |
+| `/exits/:id` | Exit Detail | Tabs: Overview, Checklist, Clearance, Interview, FnF, Assets, KT, Letters, Buyout |
 | `/checklist-templates` | Checklist Templates | CRUD for exit checklist templates |
 | `/interview-templates` | Interview Templates | CRUD for interview question templates |
 | `/letter-templates` | Letter Templates | CRUD with Handlebars preview |
+| `/email-templates` | Email Templates | Configure 6 exit stage email templates |
 | `/clearance-config` | Clearance Config | Manage clearance departments |
+| `/attrition` | Predictive Attrition | Flight risk scores, department heatmap, risk factor analysis |
+| `/attrition/:employeeId` | Employee Risk Detail | Individual risk score breakdown with factors |
+| `/nps` | Exit Survey NPS | NPS gauge visualization, trend charts, response breakdown |
+| `/rehire` | Rehire Management | Pipeline view: alumni -> screening -> approved -> hired |
 | `/analytics` | Exit Analytics | Attrition rate, reason pie chart, department trends, tenure histogram |
 | `/bgv` | BGV | Background verification records management |
-| `/alumni` | Alumni Directory | Alumni listing |
-| `/settings` | Settings | Module settings |
+| `/alumni` | Alumni Directory | Alumni listing with rehire eligibility indicators |
+| `/settings` | Settings | Module settings, buyout rules, email config |
 
 ### Self-Service Pages
 | Route | Page | Description |
@@ -223,6 +302,9 @@ All endpoints under `/api/v1/`. Server runs on port **4400**.
 | `/my/exit` | My Exit | Submit resignation, view status, checklist, clearance |
 | `/my/exit/interview` | Exit Interview | Complete exit interview form |
 | `/my/exit/kt` | Knowledge Transfer | Add KT documentation items |
+| `/my/exit/buyout` | Notice Buyout | Request notice period buyout, view calculation |
+| `/my/exit/nps` | NPS Survey | Submit exit NPS survey |
+| `/my/exit/letters` | My Letters | View and download exit letters |
 | `/my/alumni` | My Alumni Profile | Opt in/update alumni profile |
 
 ---
@@ -268,53 +350,10 @@ pnpm --filter @emp-exit/client dev    # Client on :5178
 pnpm --filter @emp-exit/server migrate
 ```
 
----
-
-## Implementation Plan
-
-### Phase 1: Foundation (Weeks 1-2)
-**Goal:** Scaffolding + core exit request flow.
-- Monorepo scaffold, server/client/shared setup, dual DB connections
-- Migrations 001, 011, 012 (exit_requests, audit_logs, exit_settings)
-- Core services: exit-request, settings, audit, auth
-- Routes: `/exits`, `/settings`, `/health`
-- Client: DashboardPage, ExitListPage, InitiateExitPage, basic ExitDetailPage
-
-### Phase 2: Checklists & Clearance (Weeks 3-4)
-**Goal:** Configurable exit workflows.
-- Migrations 002, 003 (checklist templates/instances, clearance departments/records)
-- Checklist service, clearance service
-- Auto-creation: instantiate checklist and clearance records when exit is initiated
-- Client: ChecklistTemplatesPage, ClearanceConfigPage, tabs in ExitDetailPage
-
-### Phase 3: Exit Interviews & FnF (Weeks 5-6)
-**Goal:** Structured feedback + financial settlement.
-- Migrations 004, 005 (exit interviews, FnF settlement)
-- Exit interview service, FnF service (reads salary data from emp-payroll DB or manual input)
-- FnF calculation: pending salary, leave encashment, gratuity (15*basic*years/26), notice recovery
-- Client: InterviewTemplatesPage, FnF breakdown tab, self-service interview submission
-
-### Phase 4: Assets, KT & Letters (Weeks 7-8)
-**Goal:** Complete operational exit workflow.
-- Migrations 006, 007, 008 (asset returns, knowledge transfer, letter templates)
-- Asset return, KT, and letter generation services (Handlebars + Puppeteer PDF)
-- Client: Assets/KT/Letters tabs in ExitDetailPage, LetterTemplatesPage
-- Self-service: view/download letters, manage KT items
-
-### Phase 5: BGV, Alumni & Analytics (Weeks 9-10)
-**Goal:** Post-exit capabilities.
-- Migrations 009, 010 (BGV records, reference checks, alumni profiles)
-- BGV, alumni, and analytics services
-- Analytics: attrition rate, reason aggregation, department trends, tenure distribution
-- Client: BGVPage, AlumniDirectoryPage, ExitAnalyticsPage
-
-### Phase 6: Polish & Integration (Weeks 11-12)
-**Goal:** Production readiness.
-- BullMQ notification queues for exit events
-- Rate limiting, complete Zod validators, error handling
-- Unit tests (Vitest), E2E tests (Playwright)
-- Register module in EMP Cloud module registry
-- Docker Compose, documentation
+Once running, visit:
+- **Client**: http://localhost:5178
+- **API**: http://localhost:4400
+- **API Documentation**: http://localhost:4400/api/docs
 
 ---
 
