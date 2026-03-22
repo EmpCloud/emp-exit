@@ -18,6 +18,7 @@ import {
   Settings,
   Menu,
   X,
+  UserPlus,
 } from "lucide-react";
 import { isLoggedIn, getUser, useAuthStore } from "@/lib/auth-store";
 import { cn, getInitials } from "@/lib/utils";
@@ -34,6 +35,7 @@ const NAV_ITEMS = [
   { to: "/kt", label: "KT", icon: BookOpen },
   { to: "/letters", label: "Letters", icon: FileSignature },
   { to: "/alumni", label: "Alumni", icon: GraduationCap },
+  { to: "/rehire", label: "Rehire", icon: UserPlus },
   { to: "/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/analytics/flight-risk", label: "Flight Risk", icon: AlertTriangle },
   { to: "/settings", label: "Settings", icon: Settings },

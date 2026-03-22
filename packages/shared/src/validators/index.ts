@@ -239,6 +239,23 @@ export const updateAlumniSchema = z.object({
 });
 
 // ---------------------------------------------------------------------------
+// Rehire
+// ---------------------------------------------------------------------------
+
+export const proposeRehireSchema = z.object({
+  alumni_id: z.string().uuid(),
+  position: z.string().min(1).max(255),
+  department: z.string().max(100).optional(),
+  salary: z.number().int().min(0),
+  notes: z.string().max(2000).optional(),
+});
+
+export const updateRehireStatusSchema = z.object({
+  status: z.enum(["proposed", "screening", "approved", "rejected"]),
+  notes: z.string().max(2000).optional(),
+});
+
+// ---------------------------------------------------------------------------
 // Settings
 // ---------------------------------------------------------------------------
 
@@ -248,4 +265,10 @@ export const updateSettingsSchema = z.object({
   require_exit_interview: z.boolean().optional(),
   fnf_approval_required: z.boolean().optional(),
   alumni_opt_in_default: z.boolean().optional(),
+  email_on_exit_initiated: z.boolean().optional(),
+  email_on_clearance_pending: z.boolean().optional(),
+  email_on_clearance_completed: z.boolean().optional(),
+  email_on_fnf_calculated: z.boolean().optional(),
+  email_on_fnf_approved: z.boolean().optional(),
+  email_on_exit_completed: z.boolean().optional(),
 });

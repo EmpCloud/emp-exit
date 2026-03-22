@@ -13,6 +13,12 @@ export function SettingsPage() {
     require_exit_interview: true,
     fnf_approval_required: true,
     alumni_opt_in_default: true,
+    email_on_exit_initiated: true,
+    email_on_clearance_pending: true,
+    email_on_clearance_completed: true,
+    email_on_fnf_calculated: true,
+    email_on_fnf_approved: true,
+    email_on_exit_completed: true,
   });
 
   async function fetchSettings() {
@@ -27,6 +33,12 @@ export function SettingsPage() {
           require_exit_interview: Boolean(res.data.require_exit_interview),
           fnf_approval_required: Boolean(res.data.fnf_approval_required),
           alumni_opt_in_default: Boolean(res.data.alumni_opt_in_default),
+          email_on_exit_initiated: res.data.email_on_exit_initiated !== false,
+          email_on_clearance_pending: res.data.email_on_clearance_pending !== false,
+          email_on_clearance_completed: res.data.email_on_clearance_completed !== false,
+          email_on_fnf_calculated: res.data.email_on_fnf_calculated !== false,
+          email_on_fnf_approved: res.data.email_on_fnf_approved !== false,
+          email_on_exit_completed: res.data.email_on_exit_completed !== false,
         });
       }
     } catch {
@@ -181,6 +193,154 @@ export function SettingsPage() {
             <span
               className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
                 form.alumni_opt_in_default ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
+
+        <hr className="border-gray-100" />
+
+        {/* Email Notifications Section */}
+        <div>
+          <h3 className="text-base font-semibold text-gray-900 mb-1">Email Notifications</h3>
+          <p className="text-xs text-gray-500 mb-4">
+            Enable or disable email notifications for each exit stage.
+          </p>
+        </div>
+
+        {/* Toggle: Email on exit initiated */}
+        <div className="flex items-center justify-between">
+          <div>
+            <label className="text-sm font-medium text-gray-900">Exit Initiated</label>
+            <p className="text-xs text-gray-500">
+              Notify employee, manager, and HR when an exit is initiated.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setForm({ ...form, email_on_exit_initiated: !form.email_on_exit_initiated })}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              form.email_on_exit_initiated ? "bg-rose-600" : "bg-gray-300"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                form.email_on_exit_initiated ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Toggle: Email on clearance pending */}
+        <div className="flex items-center justify-between">
+          <div>
+            <label className="text-sm font-medium text-gray-900">Clearance Pending</label>
+            <p className="text-xs text-gray-500">
+              Notify department heads when clearance is required.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setForm({ ...form, email_on_clearance_pending: !form.email_on_clearance_pending })}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              form.email_on_clearance_pending ? "bg-rose-600" : "bg-gray-300"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                form.email_on_clearance_pending ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Toggle: Email on clearance completed */}
+        <div className="flex items-center justify-between">
+          <div>
+            <label className="text-sm font-medium text-gray-900">Clearance Completed</label>
+            <p className="text-xs text-gray-500">
+              Notify employee when all clearances are completed.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setForm({ ...form, email_on_clearance_completed: !form.email_on_clearance_completed })}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              form.email_on_clearance_completed ? "bg-rose-600" : "bg-gray-300"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                form.email_on_clearance_completed ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Toggle: Email on FnF calculated */}
+        <div className="flex items-center justify-between">
+          <div>
+            <label className="text-sm font-medium text-gray-900">F&F Calculated</label>
+            <p className="text-xs text-gray-500">
+              Notify employee when F&F settlement is calculated.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setForm({ ...form, email_on_fnf_calculated: !form.email_on_fnf_calculated })}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              form.email_on_fnf_calculated ? "bg-rose-600" : "bg-gray-300"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                form.email_on_fnf_calculated ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Toggle: Email on FnF approved */}
+        <div className="flex items-center justify-between">
+          <div>
+            <label className="text-sm font-medium text-gray-900">F&F Approved</label>
+            <p className="text-xs text-gray-500">
+              Notify employee when F&F settlement is approved.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setForm({ ...form, email_on_fnf_approved: !form.email_on_fnf_approved })}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              form.email_on_fnf_approved ? "bg-rose-600" : "bg-gray-300"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                form.email_on_fnf_approved ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Toggle: Email on exit completed */}
+        <div className="flex items-center justify-between">
+          <div>
+            <label className="text-sm font-medium text-gray-900">Exit Completed</label>
+            <p className="text-xs text-gray-500">
+              Notify employee when the exit process is complete.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setForm({ ...form, email_on_exit_completed: !form.email_on_exit_completed })}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              form.email_on_exit_completed ? "bg-rose-600" : "bg-gray-300"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                form.email_on_exit_completed ? "translate-x-6" : "translate-x-1"
               }`}
             />
           </button>

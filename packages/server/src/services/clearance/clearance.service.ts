@@ -6,6 +6,7 @@
 import { getDB } from "../../db/adapters";
 import { NotFoundError } from "../../utils/errors";
 import { logger } from "../../utils/logger";
+import { sendClearancePendingEmail, sendClearanceCompletedEmail } from "../email/exit-email.service";
 import type { ClearanceDepartment, ClearanceRecord, ClearanceStatus } from "@emp-exit/shared";
 
 // ---------------------------------------------------------------------------
@@ -124,6 +125,11 @@ export async function createClearanceRecords(
   const records = await db.createMany<ClearanceRecord>("clearance_records", recordsData as any);
   logger.info(`Created ${records.length} clearance records for exit ${exitRequestId} in org ${orgId}`);
 
+  // Non-blocking: email department heads for each clearance record
+  for (const dept of activeDepts) {
+    sendClearancePendingEmail(exitRequestId, dept.name).catch(() => {});
+  }
+
   return records;
 }
 
@@ -211,6 +217,27 @@ export async function updateClearance(
 
   const updated = await db.update<ClearanceRecord>("clearance_records", clearanceId, updateData);
   logger.info(`Clearance ${clearanceId} updated to '${data.status}' by user ${approvedBy}`);
+
+  // Check if all clearances are now complete — notify employee
+  if (data.status === "approved" || data.status === "waived") {
+    (async () => {
+      try {
+        const allRecords = await db.findMany<ClearanceRecord>("clearance_records", {
+          filters: { exit_request_id: record.exit_request_id },
+          limit: 100,
+        });
+        const allDone = allRecords.data.every(
+          (r) => r.status === "approved" || r.status === "waived",
+        );
+        if (allDone) {
+          await sendClearanceCompletedEmail(record.exit_request_id);
+        }
+      } catch {
+        // silently ignore
+      }
+    })();
+  }
+
   return updated;
 }
 

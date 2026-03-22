@@ -7,6 +7,7 @@ import { getDB } from "../../db/adapters";
 import { getEmpCloudDB } from "../../db/empcloud";
 import { NotFoundError, ValidationError, ConflictError } from "../../utils/errors";
 import { logger } from "../../utils/logger";
+import { sendExitInitiatedEmail, sendExitCompletedEmail } from "../email/exit-email.service";
 import type {
   ExitRequest,
   ExitStatus,
@@ -108,6 +109,9 @@ export async function initiateExit(
   } as any);
 
   logger.info(`Exit request initiated for employee ${data.employee_id} by ${initiatedBy} in org ${orgId}`);
+
+  // Non-blocking email notification
+  sendExitInitiatedEmail(exitRequest.id).catch(() => {});
 
   return exitRequest;
 }
@@ -324,6 +328,10 @@ export async function completeExit(orgId: number, id: string): Promise<ExitReque
   }
 
   logger.info(`Exit request ${id} completed in org ${orgId}`);
+
+  // Non-blocking email notification
+  sendExitCompletedEmail(id).catch(() => {});
+
   return updated;
 }
 

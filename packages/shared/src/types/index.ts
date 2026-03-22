@@ -379,6 +379,35 @@ export interface NoticeBuyoutRequest {
   updated_at: string;
 }
 
+// ---------------------------------------------------------------------------
+// Rehire
+// ---------------------------------------------------------------------------
+
+export enum RehireStatus {
+  PROPOSED = "proposed",
+  SCREENING = "screening",
+  APPROVED = "approved",
+  REJECTED = "rejected",
+  HIRED = "hired",
+}
+
+export interface RehireRequest {
+  id: string;
+  organization_id: number;
+  alumni_id: string;
+  employee_id: number;
+  requested_by: number;
+  position: string;
+  department: string | null;
+  proposed_salary: number;
+  status: RehireStatus;
+  notes: string | null;
+  original_exit_date: string | null;
+  rehire_date: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface AuditLog {
   id: string;
   organization_id: number;

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   GraduationCap,
   Search,
@@ -8,18 +9,23 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
+  UserPlus,
 } from "lucide-react";
-import { apiGet } from "@/api/client";
+import { apiGet, apiPost } from "@/api/client";
 import toast from "react-hot-toast";
 import { getInitials } from "@/lib/utils";
 
 export function AlumniListPage() {
+  const navigate = useNavigate();
   const [alumni, setAlumni] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [rehireModal, setRehireModal] = useState<any>(null);
+  const [rehireForm, setRehireForm] = useState({ position: "", department: "", salary: "", notes: "" });
+  const [submittingRehire, setSubmittingRehire] = useState(false);
   const perPage = 12;
 
   async function fetchAlumni() {
@@ -51,6 +57,31 @@ export function AlumniListPage() {
     e.preventDefault();
     setPage(1);
     fetchAlumni();
+  }
+
+  async function handleProposeRehire(e: React.FormEvent) {
+    e.preventDefault();
+    if (!rehireModal) return;
+    setSubmittingRehire(true);
+    try {
+      const res = await apiPost<any>("/rehire", {
+        alumni_id: rehireModal.id,
+        position: rehireForm.position,
+        department: rehireForm.department || undefined,
+        salary: Math.round(Number(rehireForm.salary) * 100),
+        notes: rehireForm.notes || undefined,
+      });
+      if (res.success) {
+        toast.success("Rehire proposed successfully");
+        setRehireModal(null);
+        setRehireForm({ position: "", department: "", salary: "", notes: "" });
+        navigate("/rehire");
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.error?.message || "Failed to propose rehire");
+    } finally {
+      setSubmittingRehire(false);
+    }
   }
 
   return (
@@ -142,6 +173,19 @@ export function AlumniListPage() {
                       </a>
                     )}
                   </div>
+
+                  <div className="mt-4 pt-3 border-t border-gray-100">
+                    <button
+                      onClick={() => {
+                        setRehireModal(a);
+                        setRehireForm({ position: "", department: "", salary: "", notes: "" });
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-rose-50 px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-100 transition-colors"
+                    >
+                      <UserPlus className="h-3.5 w-3.5" />
+                      Propose Rehire
+                    </button>
+                  </div>
                 </div>
               );
             })}
@@ -172,6 +216,82 @@ export function AlumniListPage() {
             </div>
           )}
         </>
+      )}
+
+      {/* Rehire Proposal Modal */}
+      {rehireModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Propose Rehire
+            </h3>
+            <p className="text-sm text-gray-500 mb-4">
+              For: {rehireModal.first_name ? `${rehireModal.first_name} ${rehireModal.last_name || ""}` : `Alumni #${rehireModal.employee_id}`}
+            </p>
+            <form onSubmit={handleProposeRehire} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Position *</label>
+                <input
+                  type="text"
+                  required
+                  value={rehireForm.position}
+                  onChange={(e) => setRehireForm({ ...rehireForm, position: e.target.value })}
+                  className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  placeholder="e.g. Senior Engineer"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
+                <input
+                  type="text"
+                  value={rehireForm.department}
+                  onChange={(e) => setRehireForm({ ...rehireForm, department: e.target.value })}
+                  className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  placeholder="e.g. Engineering"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Proposed Salary *</label>
+                <input
+                  type="number"
+                  required
+                  min={0}
+                  step="0.01"
+                  value={rehireForm.salary}
+                  onChange={(e) => setRehireForm({ ...rehireForm, salary: e.target.value })}
+                  className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  placeholder="Monthly salary"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                <textarea
+                  value={rehireForm.notes}
+                  onChange={(e) => setRehireForm({ ...rehireForm, notes: e.target.value })}
+                  rows={2}
+                  className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  placeholder="Additional notes..."
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setRehireModal(null)}
+                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingRehire}
+                  className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50"
+                >
+                  {submittingRehire ? "Submitting..." : "Propose Rehire"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

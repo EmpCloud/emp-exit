@@ -377,3 +377,163 @@ export async function skipInterview(orgId: number, interviewId: string): Promise
   logger.info(`Interview skipped: ${interviewId}`);
   return updated;
 }
+
+// ---------------------------------------------------------------------------
+// NPS Calculation
+// ---------------------------------------------------------------------------
+
+interface NPSResult {
+  nps: number;
+  promoters: number;
+  passives: number;
+  detractors: number;
+  totalResponses: number;
+  trend: { month: string; nps: number }[];
+}
+
+/**
+ * Calculate NPS from exit interviews.
+ * Uses overall_rating: 9-10 = Promoter, 7-8 = Passive, 1-6 = Detractor.
+ * NPS = %Promoters - %Detractors (range -100 to +100).
+ */
+export async function calculateNPS(
+  orgId: number,
+  dateRange?: { from?: string; to?: string },
+): Promise<NPSResult> {
+  const db = getDB();
+
+  // Get all completed interviews for this org with an overall_rating
+  let query = `
+    SELECT ei.overall_rating, ei.completed_date
+    FROM exit_interviews ei
+    JOIN exit_requests er ON er.id = ei.exit_request_id
+    WHERE er.organization_id = ?
+      AND ei.status = 'completed'
+      AND ei.overall_rating IS NOT NULL
+  `;
+  const params: any[] = [orgId];
+
+  if (dateRange?.from) {
+    query += ` AND ei.completed_date >= ?`;
+    params.push(dateRange.from);
+  }
+  if (dateRange?.to) {
+    query += ` AND ei.completed_date <= ?`;
+    params.push(dateRange.to);
+  }
+
+  query += ` ORDER BY ei.completed_date ASC`;
+
+  const rawResult = await db.raw<any>(query, params);
+  const rows: any[] = Array.isArray(rawResult) && Array.isArray(rawResult[0]) ? rawResult[0] : rawResult;
+
+  let promoters = 0;
+  let passives = 0;
+  let detractors = 0;
+
+  for (const row of rows) {
+    const rating = Number(row.overall_rating);
+    if (rating >= 9) {
+      promoters++;
+    } else if (rating >= 7) {
+      passives++;
+    } else {
+      detractors++;
+    }
+  }
+
+  const totalResponses = rows.length;
+  const nps = totalResponses > 0
+    ? Math.round(((promoters - detractors) / totalResponses) * 100)
+    : 0;
+
+  // Calculate monthly trend
+  const monthlyData = new Map<string, { promoters: number; passives: number; detractors: number }>();
+  for (const row of rows) {
+    if (!row.completed_date) continue;
+    const date = new Date(row.completed_date);
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    if (!monthlyData.has(monthKey)) {
+      monthlyData.set(monthKey, { promoters: 0, passives: 0, detractors: 0 });
+    }
+    const m = monthlyData.get(monthKey)!;
+    const rating = Number(row.overall_rating);
+    if (rating >= 9) m.promoters++;
+    else if (rating >= 7) m.passives++;
+    else m.detractors++;
+  }
+
+  const trend: { month: string; nps: number }[] = [];
+  for (const [month, data] of monthlyData) {
+    const total = data.promoters + data.passives + data.detractors;
+    const monthNps = total > 0
+      ? Math.round(((data.promoters - data.detractors) / total) * 100)
+      : 0;
+    trend.push({ month, nps: monthNps });
+  }
+
+  return { nps, promoters, passives, detractors, totalResponses, trend };
+}
+
+/**
+ * Get monthly NPS trend over time.
+ */
+export async function getNPSTrend(
+  orgId: number,
+  months: number = 12,
+): Promise<{ month: string; nps: number; responses: number }[]> {
+  const db = getDB();
+
+  const fromDate = new Date();
+  fromDate.setMonth(fromDate.getMonth() - months);
+  const fromStr = fromDate.toISOString().split("T")[0];
+
+  const query = `
+    SELECT ei.overall_rating, ei.completed_date
+    FROM exit_interviews ei
+    JOIN exit_requests er ON er.id = ei.exit_request_id
+    WHERE er.organization_id = ?
+      AND ei.status = 'completed'
+      AND ei.overall_rating IS NOT NULL
+      AND ei.completed_date >= ?
+    ORDER BY ei.completed_date ASC
+  `;
+
+  const rawResult = await db.raw<any>(query, [orgId, fromStr]);
+  const rows: any[] = Array.isArray(rawResult) && Array.isArray(rawResult[0]) ? rawResult[0] : rawResult;
+
+  const monthlyData = new Map<string, { promoters: number; passives: number; detractors: number }>();
+
+  // Pre-fill all months
+  for (let i = 0; i < months; i++) {
+    const d = new Date();
+    d.setMonth(d.getMonth() - (months - 1 - i));
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    monthlyData.set(key, { promoters: 0, passives: 0, detractors: 0 });
+  }
+
+  for (const row of rows) {
+    if (!row.completed_date) continue;
+    const date = new Date(row.completed_date);
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    if (!monthlyData.has(monthKey)) {
+      monthlyData.set(monthKey, { promoters: 0, passives: 0, detractors: 0 });
+    }
+    const m = monthlyData.get(monthKey)!;
+    const rating = Number(row.overall_rating);
+    if (rating >= 9) m.promoters++;
+    else if (rating >= 7) m.passives++;
+    else m.detractors++;
+  }
+
+  const result: { month: string; nps: number; responses: number }[] = [];
+  for (const [month, data] of monthlyData) {
+    const total = data.promoters + data.passives + data.detractors;
+    const nps = total > 0
+      ? Math.round(((data.promoters - data.detractors) / total) * 100)
+      : 0;
+    result.push({ month, nps, responses: total });
+  }
+
+  return result;
+}

@@ -8,6 +8,7 @@ import { getDB } from "../../db/adapters";
 import { findUserById } from "../../db/empcloud";
 import { NotFoundError, ValidationError, ConflictError } from "../../utils/errors";
 import { logger } from "../../utils/logger";
+import { sendFnFCalculatedEmail, sendFnFApprovedEmail } from "../email/exit-email.service";
 import type { FnFSettlement, ExitRequest, NoticeBuyoutRequest } from "@emp-exit/shared";
 
 // ---------------------------------------------------------------------------
@@ -171,6 +172,10 @@ export async function calculateFnF(
       breakdown_json: breakdownJson,
     });
     logger.info(`FnF recalculated for exit ${exitRequestId}: total=${totalPayable}`);
+
+    // Non-blocking email notification
+    sendFnFCalculatedEmail(exitRequestId).catch(() => {});
+
     return updated;
   }
 
@@ -191,6 +196,10 @@ export async function calculateFnF(
   });
 
   logger.info(`FnF calculated for exit ${exitRequestId}: id=${fnf.id}, total=${totalPayable}`);
+
+  // Non-blocking email notification
+  sendFnFCalculatedEmail(exitRequestId).catch(() => {});
+
   return fnf;
 }
 
@@ -298,6 +307,10 @@ export async function approveFnF(
   });
 
   logger.info(`FnF approved for exit ${exitRequestId} by user ${approvedBy}`);
+
+  // Non-blocking email notification
+  sendFnFApprovedEmail(exitRequestId).catch(() => {});
+
   return updated;
 }
 

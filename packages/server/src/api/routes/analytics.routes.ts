@@ -5,6 +5,7 @@
 
 import { Router, Request, Response, NextFunction } from "express";
 import * as analyticsService from "../../services/analytics/analytics.service";
+import * as interviewService from "../../services/interview/exit-interview.service";
 import { authenticate, authorize } from "../middleware/auth.middleware";
 import { sendSuccess } from "../../utils/response";
 
@@ -61,6 +62,33 @@ router.get("/rehire-pool", async (req: Request, res: Response, next: NextFunctio
   try {
     const orgId = req.user!.empcloudOrgId;
     const data = await analyticsService.getRehirePool(orgId);
+    return sendSuccess(res, data);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /analytics/nps — NPS score with breakdown
+router.get("/nps", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const orgId = req.user!.empcloudOrgId;
+    const { from, to } = req.query;
+    const data = await interviewService.calculateNPS(orgId, {
+      from: from as string | undefined,
+      to: to as string | undefined,
+    });
+    return sendSuccess(res, data);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /analytics/nps/trend — monthly NPS trend
+router.get("/nps/trend", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const orgId = req.user!.empcloudOrgId;
+    const months = req.query.months ? Number(req.query.months) : 12;
+    const data = await interviewService.getNPSTrend(orgId, months);
     return sendSuccess(res, data);
   } catch (err) {
     next(err);

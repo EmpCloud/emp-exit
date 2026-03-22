@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { BarChart3, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { BarChart3, Loader2, ArrowRight } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -43,16 +44,18 @@ export function AnalyticsPage() {
   const [reasons, setReasons] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
   const [tenure, setTenure] = useState<any[]>([]);
+  const [nps, setNps] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   async function fetchAll() {
     setLoading(true);
     try {
-      const [attrRes, reasonRes, deptRes, tenureRes] = await Promise.all([
+      const [attrRes, reasonRes, deptRes, tenureRes, npsRes] = await Promise.all([
         apiGet<any[]>("/analytics/attrition"),
         apiGet<any[]>("/analytics/reasons"),
         apiGet<any[]>("/analytics/departments"),
         apiGet<any[]>("/analytics/tenure"),
+        apiGet<any>("/analytics/nps"),
       ]);
       if (attrRes.success) setAttrition(attrRes.data || []);
       if (reasonRes.success) {
@@ -82,6 +85,9 @@ export function AnalyticsPage() {
             count: Number(t.count),
           })),
         );
+      }
+      if (npsRes.success) {
+        setNps(npsRes.data);
       }
     } catch {
       toast.error("Failed to load analytics data");
@@ -200,6 +206,41 @@ export function AnalyticsPage() {
           )}
         </div>
       </div>
+
+      {/* NPS Summary Card */}
+      <Link
+        to="/analytics/nps"
+        className="block rounded-lg border border-gray-200 bg-white p-6 hover:shadow-md transition-shadow"
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold text-gray-500 uppercase">Exit Survey NPS</h3>
+            {nps ? (
+              <div className="mt-2 flex items-baseline gap-3">
+                <span
+                  className="text-4xl font-bold"
+                  style={{ color: nps.nps > 50 ? "#16a34a" : nps.nps >= 0 ? "#f59e0b" : "#dc2626" }}
+                >
+                  {nps.nps}
+                </span>
+                <span className="text-sm text-gray-500">
+                  from {nps.totalResponses} response{nps.totalResponses !== 1 ? "s" : ""}
+                </span>
+              </div>
+            ) : (
+              <p className="mt-2 text-sm text-gray-400">No data yet</p>
+            )}
+            {nps && (
+              <div className="mt-3 flex gap-4 text-xs">
+                <span className="text-green-600">{nps.promoters} promoters</span>
+                <span className="text-yellow-600">{nps.passives} passives</span>
+                <span className="text-red-600">{nps.detractors} detractors</span>
+              </div>
+            )}
+          </div>
+          <ArrowRight className="h-5 w-5 text-gray-400" />
+        </div>
+      </Link>
     </div>
   );
 }

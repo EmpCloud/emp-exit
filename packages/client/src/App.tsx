@@ -112,6 +112,14 @@ const BuyoutListPage = lazy(() =>
   import("@/pages/buyout/BuyoutListPage").then((m) => ({ default: m.BuyoutListPage })),
 );
 
+// Rehire
+const RehireListPage = lazy(() =>
+  import("@/pages/rehire/RehireListPage").then((m) => ({ default: m.RehireListPage })),
+);
+const RehireDetailPage = lazy(() =>
+  import("@/pages/rehire/RehireDetailPage").then((m) => ({ default: m.RehireDetailPage })),
+);
+
 // Analytics
 const AnalyticsPage = lazy(() =>
   import("@/pages/analytics/AnalyticsPage").then((m) => ({ default: m.AnalyticsPage })),
@@ -121,6 +129,9 @@ const AttritionPredictionPage = lazy(() =>
 );
 const EmployeeRiskDetailPage = lazy(() =>
   import("@/pages/analytics/EmployeeRiskDetailPage").then((m) => ({ default: m.EmployeeRiskDetailPage })),
+);
+const NPSPage = lazy(() =>
+  import("@/pages/analytics/NPSPage").then((m) => ({ default: m.NPSPage })),
 );
 
 // Settings
@@ -253,8 +264,13 @@ export default function App() {
           <Route path="/alumni" element={<AlumniListPage />} />
           <Route path="/alumni/my" element={<MyAlumniPage />} />
 
+          {/* Rehire */}
+          <Route path="/rehire" element={<RehireListPage />} />
+          <Route path="/rehire/:id" element={<RehireDetailPage />} />
+
           {/* Analytics */}
           <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/analytics/nps" element={<NPSPage />} />
           <Route path="/analytics/flight-risk" element={<AttritionPredictionPage />} />
           <Route path="/analytics/flight-risk/:employeeId" element={<EmployeeRiskDetailPage />} />
 
