@@ -113,6 +113,25 @@ export async function initiateExit(
   // Non-blocking email notification
   sendExitInitiatedEmail(exitRequest.id).catch(() => {});
 
+  // Notify EMP Cloud about the exit initiation (non-blocking)
+  const webhookUrl = process.env.EMPCLOUD_WEBHOOK_URL;
+  if (webhookUrl) {
+    fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event: "exit.initiated",
+        data: {
+          employeeId: data.employee_id,
+          exitType: data.exit_type,
+          lastWorkingDate: data.last_working_date || null,
+        },
+        source: "emp-exit",
+        timestamp: new Date().toISOString(),
+      }),
+    }).catch(() => {}); // fire-and-forget
+  }
+
   return exitRequest;
 }
 
@@ -331,6 +350,25 @@ export async function completeExit(orgId: number, id: string): Promise<ExitReque
 
   // Non-blocking email notification
   sendExitCompletedEmail(id).catch(() => {});
+
+  // Notify EMP Cloud about the exit completion (non-blocking)
+  const exitWebhookUrl = process.env.EMPCLOUD_WEBHOOK_URL;
+  if (exitWebhookUrl) {
+    fetch(exitWebhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event: "exit.completed",
+        data: {
+          employeeId: exit.employee_id,
+          exitType: exit.exit_type,
+          lastWorkingDate: updated.actual_exit_date || new Date().toISOString().split("T")[0],
+        },
+        source: "emp-exit",
+        timestamp: new Date().toISOString(),
+      }),
+    }).catch(() => {}); // fire-and-forget
+  }
 
   return updated;
 }
