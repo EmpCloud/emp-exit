@@ -165,7 +165,7 @@ export async function updateItem(
   if (data.status !== undefined) {
     updateData.status = data.status;
     if (data.status === "completed") {
-      updateData.completed_at = data.completed_at || new Date().toISOString();
+      updateData.completed_at = data.completed_at ? new Date(data.completed_at) : new Date();
     }
   }
 

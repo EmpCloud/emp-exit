@@ -182,7 +182,7 @@ export async function approveBuyout(
   const updated = await db.update<NoticeBuyoutRequest>("notice_buyout_requests", buyoutId, {
     status: "approved",
     approved_by: approvedBy,
-    approved_at: new Date().toISOString(),
+    approved_at: new Date(),
   } as any);
 
   // Update exit request's last working date
