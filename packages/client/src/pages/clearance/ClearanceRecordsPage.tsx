@@ -102,7 +102,7 @@ export function ClearanceRecordsPage() {
           <p className="text-sm text-gray-500">No pending clearances assigned to you.</p>
         </div>
       ) : (
-        <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+        <div className="rounded-xl border border-gray-200 bg-white overflow-x-auto -mx-4 lg:mx-0">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-gray-100 text-xs font-medium uppercase tracking-wider text-gray-500">
