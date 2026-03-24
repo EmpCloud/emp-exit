@@ -331,6 +331,17 @@ All endpoints under `/api/v1/`. Server runs on port **4400**.
 
 ---
 
+## Test Deployment
+
+| Environment | URL |
+|-------------|-----|
+| Frontend | https://test-exit.empcloud.com |
+| API | https://test-exit-api.empcloud.com |
+
+SSO integrated with EMP Cloud.
+
+---
+
 ## Getting Started
 
 ### Prerequisites
