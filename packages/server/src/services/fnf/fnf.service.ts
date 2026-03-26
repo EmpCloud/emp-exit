@@ -125,15 +125,16 @@ export async function calculateFnF(
       )
     : 0;
 
-  // If an approved buyout exists, add the buyout amount to notice recovery
+  // If an approved buyout exists, use ONLY the buyout amount as notice recovery
+  // (the buyout replaces the notice period shortfall — adding both would double-charge)
   const approvedBuyout = await db.findOne<NoticeBuyoutRequest>("notice_buyout_requests", {
     exit_request_id: exitRequestId,
     status: "approved",
   });
   if (approvedBuyout) {
-    noticePayRecovery += approvedBuyout.buyout_amount;
+    noticePayRecovery = approvedBuyout.buyout_amount;
     logger.info(
-      `FnF includes buyout recovery of ${approvedBuyout.buyout_amount} for exit ${exitRequestId}`,
+      `FnF uses buyout recovery of ${approvedBuyout.buyout_amount} (replaces notice shortfall) for exit ${exitRequestId}`,
     );
   }
 
