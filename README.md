@@ -3,7 +3,7 @@
 > Simplify exit formalities and manage background verification portfolio efficiently
 
 [![Part of EmpCloud](https://img.shields.io/badge/EmpCloud-Module-blue)]()
-[![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-green.svg)](LICENSE)
+[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
 [![Status: Built](https://img.shields.io/badge/Status-Built-green)]()
 
 EMP Exit is the offboarding and exit management module of the EmpCloud ecosystem. It provides configurable exit workflows, clearance management, exit interviews, full and final settlement calculation, asset return tracking, knowledge transfer, letter generation, background verification portfolios, alumni network, predictive attrition dashboard, notice period buyout calculator, exit stage email notifications, rehire workflow, and exit survey NPS tracking.
@@ -392,4 +392,4 @@ Once running, visit:
 
 ## License
 
-This project is licensed under the [GPL-3.0 License](LICENSE).
+This project is licensed under the [AGPL-3.0 License](LICENSE).
