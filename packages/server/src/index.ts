@@ -30,6 +30,7 @@ import { predictionRoutes } from "./api/routes/prediction.routes";
 import { settingsRoutes } from "./api/routes/settings.routes";
 import { buyoutRoutes } from "./api/routes/buyout.routes";
 import { rehireRoutes } from "./api/routes/rehire.routes";
+import { emailTemplateRoutes } from "./api/routes/email-template.routes";
 import { errorHandler } from "./api/middleware/error.middleware";
 import { apiLimiter } from "./api/middleware/rate-limit.middleware";
 import { swaggerUIHandler, openapiHandler } from "./api/docs";
@@ -93,12 +94,14 @@ v1.use("/fnf", fnfRoutes);
 v1.use("/assets", assetRoutes);
 v1.use("/kt", ktRoutes);
 v1.use("/letters", letterRoutes);
+v1.use("/letter-templates", letterRoutes); // alias — some clients use /letter-templates instead of /letters
 v1.use("/alumni", alumniRoutes);
 v1.use("/analytics", analyticsRoutes);
 v1.use("/predictions", predictionRoutes);
 v1.use("/settings", settingsRoutes);
 v1.use("/buyout", buyoutRoutes);
 v1.use("/rehire", rehireRoutes);
+v1.use("/email-templates", emailTemplateRoutes);
 
 app.use("/api/v1", v1);
 
