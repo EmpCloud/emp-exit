@@ -103,6 +103,13 @@ v1.use("/buyout", buyoutRoutes);
 v1.use("/rehire", rehireRoutes);
 v1.use("/email-templates", emailTemplateRoutes);
 
+// Alias routes — some clients use flattened paths (e.g. /checklist-templates)
+// instead of the nested resource paths (e.g. /checklists/templates).
+v1.use("/checklist-templates", checklistRoutes); // alias for /checklists/templates
+v1.use("/clearance-departments", clearanceRoutes); // alias for /clearance/departments
+v1.use("/interview-templates", interviewRoutes); // alias for /interviews/templates
+v1.use("/exit-interviews", interviewRoutes); // alias for /interviews
+
 app.use("/api/v1", v1);
 
 // API Documentation
