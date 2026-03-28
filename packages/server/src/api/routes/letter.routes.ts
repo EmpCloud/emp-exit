@@ -17,8 +17,8 @@ router.use(authenticate);
 
 // ---- Templates ----
 
-// GET /letters/templates
-router.get("/templates", async (req: Request, res: Response, next: NextFunction) => {
+// Shared handler for listing templates
+async function handleListTemplates(req: Request, res: Response, next: NextFunction) {
   try {
     const orgId = req.user!.empcloudOrgId;
     const templates = await letterService.listTemplates(orgId);
@@ -26,7 +26,13 @@ router.get("/templates", async (req: Request, res: Response, next: NextFunction)
   } catch (err) {
     next(err);
   }
-});
+}
+
+// GET / — alias root (supports /letter-templates mount)
+router.get("/", handleListTemplates);
+
+// GET /letters/templates
+router.get("/templates", handleListTemplates);
 
 // POST /letters/templates
 router.post(

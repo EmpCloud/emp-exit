@@ -22,20 +22,22 @@ router.use(authenticate);
 // Template routes
 // ---------------------------------------------------------------------------
 
+// Shared handler for listing templates
+async function handleListTemplates(req: Request, res: Response, next: NextFunction) {
+  try {
+    const orgId = req.user!.empcloudOrgId;
+    const templates = await interviewService.listTemplates(orgId);
+    sendSuccess(res, templates);
+  } catch (err) {
+    next(err);
+  }
+}
+
+// GET / — alias root (supports /interview-templates mount)
+router.get("/", authorize("org_admin", "hr_admin", "hr_manager"), handleListTemplates);
+
 // GET /templates — list all templates for org
-router.get(
-  "/templates",
-  authorize("org_admin", "hr_admin", "hr_manager"),
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const orgId = req.user!.empcloudOrgId;
-      const templates = await interviewService.listTemplates(orgId);
-      sendSuccess(res, templates);
-    } catch (err) {
-      next(err);
-    }
-  },
-);
+router.get("/templates", authorize("org_admin", "hr_admin", "hr_manager"), handleListTemplates);
 
 // POST /templates — create a new template
 router.post(

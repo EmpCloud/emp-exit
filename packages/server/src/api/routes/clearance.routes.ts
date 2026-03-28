@@ -25,18 +25,21 @@ router.use(authenticate);
 // Departments
 // ---------------------------------------------------------------------------
 
+// Shared handler for listing departments
+async function handleListDepartments(req: Request, res: Response, next: NextFunction) {
+  try {
+    const depts = await clearanceService.listDepartments(req.user!.empcloudOrgId);
+    sendSuccess(res, depts);
+  } catch (err) {
+    next(err);
+  }
+}
+
+// GET / — alias root (supports /clearance-departments mount)
+router.get("/", handleListDepartments);
+
 // GET /departments
-router.get(
-  "/departments",
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const depts = await clearanceService.listDepartments(req.user!.empcloudOrgId);
-      sendSuccess(res, depts);
-    } catch (err) {
-      next(err);
-    }
-  },
-);
+router.get("/departments", handleListDepartments);
 
 // POST /departments
 router.post(

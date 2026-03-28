@@ -31,6 +31,8 @@ import { settingsRoutes } from "./api/routes/settings.routes";
 import { buyoutRoutes } from "./api/routes/buyout.routes";
 import { rehireRoutes } from "./api/routes/rehire.routes";
 import { emailTemplateRoutes } from "./api/routes/email-template.routes";
+import { npsRoutes } from "./api/routes/nps.routes";
+import { myClearancesRoutes } from "./api/routes/my-clearances.routes";
 import { errorHandler } from "./api/middleware/error.middleware";
 import { apiLimiter } from "./api/middleware/rate-limit.middleware";
 import { swaggerUIHandler, openapiHandler } from "./api/docs";
@@ -105,10 +107,13 @@ v1.use("/email-templates", emailTemplateRoutes);
 
 // Alias routes — some clients use flattened paths (e.g. /checklist-templates)
 // instead of the nested resource paths (e.g. /checklists/templates).
+// Each aliased router now has a GET / root handler so the flattened path resolves.
 v1.use("/checklist-templates", checklistRoutes); // alias for /checklists/templates
 v1.use("/clearance-departments", clearanceRoutes); // alias for /clearance/departments
+v1.use("/my-clearances", myClearancesRoutes); // alias for /clearance/my
 v1.use("/interview-templates", interviewRoutes); // alias for /interviews/templates
 v1.use("/exit-interviews", interviewRoutes); // alias for /interviews
+v1.use("/nps", npsRoutes); // alias — /nps/scores, /nps/trends, /nps/responses
 
 app.use("/api/v1", v1);
 

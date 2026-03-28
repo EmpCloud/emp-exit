@@ -32,18 +32,28 @@ router.use(authenticate);
 // Templates
 // ---------------------------------------------------------------------------
 
+// Shared handler for listing templates
+async function handleListTemplates(req: Request, res: Response, next: NextFunction) {
+  try {
+    const templates = await checklistService.listTemplates(req.user!.empcloudOrgId);
+    sendSuccess(res, templates);
+  } catch (err) {
+    next(err);
+  }
+}
+
+// GET / — alias root (supports /checklist-templates mount)
+router.get(
+  "/",
+  authorize("super_admin", "org_admin", "hr_admin", "hr_manager"),
+  handleListTemplates,
+);
+
 // GET /templates
 router.get(
   "/templates",
   authorize("super_admin", "org_admin", "hr_admin", "hr_manager"),
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const templates = await checklistService.listTemplates(req.user!.empcloudOrgId);
-      sendSuccess(res, templates);
-    } catch (err) {
-      next(err);
-    }
-  },
+  handleListTemplates,
 );
 
 // POST /templates
