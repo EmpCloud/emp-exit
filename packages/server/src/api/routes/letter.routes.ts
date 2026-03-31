@@ -87,7 +87,7 @@ router.post(
       }
       const letter = await letterService.generateLetter(
         orgId,
-        req.params.exitId,
+        req.params.exitId as string,
         templateId,
         req.user!.empcloudUserId,
       );
@@ -102,7 +102,7 @@ router.post(
 router.get("/exit/:exitId", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const orgId = req.user!.empcloudOrgId;
-    const letters = await letterService.listLetters(orgId, req.params.exitId);
+    const letters = await letterService.listLetters(orgId, req.params.exitId as string);
     return sendSuccess(res, letters);
   } catch (err) {
     next(err);
@@ -115,7 +115,7 @@ router.get("/exit/:exitId", async (req: Request, res: Response, next: NextFuncti
 router.get("/:letterId/download", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const orgId = req.user!.empcloudOrgId;
-    const letter = await letterService.getLetter(orgId, req.params.letterId) as any;
+    const letter = await letterService.getLetter(orgId, req.params.letterId as string) as any;
     res.setHeader("Content-Type", "text/html");
     res.setHeader("Content-Disposition", `attachment; filename="${letter.letter_type}_letter.html"`);
     return res.send(letter.generated_body);
@@ -131,7 +131,7 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const orgId = req.user!.empcloudOrgId;
-      const result = await letterService.sendLetter(orgId, req.params.letterId);
+      const result = await letterService.sendLetter(orgId, req.params.letterId as string);
       return sendSuccess(res, result);
     } catch (err) {
       next(err);
