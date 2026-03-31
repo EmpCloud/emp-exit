@@ -28,6 +28,16 @@ function SSOGate({ children }: { children: React.ReactNode }) {
 
     let cancelled = false;
 
+    // Timeout to prevent infinite loading if the API is unreachable
+    const timeout = setTimeout(() => {
+      if (!cancelled) {
+        cancelled = true;
+        console.error("SSO exchange timed out after 10s");
+        setError("SSO login timed out. The server may be unavailable.");
+        setReady(true);
+      }
+    }, 10000);
+
     (async () => {
       try {
         const res = await apiPost<{
@@ -36,6 +46,7 @@ function SSOGate({ children }: { children: React.ReactNode }) {
         }>("/auth/sso", { token: ssoToken });
 
         if (cancelled) return;
+        clearTimeout(timeout);
 
         const { user, tokens } = res.data!;
         login(user, tokens);
@@ -47,13 +58,18 @@ function SSOGate({ children }: { children: React.ReactNode }) {
         setReady(true);
       } catch (err: any) {
         if (cancelled) return;
+        clearTimeout(timeout);
         console.error("SSO exchange failed:", err);
-        setError("SSO login failed. Please try logging in manually.");
+        const message = err?.response?.data?.error?.message || "SSO login failed. Please try logging in manually.";
+        setError(message);
         setReady(true);
       }
     })();
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
   }, [ssoToken, login]);
 
   if (!ready) return <PageLoader />;
