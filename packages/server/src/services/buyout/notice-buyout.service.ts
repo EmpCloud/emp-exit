@@ -89,8 +89,8 @@ export async function calculateBuyout(
   // Get employee salary for daily rate computation
   const employee = await findUserById(exitReq.employee_id);
   let lastBasic = 0;
-  if (employee?.last_basic_salary) {
-    lastBasic = employee.last_basic_salary;
+  if ((employee as any)?.last_basic_salary) {
+    lastBasic = (employee as any).last_basic_salary;
   }
 
   const dailyRate = lastBasic > 0 ? Math.round(lastBasic / 30) : 0;

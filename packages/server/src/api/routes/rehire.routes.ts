@@ -65,7 +65,7 @@ router.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const orgId = req.user!.empcloudOrgId;
-      const result = await rehireService.getRehireRequest(orgId, req.params.id);
+      const result = await rehireService.getRehireRequest(orgId, req.params.id as string);
       return sendSuccess(res, result);
     } catch (err) {
       next(err);
@@ -88,7 +88,7 @@ router.put(
         throw new ValidationError(`status must be one of: ${validStatuses.join(", ")}`);
       }
       const orgId = req.user!.empcloudOrgId;
-      const result = await rehireService.updateStatus(orgId, req.params.id, status, notes);
+      const result = await rehireService.updateStatus(orgId, req.params.id as string, status, notes);
       return sendSuccess(res, result);
     } catch (err) {
       next(err);
@@ -103,7 +103,7 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const orgId = req.user!.empcloudOrgId;
-      const result = await rehireService.completeRehire(orgId, req.params.id);
+      const result = await rehireService.completeRehire(orgId, req.params.id as string);
       return sendSuccess(res, result);
     } catch (err) {
       next(err);

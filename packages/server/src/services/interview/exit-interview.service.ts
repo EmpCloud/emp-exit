@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import { getDB } from "../../db/adapters";
 import { NotFoundError, ValidationError, ConflictError } from "../../utils/errors";
 import { logger } from "../../utils/logger";
+import { InterviewStatus } from "@emp-exit/shared";
 import type {
   ExitInterviewTemplate,
   ExitInterviewQuestion,
@@ -235,7 +236,7 @@ export async function scheduleInterview(
     template_id: templateId,
     interviewer_id: conductedBy,
     scheduled_date: scheduledAt,
-    status: "scheduled",
+    status: "scheduled" as InterviewStatus,
   });
 
   logger.info(`Interview scheduled: ${interview.id} for exit ${exitRequestId}`);
@@ -346,7 +347,7 @@ export async function completeInterview(orgId: number, interviewId: string): Pro
   }
 
   const updated = await db.update<ExitInterview>("exit_interviews", interviewId, {
-    status: "completed",
+    status: "completed" as InterviewStatus,
     completed_date: new Date().toISOString().split("T")[0],
   });
 
@@ -371,7 +372,7 @@ export async function skipInterview(orgId: number, interviewId: string): Promise
   }
 
   const updated = await db.update<ExitInterview>("exit_interviews", interviewId, {
-    status: "skipped",
+    status: "skipped" as InterviewStatus,
   });
 
   logger.info(`Interview skipped: ${interviewId}`);

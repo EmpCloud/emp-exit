@@ -9,6 +9,7 @@ import { findUserById } from "../../db/empcloud";
 import { NotFoundError, ValidationError, ConflictError } from "../../utils/errors";
 import { logger } from "../../utils/logger";
 import { sendFnFCalculatedEmail, sendFnFApprovedEmail } from "../email/exit-email.service";
+import { FnFStatus } from "@emp-exit/shared";
 import type { FnFSettlement, ExitRequest, NoticeBuyoutRequest } from "@emp-exit/shared";
 
 // ---------------------------------------------------------------------------
@@ -161,7 +162,7 @@ export async function calculateFnF(
   if (existing) {
     // Update existing FnF
     const updated = await db.update<FnFSettlement>("fnf_settlements", existing.id, {
-      status: "calculated",
+      status: "calculated" as FnFStatus,
       basic_salary_due: pendingSalary,
       leave_encashment: leaveEncashment,
       bonus_due: bonusDue,
@@ -184,7 +185,7 @@ export async function calculateFnF(
   const fnf = await db.create<FnFSettlement>("fnf_settlements", {
     id: uuidv4(),
     exit_request_id: exitRequestId,
-    status: "calculated",
+    status: "calculated" as FnFStatus,
     basic_salary_due: pendingSalary,
     leave_encashment: leaveEncashment,
     bonus_due: bonusDue,
@@ -303,7 +304,7 @@ export async function approveFnF(
   }
 
   const updated = await db.update<FnFSettlement>("fnf_settlements", fnf.id, {
-    status: "approved",
+    status: "approved" as FnFStatus,
     approved_by: approvedBy,
   });
 
@@ -338,7 +339,7 @@ export async function markPaid(
   }
 
   const updated = await db.update<FnFSettlement>("fnf_settlements", fnf.id, {
-    status: "paid",
+    status: "paid" as FnFStatus,
     paid_date: new Date().toISOString().split("T")[0],
     remarks: fnf.remarks
       ? `${fnf.remarks}\nPayment ref: ${paymentReference}`
