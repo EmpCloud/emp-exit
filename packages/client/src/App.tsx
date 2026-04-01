@@ -95,7 +95,7 @@ export default function App() {
         <Route path="/" element={<AuthRedirect />} />
 
         {/* All app routes */}
-        <AppRoutes />
+        {AppRoutes()}
       </Routes>
     </Suspense>
     </SSOGate>
