@@ -12,6 +12,12 @@ interface UpdateSettingsData {
   require_exit_interview?: boolean;
   fnf_approval_required?: boolean;
   alumni_opt_in_default?: boolean;
+  email_on_exit_initiated?: boolean;
+  email_on_clearance_pending?: boolean;
+  email_on_clearance_completed?: boolean;
+  email_on_fnf_calculated?: boolean;
+  email_on_fnf_approved?: boolean;
+  email_on_exit_completed?: boolean;
 }
 
 export async function getSettings(orgId: number) {

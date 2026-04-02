@@ -57,15 +57,13 @@ export function DashboardLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const logout = useAuthStore((s) => s.logout);
+  const user = getUser();
 
-  if (!isLoggedIn()) return <Navigate to="/login" replace />;
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     setMobileOpen(false);
   }, [location.pathname]);
 
-  const user = getUser();
+  if (!isLoggedIn()) return <Navigate to="/login" replace />;
   const displayName = user ? `${user.firstName} ${user.lastName}` : "User";
   const roleLabel =
     user?.role === "hr_admin"
