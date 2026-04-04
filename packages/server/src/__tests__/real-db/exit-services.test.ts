@@ -20,6 +20,7 @@ const TS = Date.now(); // unique per run to avoid collisions
 
 // Track IDs for cleanup
 const cleanup: { table: string; id: string }[] = [];
+const parentCleanup: { table: string; id: string }[] = [];
 
 beforeAll(async () => {
   db = knexLib({
@@ -48,6 +49,15 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
+  // Clean up parent records created in beforeAll
+  for (const item of parentCleanup.reverse()) {
+    try {
+      await db(item.table).where({ id: item.id }).del();
+    } catch {
+      // ignore
+    }
+  }
+  parentCleanup.length = 0;
   if (db) await db.destroy();
 });
 
@@ -74,7 +84,7 @@ async function seedExitRequest(overrides: Record<string, any> = {}) {
     updated_at: now,
     ...overrides,
   });
-  cleanup.push({ table: "exit_requests", id });
+  parentCleanup.push({ table: "exit_requests", id });
   return id;
 }
 
@@ -232,7 +242,7 @@ describe("ChecklistService", () => {
         name: `Items Template ${TS}`,
         is_active: true,
       });
-      cleanup.push({ table: "exit_checklist_templates", id: templateId });
+      parentCleanup.push({ table: "exit_checklist_templates", id: templateId });
     });
 
     it("should add items to a template", async () => {
@@ -304,7 +314,7 @@ describe("ChecklistService", () => {
         name: `Instance Template ${TS}`,
         is_active: true,
       });
-      cleanup.push({ table: "exit_checklist_templates", id: templateId });
+      parentCleanup.push({ table: "exit_checklist_templates", id: templateId });
 
       templateItemId = `test-titem-inst-${TS}`;
       await db("exit_checklist_template_items").insert({
@@ -314,7 +324,7 @@ describe("ChecklistService", () => {
         sort_order: 0,
         is_mandatory: true,
       });
-      cleanup.push({ table: "exit_checklist_template_items", id: templateItemId });
+      parentCleanup.push({ table: "exit_checklist_template_items", id: templateItemId });
     });
 
     it("should generate checklist instances from a template", async () => {
@@ -459,7 +469,7 @@ describe("ExitInterviewService", () => {
         name: `Question Template ${TS}`,
         is_active: true,
       });
-      cleanup.push({ table: "exit_interview_templates", id: templateId });
+      parentCleanup.push({ table: "exit_interview_templates", id: templateId });
     });
 
     it("should add a question to a template", async () => {
@@ -530,7 +540,7 @@ describe("ExitInterviewService", () => {
         name: `Lifecycle Template ${TS}`,
         is_active: true,
       });
-      cleanup.push({ table: "exit_interview_templates", id: templateId });
+      parentCleanup.push({ table: "exit_interview_templates", id: templateId });
     });
 
     it("should schedule an interview", async () => {
@@ -1081,7 +1091,7 @@ describe("RehireService", () => {
       opted_in: true,
       exit_date: "2026-03-31",
     });
-    cleanup.push({ table: "alumni_profiles", id: alumniId });
+    parentCleanup.push({ table: "alumni_profiles", id: alumniId });
   });
 
   it("should propose a rehire request", async () => {
