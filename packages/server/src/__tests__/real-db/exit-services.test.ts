@@ -69,6 +69,7 @@ async function seedExitRequest(overrides: Record<string, any> = {}) {
     notice_period_days: 30,
     resignation_date: "2026-03-01",
     last_working_date: "2026-03-31",
+    initiated_by: USER_ID,
     created_at: now,
     updated_at: now,
     ...overrides,
