@@ -22,6 +22,9 @@ process.env.LOG_LEVEL = "error";
 process.env.EMAIL_HOST = "localhost";
 process.env.EMAIL_PORT = "587";
 process.env.EMAIL_FROM = "test@empcloud.com";
+process.env.SMTP_HOST = "127.0.0.254";
+process.env.SMTP_PORT = "2525";
+process.env.SMTP_FROM = "test@empcloud.com";
 
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import knexLib, { Knex } from "knex";
