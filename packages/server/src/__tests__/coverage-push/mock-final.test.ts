@@ -4,24 +4,31 @@
 // =============================================================================
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const mockKnex = Object.assign(vi.fn().mockReturnThis(), {
-  where: vi.fn().mockReturnThis(),
-  whereNull: vi.fn().mockReturnThis(),
-  whereNotNull: vi.fn().mockReturnThis(),
-  whereIn: vi.fn().mockReturnThis(),
-  select: vi.fn().mockReturnThis(),
+const mockKnexChain: any = {
+  where: vi.fn(),
+  whereNull: vi.fn(),
+  whereNotNull: vi.fn(),
+  whereIn: vi.fn(),
+  select: vi.fn(),
   first: vi.fn().mockResolvedValue(null),
   insert: vi.fn().mockResolvedValue([1]),
   update: vi.fn().mockResolvedValue(1),
-  count: vi.fn().mockReturnThis(),
-  orderBy: vi.fn().mockReturnThis(),
-  limit: vi.fn().mockReturnThis(),
-  offset: vi.fn().mockReturnThis(),
+  count: vi.fn(),
+  orderBy: vi.fn(),
+  limit: vi.fn(),
+  offset: vi.fn(),
   delete: vi.fn().mockResolvedValue(1),
-  join: vi.fn().mockReturnThis(),
-  leftJoin: vi.fn().mockReturnThis(),
-  clone: vi.fn().mockReturnThis(),
-});
+  join: vi.fn(),
+  leftJoin: vi.fn(),
+  clone: vi.fn(),
+};
+// Make all chain methods return the chain itself
+for (const key of Object.keys(mockKnexChain)) {
+  if (!["first", "insert", "update", "delete"].includes(key)) {
+    mockKnexChain[key].mockReturnValue(mockKnexChain);
+  }
+}
+const mockKnex: any = Object.assign(vi.fn().mockReturnValue(mockKnexChain), mockKnexChain);
 
 const mockDB = {
   create: vi.fn().mockResolvedValue({ id: "uuid-1", organization_id: 5 }),
@@ -735,7 +742,7 @@ describe("ChecklistService -- deep coverage", () => {
   beforeEach(() => { vi.clearAllMocks(); });
 
   it("imports and has key exports", async () => {
-    const mod = await import("../../services/checklist/exit-checklist.service");
+    const mod = await import("../../services/checklist/checklist.service");
     expect(mod).toBeTruthy();
     if (mod.createTemplate) expect(typeof mod.createTemplate).toBe("function");
     if (mod.listTemplates) expect(typeof mod.listTemplates).toBe("function");
@@ -747,7 +754,7 @@ describe("ChecklistService -- deep coverage", () => {
     });
 
     try {
-      const { createTemplate } = await import("../../services/checklist/exit-checklist.service");
+      const { createTemplate } = await import("../../services/checklist/checklist.service");
       const r = await createTemplate(5, { name: "Standard Exit" });
       expect(r.id).toBeTruthy();
     } catch { expect(true).toBe(true); }
@@ -757,7 +764,7 @@ describe("ChecklistService -- deep coverage", () => {
     mockDB.findMany.mockResolvedValueOnce({ data: [{ id: "ct1" }], total: 1, page: 1, limit: 100, totalPages: 1 });
 
     try {
-      const { listTemplates } = await import("../../services/checklist/exit-checklist.service");
+      const { listTemplates } = await import("../../services/checklist/checklist.service");
       const r = await listTemplates(5);
       expect(r).toBeTruthy();
     } catch { expect(true).toBe(true); }
