@@ -21,68 +21,25 @@ process.env.SMTP_HOST = "localhost";
 process.env.SMTP_PORT = "1025";
 
 import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
-import { initDB, closeDB, getDB } from "../../db/adapters";
-import { initEmpCloudDB, closeEmpCloudDB } from "../../db/empcloud";
 import knexLib, { Knex } from "knex";
 
-// Services — flight risk
-import {
-  calculateFlightRisk,
-  batchCalculateFlightRisk,
-  getHighRiskEmployees,
-  getEmployeeFlightRisk,
-  getFlightRiskDashboard,
-  scoreToRiskLevel,
-} from "../../services/analytics/flight-risk.service";
-
-// Services — attrition prediction
-import {
-  generateAttritionPrediction,
-  getPredictionTrends,
-} from "../../services/analytics/attrition-prediction.service";
-
-// Services — analytics
-import * as analyticsService from "../../services/analytics/analytics.service";
-
-// Services — exit request
-import {
-  initiateExit,
-  listExits,
-  getExit,
-  updateExit,
-  cancelExit,
-  completeExit,
-  submitResignation,
-  getMyExit,
-} from "../../services/exit/exit-request.service";
-
-// Services — checklist
-import * as checklistService from "../../services/checklist/checklist.service";
-
-// Services — clearance
-import * as clearanceService from "../../services/clearance/clearance.service";
-
-// Services — email
-import {
-  sendExitInitiatedEmail,
-  sendClearancePendingEmail,
-  sendClearanceCompletedEmail,
-  sendFnFCalculatedEmail,
-  sendFnFApprovedEmail,
-  sendExitCompletedEmail,
-} from "../../services/email/exit-email.service";
-
-// Services — FnF
-import * as fnfService from "../../services/fnf/fnf.service";
-
-// Services — letter, rehire, alumni, kt, asset, buyout, settings (fill remaining gaps)
-import * as letterService from "../../services/letter/letter.service";
-import * as rehireService from "../../services/rehire/rehire.service";
-import * as alumniService from "../../services/alumni/alumni.service";
-import * as ktService from "../../services/kt/knowledge-transfer.service";
-import * as assetService from "../../services/asset/asset-return.service";
-import * as buyoutService from "../../services/buyout/notice-buyout.service";
-import * as settingsService from "../../services/settings/settings.service";
+// All service imports are done dynamically inside beforeAll (after env vars are set)
+// to ensure config module reads our process.env values
+let initDB: any, closeDB: any, getDB: any;
+let initEmpCloudDB: any, closeEmpCloudDB: any;
+let calculateFlightRisk: any, batchCalculateFlightRisk: any, getHighRiskEmployees: any;
+let getEmployeeFlightRisk: any, getFlightRiskDashboard: any, scoreToRiskLevel: any;
+let generateAttritionPrediction: any, getPredictionTrends: any;
+let analyticsService: any;
+let initiateExit: any, listExits: any, getExit: any, updateExit: any;
+let cancelExit: any, completeExit: any, submitResignation: any, getMyExit: any;
+let checklistService: any, clearanceService: any;
+let sendExitInitiatedEmail: any, sendClearancePendingEmail: any;
+let sendClearanceCompletedEmail: any, sendFnFCalculatedEmail: any;
+let sendFnFApprovedEmail: any, sendExitCompletedEmail: any;
+let fnfService: any, letterService: any, rehireService: any;
+let alumniService: any, ktService: any, assetService: any;
+let buyoutService: any, settingsService: any;
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -145,13 +102,51 @@ beforeAll(async () => {
     });
     await rawDb.raw("SELECT 1");
 
+    // Dynamic imports — after env vars are set, so config reads them correctly
+    const dbMod = await import("../../db/adapters/index.js");
+    initDB = dbMod.initDB; closeDB = dbMod.closeDB; getDB = dbMod.getDB;
+    const ecMod = await import("../../db/empcloud.js");
+    initEmpCloudDB = ecMod.initEmpCloudDB; closeEmpCloudDB = ecMod.closeEmpCloudDB;
+
+    const fr = await import("../../services/analytics/flight-risk.service.js");
+    calculateFlightRisk = fr.calculateFlightRisk; batchCalculateFlightRisk = fr.batchCalculateFlightRisk;
+    getHighRiskEmployees = fr.getHighRiskEmployees; getEmployeeFlightRisk = fr.getEmployeeFlightRisk;
+    getFlightRiskDashboard = fr.getFlightRiskDashboard; scoreToRiskLevel = fr.scoreToRiskLevel;
+
+    const ap = await import("../../services/analytics/attrition-prediction.service.js");
+    generateAttritionPrediction = ap.generateAttritionPrediction; getPredictionTrends = ap.getPredictionTrends;
+
+    analyticsService = await import("../../services/analytics/analytics.service.js");
+
+    const ex = await import("../../services/exit/exit-request.service.js");
+    initiateExit = ex.initiateExit; listExits = ex.listExits; getExit = ex.getExit;
+    updateExit = ex.updateExit; cancelExit = ex.cancelExit; completeExit = ex.completeExit;
+    submitResignation = ex.submitResignation; getMyExit = ex.getMyExit;
+
+    checklistService = await import("../../services/checklist/checklist.service.js");
+    clearanceService = await import("../../services/clearance/clearance.service.js");
+
+    const em = await import("../../services/email/exit-email.service.js");
+    sendExitInitiatedEmail = em.sendExitInitiatedEmail; sendClearancePendingEmail = em.sendClearancePendingEmail;
+    sendClearanceCompletedEmail = em.sendClearanceCompletedEmail; sendFnFCalculatedEmail = em.sendFnFCalculatedEmail;
+    sendFnFApprovedEmail = em.sendFnFApprovedEmail; sendExitCompletedEmail = em.sendExitCompletedEmail;
+
+    fnfService = await import("../../services/fnf/fnf.service.js");
+    letterService = await import("../../services/letter/letter.service.js");
+    rehireService = await import("../../services/rehire/rehire.service.js");
+    alumniService = await import("../../services/alumni/alumni.service.js");
+    ktService = await import("../../services/kt/knowledge-transfer.service.js");
+    assetService = await import("../../services/asset/asset-return.service.js");
+    buyoutService = await import("../../services/buyout/notice-buyout.service.js");
+    settingsService = await import("../../services/settings/settings.service.js");
+
     // Initialize the app adapters (used by services)
     await initDB();
     try { await initEmpCloudDB(); } catch { /* may already be initialized */ }
 
     dbAvailable = true;
-  } catch {
-    // No local MySQL — tests will be skipped
+  } catch (err) {
+    console.warn("DB not available, skipping:", (err as Error).message);
   }
 }, 30000);
 
