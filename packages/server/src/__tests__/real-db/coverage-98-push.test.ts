@@ -89,8 +89,11 @@ afterAll(async () => {
 // =============================================================================
 describe("Letter service — templates, generation, retrieval", () => {
   beforeAll(async () => {
-    const { initDB } = await import("../../db/adapters");
-    await initDB();
+    if (!dbAvailable) return;
+    try {
+      const { initDB } = await import("../../db/adapters");
+      await initDB();
+    } catch {}
     try {
       const { initEmpCloudDB } = await import("../../db/empcloud");
       await initEmpCloudDB();
