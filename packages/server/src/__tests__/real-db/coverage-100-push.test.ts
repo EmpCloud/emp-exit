@@ -20,7 +20,7 @@ process.env.JWT_SECRET = "test-secret-key";
 process.env.SMTP_HOST = "localhost";
 process.env.SMTP_PORT = "1025";
 
-import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach, afterAll, afterEach } from "vitest";
 import knexLib, { Knex } from "knex";
 
 // All service imports are done dynamically inside beforeAll (after env vars are set)
@@ -158,6 +158,9 @@ afterEach(async () => {
   cleanupIds.length = 0;
 });
 
+// Skip individual tests when DB is unavailable
+beforeEach((ctx) => { if (!dbAvailable) ctx.skip(); });
+
 afterAll(async () => {
   if (!dbAvailable) return;
   try { await closeDB(); } catch { /* ignore */ }
@@ -169,7 +172,7 @@ afterAll(async () => {
 // 1. FLIGHT RISK SERVICE — comprehensive branch coverage
 // ==========================================================================
 
-describe.skipIf(!dbAvailable)("FlightRiskService — full coverage", () => {
+describe("FlightRiskService — full coverage", () => {
   // scoreToRiskLevel — all 4 brackets
   it("scoreToRiskLevel: critical for >= 80", () => {
     expect(scoreToRiskLevel(80)).toBe("critical");
@@ -307,7 +310,7 @@ describe.skipIf(!dbAvailable)("FlightRiskService — full coverage", () => {
 // 2. ATTRITION PREDICTION SERVICE
 // ==========================================================================
 
-describe.skipIf(!dbAvailable)("AttritionPredictionService — full coverage", () => {
+describe("AttritionPredictionService — full coverage", () => {
   it("generateAttritionPrediction runs without error", async () => {
     await expect(generateAttritionPrediction(ORG_ID)).resolves.not.toThrow();
   });
@@ -336,7 +339,7 @@ describe.skipIf(!dbAvailable)("AttritionPredictionService — full coverage", ()
 // 3. EXIT REQUEST SERVICE — comprehensive branch coverage
 // ==========================================================================
 
-describe.skipIf(!dbAvailable)("ExitRequestService — full coverage", () => {
+describe("ExitRequestService — full coverage", () => {
   let createdExitId: string | null = null;
 
   afterEach(async () => {
@@ -626,7 +629,7 @@ describe.skipIf(!dbAvailable)("ExitRequestService — full coverage", () => {
 // 4. CHECKLIST SERVICE — deep branch coverage
 // ==========================================================================
 
-describe.skipIf(!dbAvailable)("ChecklistService — deep coverage", () => {
+describe("ChecklistService — deep coverage", () => {
   // Template CRUD with all options
   it("createTemplate with is_default=true unsets other defaults", async () => {
     const t1 = await checklistService.createTemplate(ORG_ID, {
@@ -929,7 +932,7 @@ describe.skipIf(!dbAvailable)("ChecklistService — deep coverage", () => {
 // 5. CLEARANCE SERVICE — deep branch coverage
 // ==========================================================================
 
-describe.skipIf(!dbAvailable)("ClearanceService — deep coverage", () => {
+describe("ClearanceService — deep coverage", () => {
   it("listDepartments returns array", async () => {
     const result = await clearanceService.listDepartments(ORG_ID);
     expect(Array.isArray(result)).toBe(true);
@@ -1139,7 +1142,7 @@ describe.skipIf(!dbAvailable)("ClearanceService — deep coverage", () => {
 // 6. EMAIL SERVICE — cover all email functions (they catch internally)
 // ==========================================================================
 
-describe.skipIf(!dbAvailable)("ExitEmailService — all email functions", () => {
+describe("ExitEmailService — all email functions", () => {
   it("sendExitInitiatedEmail with valid exit request", async () => {
     const exitId = await seedExitRequest();
     // Should not throw — emails fail silently
@@ -1200,7 +1203,7 @@ describe.skipIf(!dbAvailable)("ExitEmailService — all email functions", () => 
 // 7. FNF SERVICE — additional branch coverage
 // ==========================================================================
 
-describe.skipIf(!dbAvailable)("FnFService — deep coverage", () => {
+describe("FnFService — deep coverage", () => {
   it("calculateFnF creates new FnF settlement", async () => {
     const exitId = await seedExitRequest();
     try {
@@ -1367,7 +1370,7 @@ describe.skipIf(!dbAvailable)("FnFService — deep coverage", () => {
 // 8. ANALYTICS SERVICE — remaining branches
 // ==========================================================================
 
-describe.skipIf(!dbAvailable)("AnalyticsService — extra coverage", () => {
+describe("AnalyticsService — extra coverage", () => {
   it("getAttritionRate for empty org", async () => {
     const result = await analyticsService.getAttritionRate(99999);
     expect(Array.isArray(result)).toBe(true);
@@ -1409,7 +1412,7 @@ describe.skipIf(!dbAvailable)("AnalyticsService — extra coverage", () => {
 // 9. REMAINING SERVICE GAP FILLERS
 // ==========================================================================
 
-describe.skipIf(!dbAvailable)("SettingsService — edge cases", () => {
+describe("SettingsService — edge cases", () => {
   it("getSettings creates default if none exist", async () => {
     const result = await settingsService.getSettings(ORG_ID);
     expect(result).toBeDefined();
@@ -1443,7 +1446,7 @@ describe.skipIf(!dbAvailable)("SettingsService — edge cases", () => {
   });
 });
 
-describe.skipIf(!dbAvailable)("LetterService — additional", () => {
+describe("LetterService — additional", () => {
   it("createTemplate and generateLetter", async () => {
     try {
       const tmpl = await letterService.createTemplate(ORG_ID, {
@@ -1490,7 +1493,7 @@ describe.skipIf(!dbAvailable)("LetterService — additional", () => {
   });
 });
 
-describe.skipIf(!dbAvailable)("RehireService — additional", () => {
+describe("RehireService — additional", () => {
   it("listRehireRequests with various filters", async () => {
     const result = await rehireService.listRehireRequests(ORG_ID, {
       page: 1,
@@ -1523,7 +1526,7 @@ describe.skipIf(!dbAvailable)("RehireService — additional", () => {
   });
 });
 
-describe.skipIf(!dbAvailable)("AlumniService — additional", () => {
+describe("AlumniService — additional", () => {
   it("listAlumni with search param", async () => {
     const result = await alumniService.listAlumni(ORG_ID, {
       page: 1,
@@ -1543,7 +1546,7 @@ describe.skipIf(!dbAvailable)("AlumniService — additional", () => {
   });
 });
 
-describe.skipIf(!dbAvailable)("KTService — additional", () => {
+describe("KTService — additional", () => {
   it("createKT creates a KT plan", async () => {
     const exitId = await seedExitRequest();
     try {
@@ -1565,7 +1568,7 @@ describe.skipIf(!dbAvailable)("KTService — additional", () => {
   });
 });
 
-describe.skipIf(!dbAvailable)("AssetReturnService — additional", () => {
+describe("AssetReturnService — additional", () => {
   it("addAsset creates asset return record", async () => {
     const exitId = await seedExitRequest();
     try {
@@ -1593,7 +1596,7 @@ describe.skipIf(!dbAvailable)("AssetReturnService — additional", () => {
   });
 });
 
-describe.skipIf(!dbAvailable)("BuyoutService — additional", () => {
+describe("BuyoutService — additional", () => {
   it("listBuyoutRequests returns paginated data", async () => {
     const result = await buyoutService.listBuyoutRequests(ORG_ID, {
       page: 1,
