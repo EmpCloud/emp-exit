@@ -2,7 +2,7 @@
 // EXIT CLEARANCE DEEP COVERAGE — multi-dept clearance, approval chain, status
 // =============================================================================
 
-import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, afterEach, beforeEach } from "vitest";
 import knexLib, { Knex } from "knex";
 import { v4 as uuidv4 } from "uuid";
 
@@ -43,6 +43,8 @@ afterAll(async () => {
   if (db) await db.destroy();
 });
 
+beforeEach((ctx) => { if (!dbAvailable) ctx.skip(); });
+
 async function seedExitRequest(useParentCleanup = false): Promise<string> {
   const id = uuidv4();
   await db("exit_requests").insert({
@@ -61,7 +63,7 @@ async function seedExitRequest(useParentCleanup = false): Promise<string> {
 // ==========================================================================
 // CLEARANCE DEPARTMENTS
 // ==========================================================================
-describe.skipIf(!dbAvailable)("ClearanceDepartment CRUD", () => {
+describe("ClearanceDepartment CRUD", () => {
   it("should create a clearance department", async () => {
     const id = uuidv4();
     await db("clearance_departments").insert({
@@ -137,7 +139,7 @@ describe.skipIf(!dbAvailable)("ClearanceDepartment CRUD", () => {
 // ==========================================================================
 // CLEARANCE RECORDS
 // ==========================================================================
-describe.skipIf(!dbAvailable)("ClearanceRecord lifecycle", () => {
+describe("ClearanceRecord lifecycle", () => {
   let exitReqId: string;
   let deptIds: string[] = [];
 

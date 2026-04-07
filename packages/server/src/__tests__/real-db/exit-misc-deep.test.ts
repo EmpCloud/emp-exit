@@ -3,7 +3,7 @@
 //   checklist, asset, exit-request lifecycle, settings
 // =============================================================================
 
-import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, afterEach, beforeEach } from "vitest";
 import knexLib, { Knex } from "knex";
 import { v4 as uuidv4 } from "uuid";
 
@@ -36,6 +36,8 @@ afterEach(async () => {
 
 afterAll(async () => { if (db) await db.destroy(); });
 
+beforeEach((ctx) => { if (!dbAvailable) ctx.skip(); });
+
 async function seedExitRequest(overrides: Record<string, any> = {}): Promise<string> {
   const id = uuidv4();
   await db("exit_requests").insert({
@@ -53,7 +55,7 @@ async function seedExitRequest(overrides: Record<string, any> = {}): Promise<str
 // ==========================================================================
 // ALUMNI
 // ==========================================================================
-describe.skipIf(!dbAvailable)("Alumni Profiles", () => {
+describe("Alumni Profiles", () => {
   it("should create an alumni opt-in profile", async () => {
     const exitId = await seedExitRequest();
     const pid = uuidv4();
@@ -119,7 +121,7 @@ describe.skipIf(!dbAvailable)("Alumni Profiles", () => {
 // ==========================================================================
 // REHIRE
 // ==========================================================================
-describe.skipIf(!dbAvailable)("Rehire Requests", () => {
+describe("Rehire Requests", () => {
   it("should create a rehire request from alumni", async () => {
     const exitId = await seedExitRequest();
     const alumniId = uuidv4();
@@ -197,7 +199,7 @@ describe.skipIf(!dbAvailable)("Rehire Requests", () => {
 // ==========================================================================
 // LETTER TEMPLATES & GENERATION
 // ==========================================================================
-describe.skipIf(!dbAvailable)("Letter Templates & Generation", () => {
+describe("Letter Templates & Generation", () => {
   it("should create a letter template with Handlebars body", async () => {
     const id = uuidv4();
     await db("letter_templates").insert({
@@ -267,7 +269,7 @@ describe.skipIf(!dbAvailable)("Letter Templates & Generation", () => {
 // ==========================================================================
 // KNOWLEDGE TRANSFER
 // ==========================================================================
-describe.skipIf(!dbAvailable)("Knowledge Transfer", () => {
+describe("Knowledge Transfer", () => {
   it("should create a KT plan with items", async () => {
     const exitId = await seedExitRequest();
     const ktId = uuidv4();
@@ -341,7 +343,7 @@ describe.skipIf(!dbAvailable)("Knowledge Transfer", () => {
 // ==========================================================================
 // CHECKLIST TEMPLATES & INSTANCES
 // ==========================================================================
-describe.skipIf(!dbAvailable)("Checklist Templates & Instances", () => {
+describe("Checklist Templates & Instances", () => {
   it("should create a checklist template with items", async () => {
     const tmplId = uuidv4();
     await db("exit_checklist_templates").insert({
@@ -414,7 +416,7 @@ describe.skipIf(!dbAvailable)("Checklist Templates & Instances", () => {
 // ==========================================================================
 // ASSET RETURNS
 // ==========================================================================
-describe.skipIf(!dbAvailable)("Asset Returns", () => {
+describe("Asset Returns", () => {
   it("should add and return an asset", async () => {
     const exitId = await seedExitRequest();
     const assetId = uuidv4();
@@ -456,7 +458,7 @@ describe.skipIf(!dbAvailable)("Asset Returns", () => {
 // ==========================================================================
 // ANALYTICS: attrition, reason breakdown, dept trends, tenure, rehire pool
 // ==========================================================================
-describe.skipIf(!dbAvailable)("Analytics Queries", () => {
+describe("Analytics Queries", () => {
   it("should get attrition rate by month", async () => {
     const rows = await db.raw(
       `SELECT DATE_FORMAT(created_at, '%Y-%m') AS month, COUNT(*) AS exit_count
@@ -494,7 +496,7 @@ describe.skipIf(!dbAvailable)("Analytics Queries", () => {
 // ==========================================================================
 // FLIGHT RISK & PREDICTION
 // ==========================================================================
-describe.skipIf(!dbAvailable)("Flight Risk & Attrition Prediction", () => {
+describe("Flight Risk & Attrition Prediction", () => {
   it("should insert and query flight risk scores", async () => {
     const frsId = uuidv4();
     await db("flight_risk_scores").insert({
@@ -546,7 +548,7 @@ describe.skipIf(!dbAvailable)("Flight Risk & Attrition Prediction", () => {
 // ==========================================================================
 // EXIT REQUEST LIFECYCLE
 // ==========================================================================
-describe.skipIf(!dbAvailable)("Exit Request Lifecycle", () => {
+describe("Exit Request Lifecycle", () => {
   it("should initiate -> update -> complete an exit request", async () => {
     const exitId = await seedExitRequest({ status: "initiated" });
 
@@ -587,7 +589,7 @@ describe.skipIf(!dbAvailable)("Exit Request Lifecycle", () => {
 // ==========================================================================
 // SETTINGS
 // ==========================================================================
-describe.skipIf(!dbAvailable)("Exit Settings", () => {
+describe("Exit Settings", () => {
   it("should create default settings for org", async () => {
     const fakeOrg = 88880 + (TS % 1000);
     const sid = uuidv4();

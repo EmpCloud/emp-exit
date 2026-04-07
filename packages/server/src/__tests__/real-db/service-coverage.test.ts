@@ -18,7 +18,7 @@ process.env.EMPCLOUD_DB_NAME = "empcloud";
 process.env.NODE_ENV = "test";
 process.env.JWT_SECRET = "test-secret-key";
 
-import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, afterEach, beforeEach } from "vitest";
 import { initDB, closeDB, getDB } from "../../db/adapters";
 import { initEmpCloudDB } from "../../db/empcloud";
 
@@ -74,9 +74,11 @@ afterAll(async () => {
   await closeDB();
 }, 10000);
 
+beforeEach((ctx) => { if (!dbAvailable) ctx.skip(); });
+
 // -- Settings Service ---------------------------------------------------------
 
-describe.skipIf(!dbAvailable)("SettingsService", () => {
+describe("SettingsService", () => {
   it("getSettings returns settings for org", async () => {
     const result = await settingsService.getSettings(ORG_ID);
     expect(result).toBeDefined();
@@ -98,7 +100,7 @@ describe.skipIf(!dbAvailable)("SettingsService", () => {
 
 // -- Checklist Service --------------------------------------------------------
 
-describe.skipIf(!dbAvailable)("ChecklistService", () => {
+describe("ChecklistService", () => {
   it("listTemplates returns array for org", async () => {
     const result = await checklistService.listTemplates(ORG_ID);
     expect(Array.isArray(result)).toBe(true);
@@ -146,7 +148,7 @@ describe.skipIf(!dbAvailable)("ChecklistService", () => {
 
 // -- Interview Service --------------------------------------------------------
 
-describe.skipIf(!dbAvailable)("InterviewService", () => {
+describe("InterviewService", () => {
   it("listTemplates returns array", async () => {
     const result = await interviewService.listTemplates(ORG_ID);
     expect(Array.isArray(result)).toBe(true);
@@ -204,7 +206,7 @@ describe.skipIf(!dbAvailable)("InterviewService", () => {
 
 // -- Alumni Service -----------------------------------------------------------
 
-describe.skipIf(!dbAvailable)("AlumniService", () => {
+describe("AlumniService", () => {
   it("listAlumni returns data", async () => {
     const result = await alumniService.listAlumni(ORG_ID, { page: 1, limit: 10 } as any);
     expect(result).toBeDefined();
@@ -213,7 +215,7 @@ describe.skipIf(!dbAvailable)("AlumniService", () => {
 
 // -- Analytics Service --------------------------------------------------------
 
-describe.skipIf(!dbAvailable)("AnalyticsService", () => {
+describe("AnalyticsService", () => {
   it("getAttritionRate returns rate data", async () => {
     const result = await analyticsService.getAttritionRate(ORG_ID);
     expect(result).toBeDefined();
@@ -242,7 +244,7 @@ describe.skipIf(!dbAvailable)("AnalyticsService", () => {
 
 // -- Flight Risk Service ------------------------------------------------------
 
-describe.skipIf(!dbAvailable)("FlightRiskService", () => {
+describe("FlightRiskService", () => {
   it("scoreToRiskLevel classifies scores correctly", () => {
     expect(flightRiskService.scoreToRiskLevel(85)).toBe("critical");
     expect(flightRiskService.scoreToRiskLevel(65)).toBe("high");
@@ -263,7 +265,7 @@ describe.skipIf(!dbAvailable)("FlightRiskService", () => {
 
 // -- Asset Return Service -----------------------------------------------------
 
-describe.skipIf(!dbAvailable)("AssetReturnService", () => {
+describe("AssetReturnService", () => {
   it("listAssets returns array for org", async () => {
     // Need an exit request ID; use a known one if exists
     const exits = await db.findMany<any>("exit_requests", {
@@ -278,7 +280,7 @@ describe.skipIf(!dbAvailable)("AssetReturnService", () => {
 
 // -- Buyout Service -----------------------------------------------------------
 
-describe.skipIf(!dbAvailable)("BuyoutService", () => {
+describe("BuyoutService", () => {
   it("listBuyoutRequests returns data", async () => {
     const result = await buyoutService.listBuyoutRequests(ORG_ID, { page: 1, perPage: 10 } as any);
     expect(result).toBeDefined();
@@ -287,7 +289,7 @@ describe.skipIf(!dbAvailable)("BuyoutService", () => {
 
 // -- Clearance Service --------------------------------------------------------
 
-describe.skipIf(!dbAvailable)("ClearanceService", () => {
+describe("ClearanceService", () => {
   it("listDepartments returns departments", async () => {
     const result = await clearanceService.listDepartments(ORG_ID);
     expect(Array.isArray(result)).toBe(true);
@@ -313,7 +315,7 @@ describe.skipIf(!dbAvailable)("ClearanceService", () => {
 
 // -- Exit Request Service -----------------------------------------------------
 
-describe.skipIf(!dbAvailable)("ExitRequestService", () => {
+describe("ExitRequestService", () => {
   it("listExits returns paginated exits", async () => {
     const result = await exitService.listExits(ORG_ID, { page: 1, perPage: 10 });
     expect(result).toHaveProperty("data");
@@ -329,7 +331,7 @@ describe.skipIf(!dbAvailable)("ExitRequestService", () => {
 
 // -- FnF Service --------------------------------------------------------------
 
-describe.skipIf(!dbAvailable)("FnFService", () => {
+describe("FnFService", () => {
   it("getFnF returns null or settlement for non-existent exit", async () => {
     try {
       const result = await fnfService.getFnF(ORG_ID, "non-existent-exit-id");
@@ -342,7 +344,7 @@ describe.skipIf(!dbAvailable)("FnFService", () => {
 
 // -- KT Service ---------------------------------------------------------------
 
-describe.skipIf(!dbAvailable)("KTService", () => {
+describe("KTService", () => {
   it("getKT returns null or data for non-existent exit", async () => {
     try {
       const result = await ktService.getKT(ORG_ID, "non-existent-exit-id");
@@ -355,7 +357,7 @@ describe.skipIf(!dbAvailable)("KTService", () => {
 
 // -- Letter Service -----------------------------------------------------------
 
-describe.skipIf(!dbAvailable)("LetterService", () => {
+describe("LetterService", () => {
   it("listTemplates returns array", async () => {
     const result = await letterService.listTemplates(ORG_ID);
     expect(Array.isArray(result)).toBe(true);
@@ -389,7 +391,7 @@ describe.skipIf(!dbAvailable)("LetterService", () => {
 
 // -- Rehire Service -----------------------------------------------------------
 
-describe.skipIf(!dbAvailable)("RehireService", () => {
+describe("RehireService", () => {
   it("listRehireRequests returns paginated data", async () => {
     const result = await rehireService.listRehireRequests(ORG_ID, { page: 1, perPage: 10 } as any);
     expect(result).toHaveProperty("data");

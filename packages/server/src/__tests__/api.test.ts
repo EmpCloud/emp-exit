@@ -4,7 +4,7 @@
 // Run: npx vitest run src/__tests__/api.test.ts
 // ============================================================================
 
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach } from "vitest";
 
 const BASE = process.env.API_BASE_URL || "https://test-exit.empcloud.com/api/v1";
 let token = "";
@@ -72,10 +72,12 @@ beforeAll(async () => {
   }
 });
 
+beforeEach((ctx) => { if (!apiAvailable) ctx.skip(); });
+
 // ============================================================================
 // 1. AUTH
 // ============================================================================
-describe.skipIf(!apiAvailable)("Auth", () => {
+describe("Auth", () => {
   it("1.1 POST /auth/login — valid credentials", async () => {
     const { status, body } = await api("/auth/login", {
       method: "POST",
@@ -106,7 +108,7 @@ describe.skipIf(!apiAvailable)("Auth", () => {
 // ============================================================================
 // 2. SETTINGS
 // ============================================================================
-describe.skipIf(!apiAvailable)("Settings", () => {
+describe("Settings", () => {
   it("2.1 GET /settings — verify exit settings", async () => {
     const { status, body } = await api("/settings");
     expect(status).toBe(200);
@@ -132,7 +134,7 @@ describe.skipIf(!apiAvailable)("Settings", () => {
 // ============================================================================
 // 3. EXIT REQUESTS
 // ============================================================================
-describe.skipIf(!apiAvailable)("Exit Requests", () => {
+describe("Exit Requests", () => {
   it("3.1 POST /exits — initiate exit for employee 3", async () => {
     const { status, body } = await api("/exits", {
       method: "POST",
@@ -202,7 +204,7 @@ describe.skipIf(!apiAvailable)("Exit Requests", () => {
 // ============================================================================
 // 4. EXIT INTERVIEWS
 // ============================================================================
-describe.skipIf(!apiAvailable)("Exit Interviews", () => {
+describe("Exit Interviews", () => {
   it("4.1 POST /interviews/templates — create interview template", async () => {
     const { status, body } = await api("/interviews/templates", {
       method: "POST",
@@ -293,7 +295,7 @@ describe.skipIf(!apiAvailable)("Exit Interviews", () => {
 // ============================================================================
 // 5. CHECKLISTS
 // ============================================================================
-describe.skipIf(!apiAvailable)("Checklists", () => {
+describe("Checklists", () => {
   it("5.1 POST /checklists/templates — create checklist template", async () => {
     const { status, body } = await api("/checklists/templates", {
       method: "POST",
@@ -385,7 +387,7 @@ describe.skipIf(!apiAvailable)("Checklists", () => {
 // ============================================================================
 // 6. CLEARANCE
 // ============================================================================
-describe.skipIf(!apiAvailable)("Clearance", () => {
+describe("Clearance", () => {
   it("6.1 POST /clearance/departments — create clearance department", async () => {
     const { status, body } = await api("/clearance/departments", {
       method: "POST",
@@ -476,7 +478,7 @@ describe.skipIf(!apiAvailable)("Clearance", () => {
 // ============================================================================
 // 7. KNOWLEDGE TRANSFER
 // ============================================================================
-describe.skipIf(!apiAvailable)("Knowledge Transfer", () => {
+describe("Knowledge Transfer", () => {
   it("7.1 POST /kt/exit/:exitId — create KT plan", async () => {
     const { status, body } = await api(`/kt/exit/${exitId}`, {
       method: "POST",
@@ -527,7 +529,7 @@ describe.skipIf(!apiAvailable)("Knowledge Transfer", () => {
 // ============================================================================
 // 8. FNF SETTLEMENT
 // ============================================================================
-describe.skipIf(!apiAvailable)("FnF Settlement", () => {
+describe("FnF Settlement", () => {
   it("8.1 POST /fnf/exit/:exitId/calculate — calculate FnF", async () => {
     const { status, body } = await api(`/fnf/exit/${exitId}/calculate`, { method: "POST" });
     expect(status).toBe(200);
@@ -577,7 +579,7 @@ describe.skipIf(!apiAvailable)("FnF Settlement", () => {
 // ============================================================================
 // 9. ASSETS
 // ============================================================================
-describe.skipIf(!apiAvailable)("Assets", () => {
+describe("Assets", () => {
   it("9.1 POST /assets/exit/:exitId — add asset", async () => {
     const { status, body } = await api(`/assets/exit/${exitId}`, {
       method: "POST",
@@ -619,7 +621,7 @@ describe.skipIf(!apiAvailable)("Assets", () => {
 // ============================================================================
 // 10. LETTERS
 // ============================================================================
-describe.skipIf(!apiAvailable)("Letters", () => {
+describe("Letters", () => {
   it("10.1 POST /letters/templates — create letter template", async () => {
     const { status, body } = await api("/letters/templates", {
       method: "POST",
@@ -684,7 +686,7 @@ describe.skipIf(!apiAvailable)("Letters", () => {
 // ============================================================================
 // 11. ANALYTICS
 // ============================================================================
-describe.skipIf(!apiAvailable)("Analytics", () => {
+describe("Analytics", () => {
   it("11.1 GET /analytics/attrition — attrition rate", async () => {
     const { status, body } = await api("/analytics/attrition");
     expect(status).toBe(200);
@@ -731,7 +733,7 @@ describe.skipIf(!apiAvailable)("Analytics", () => {
 // ============================================================================
 // 12. ALUMNI
 // ============================================================================
-describe.skipIf(!apiAvailable)("Alumni", () => {
+describe("Alumni", () => {
   it("12.1 GET /alumni — list alumni directory", async () => {
     const { status, body } = await api("/alumni");
     expect(status).toBe(200);
@@ -755,7 +757,7 @@ describe.skipIf(!apiAvailable)("Alumni", () => {
 // ============================================================================
 // 13. BUYOUT
 // ============================================================================
-describe.skipIf(!apiAvailable)("Notice Period Buyout", () => {
+describe("Notice Period Buyout", () => {
   it("13.1 POST /buyout/calculate — preview buyout calculation", async () => {
     const { status, body } = await api("/buyout/calculate", {
       method: "POST",
@@ -804,7 +806,7 @@ describe.skipIf(!apiAvailable)("Notice Period Buyout", () => {
 // ============================================================================
 // 14. REHIRE
 // ============================================================================
-describe.skipIf(!apiAvailable)("Rehire", () => {
+describe("Rehire", () => {
   it("14.1 GET /rehire — list rehire requests", async () => {
     const { status, body } = await api("/rehire");
     expect(status).toBe(200);
@@ -833,7 +835,7 @@ describe.skipIf(!apiAvailable)("Rehire", () => {
 // ============================================================================
 // 15. PREDICTIONS (FLIGHT RISK)
 // ============================================================================
-describe.skipIf(!apiAvailable)("Predictions (Flight Risk)", () => {
+describe("Predictions (Flight Risk)", () => {
   it("15.1 GET /predictions/dashboard — flight risk dashboard", async () => {
     const { status, body } = await api("/predictions/dashboard");
     expect(status).toBe(200);
@@ -869,7 +871,7 @@ describe.skipIf(!apiAvailable)("Predictions (Flight Risk)", () => {
 // ============================================================================
 // 16. EXIT LIFECYCLE COMPLETION
 // ============================================================================
-describe.skipIf(!apiAvailable)("Exit Lifecycle", () => {
+describe("Exit Lifecycle", () => {
   it("16.1 POST /exits/:id/cancel — cancel second exit", async () => {
     const { status, body } = await api(`/exits/${exitId2}/cancel`, { method: "POST" });
     expect(status).toBe(200);
@@ -888,7 +890,7 @@ describe.skipIf(!apiAvailable)("Exit Lifecycle", () => {
 // ============================================================================
 // 17. HEALTH CHECK
 // ============================================================================
-describe.skipIf(!apiAvailable)("Health", () => {
+describe("Health", () => {
   it("17.1 GET /health — health check passes", async () => {
     const healthBase = BASE.replace("/api/v1", "/health");
     const res = await fetch(healthBase);

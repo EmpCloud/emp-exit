@@ -19,7 +19,7 @@ process.env.JWT_SECRET = "test-jwt-secret-cov-final";
 process.env.EMPCLOUD_URL = "http://localhost:3000";
 process.env.LOG_LEVEL = "error";
 
-import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, vi, beforeEach } from "vitest";
 import { initDB, closeDB, getDB } from "../../db/adapters";
 import { initEmpCloudDB, closeEmpCloudDB } from "../../db/empcloud";
 
@@ -48,9 +48,11 @@ afterAll(async () => {
   await closeDB();
 }, 10000);
 
+beforeEach((ctx) => { if (!dbAvailable) ctx.skip(); });
+
 // ── ERROR CLASSES ────────────────────────────────────────────────────────────
 
-describe.skipIf(!dbAvailable)("Exit error classes", () => {
+describe("Exit error classes", () => {
   let errors: any;
 
   beforeAll(async () => {
@@ -98,7 +100,7 @@ describe.skipIf(!dbAvailable)("Exit error classes", () => {
 
 // ── ALUMNI SERVICE — NotFoundError branches ──────────────────────────────────
 
-describe.skipIf(!dbAvailable)("Alumni service — error branches", () => {
+describe("Alumni service — error branches", () => {
   let alumniService: any;
   const ORG_ID = 5;
 
@@ -136,7 +138,7 @@ describe.skipIf(!dbAvailable)("Alumni service — error branches", () => {
 
 // ── KNOWLEDGE TRANSFER SERVICE — getKT error ─────────────────────────────────
 
-describe.skipIf(!dbAvailable)("Knowledge transfer service — errors", () => {
+describe("Knowledge transfer service — errors", () => {
   let ktService: any;
   const ORG_ID = 5;
 
@@ -152,7 +154,7 @@ describe.skipIf(!dbAvailable)("Knowledge transfer service — errors", () => {
 
 // ── REHIRE SERVICE — error branches ──────────────────────────────────────────
 
-describe.skipIf(!dbAvailable)("Rehire service — error branches", () => {
+describe("Rehire service — error branches", () => {
   let rehireService: any;
   const ORG_ID = 5;
 
@@ -173,7 +175,7 @@ describe.skipIf(!dbAvailable)("Rehire service — error branches", () => {
 
 // ── CLEARANCE SERVICE — error branches ───────────────────────────────────────
 
-describe.skipIf(!dbAvailable)("Clearance service — error branches", () => {
+describe("Clearance service — error branches", () => {
   let clearanceService: any;
   const ORG_ID = 5;
 

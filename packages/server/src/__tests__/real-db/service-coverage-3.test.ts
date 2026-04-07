@@ -19,7 +19,7 @@ process.env.JWT_SECRET = "test-jwt-secret-cov3";
 process.env.EMPCLOUD_URL = "http://localhost:3000";
 process.env.LOG_LEVEL = "error";
 
-import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, vi, beforeEach } from "vitest";
 import { initDB, closeDB, getDB } from "../../db/adapters";
 import { initEmpCloudDB, closeEmpCloudDB } from "../../db/empcloud";
 
@@ -60,8 +60,10 @@ afterAll(async () => {
   await closeDB();
 }, 15000);
 
+beforeEach((ctx) => { if (!dbAvailable) ctx.skip(); });
+
 // ALUMNI SERVICE (8.6% -> 85%+)
-describe.skipIf(!dbAvailable)("Alumni cov3", () => {
+describe("Alumni cov3", () => {
   it("listAlumni", async () => {
     const { listAlumni } = await import("../../services/alumni/alumni.service.js");
     const r = await listAlumni(ORG, { page: 1, perPage: 10 });
@@ -106,7 +108,7 @@ describe.skipIf(!dbAvailable)("Alumni cov3", () => {
 });
 
 // KNOWLEDGE TRANSFER SERVICE (6.9% -> 85%+)
-describe.skipIf(!dbAvailable)("KT cov3", () => {
+describe("KT cov3", () => {
   let ktId: string;
 
   it("createKT 404 exit", async () => {
@@ -162,7 +164,7 @@ describe.skipIf(!dbAvailable)("KT cov3", () => {
 });
 
 // ASSET RETURN SERVICE (25.7% -> 85%+)
-describe.skipIf(!dbAvailable)("AssetReturn cov3", () => {
+describe("AssetReturn cov3", () => {
   let assetId: string;
 
   it("addAsset 404 exit", async () => {
@@ -204,7 +206,7 @@ describe.skipIf(!dbAvailable)("AssetReturn cov3", () => {
 });
 
 // CHECKLIST SERVICE (32.6% -> 85%+)
-describe.skipIf(!dbAvailable)("Checklist cov3", () => {
+describe("Checklist cov3", () => {
   let tmplId: string;
   let tmplItemId: string;
 
@@ -291,7 +293,7 @@ describe.skipIf(!dbAvailable)("Checklist cov3", () => {
 });
 
 // REHIRE SERVICE (42.2% -> 85%+)
-describe.skipIf(!dbAvailable)("Rehire cov3", () => {
+describe("Rehire cov3", () => {
   it("listRehireRequests", async () => {
     const { listRehireRequests } = await import("../../services/rehire/rehire.service.js");
     const r = await listRehireRequests(ORG, { page: 1, perPage: 10 });
@@ -322,7 +324,7 @@ describe.skipIf(!dbAvailable)("Rehire cov3", () => {
 });
 
 // ANALYTICS - ATTRITION PREDICTION SERVICE (40% -> 85%+)
-describe.skipIf(!dbAvailable)("AttritionPrediction cov3", () => {
+describe("AttritionPrediction cov3", () => {
   it("generateAttritionPrediction", async () => {
     const { generateAttritionPrediction } = await import("../../services/analytics/attrition-prediction.service.js");
     await generateAttritionPrediction(ORG);
@@ -337,7 +339,7 @@ describe.skipIf(!dbAvailable)("AttritionPrediction cov3", () => {
 });
 
 // ANALYTICS - FLIGHT RISK SERVICE (17% -> 85%+)
-describe.skipIf(!dbAvailable)("FlightRisk cov3", () => {
+describe("FlightRisk cov3", () => {
   it("scoreToRiskLevel", async () => {
     const { scoreToRiskLevel } = await import("../../services/analytics/flight-risk.service.js");
     expect(scoreToRiskLevel(85)).toBe("critical");
@@ -362,7 +364,7 @@ describe.skipIf(!dbAvailable)("FlightRisk cov3", () => {
 });
 
 // SETTINGS SERVICE (69% -> 85%+)
-describe.skipIf(!dbAvailable)("Settings cov3", () => {
+describe("Settings cov3", () => {
   it("getSettings", async () => {
     const { getSettings } = await import("../../services/settings/settings.service.js");
     const s = await getSettings(ORG);
@@ -381,7 +383,7 @@ describe.skipIf(!dbAvailable)("Settings cov3", () => {
 });
 
 // BUYOUT SERVICE (58.4% -> 85%+)
-describe.skipIf(!dbAvailable)("NoticeBuyout cov3", () => {
+describe("NoticeBuyout cov3", () => {
   it("calculateBuyout 404", async () => {
     const mod = await import("../../services/buyout/notice-buyout.service.js");
     const fn = mod.calculateBuyout || mod.default?.calculateBuyout;

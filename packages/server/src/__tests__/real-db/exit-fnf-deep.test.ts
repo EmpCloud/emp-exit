@@ -2,7 +2,7 @@
 // EXIT FNF DEEP COVERAGE — calculation, salary+leave+gratuity-deductions, lifecycle
 // =============================================================================
 
-import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, afterEach, beforeEach } from "vitest";
 import knexLib, { Knex } from "knex";
 import { v4 as uuidv4 } from "uuid";
 
@@ -35,6 +35,8 @@ afterEach(async () => {
 
 afterAll(async () => { if (db) await db.destroy(); });
 
+beforeEach((ctx) => { if (!dbAvailable) ctx.skip(); });
+
 async function seedExitRequest(overrides: Record<string, any> = {}): Promise<string> {
   const id = uuidv4();
   await db("exit_requests").insert({
@@ -52,7 +54,7 @@ async function seedExitRequest(overrides: Record<string, any> = {}): Promise<str
 // ==========================================================================
 // FNF SETTLEMENT CRUD & LIFECYCLE
 // ==========================================================================
-describe.skipIf(!dbAvailable)("FnF Settlement CRUD", () => {
+describe("FnF Settlement CRUD", () => {
   it("should create a draft FnF settlement", async () => {
     const exitReqId = await seedExitRequest();
     const fnfId = uuidv4();
@@ -184,7 +186,7 @@ describe.skipIf(!dbAvailable)("FnF Settlement CRUD", () => {
 // ==========================================================================
 // FNF CALCULATION LOGIC (unit tests for formulas)
 // ==========================================================================
-describe.skipIf(!dbAvailable)("FnF Calculation Formulas", () => {
+describe("FnF Calculation Formulas", () => {
   it("should compute pro-rata salary correctly", () => {
     const lastBasic = 6000000; // 60,000 in paise
     const lwdDate = new Date("2026-01-15");
@@ -251,7 +253,7 @@ describe.skipIf(!dbAvailable)("FnF Calculation Formulas", () => {
 // ==========================================================================
 // NOTICE BUYOUT INTEGRATION WITH FNF
 // ==========================================================================
-describe.skipIf(!dbAvailable)("Notice Buyout + FnF Integration", () => {
+describe("Notice Buyout + FnF Integration", () => {
   it("should create and approve a buyout request", async () => {
     const exitReqId = await seedExitRequest({
       resignation_date: "2026-01-01",

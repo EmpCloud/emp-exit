@@ -2,7 +2,7 @@
 // EXIT INTERVIEW DEEP COVERAGE — template CRUD, questions, schedule/complete/skip, NPS
 // =============================================================================
 
-import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, afterEach, beforeEach } from "vitest";
 import knexLib, { Knex } from "knex";
 import { v4 as uuidv4 } from "uuid";
 
@@ -43,6 +43,8 @@ afterAll(async () => {
   if (db) await db.destroy();
 });
 
+beforeEach((ctx) => { if (!dbAvailable) ctx.skip(); });
+
 // Helper to seed an exit request
 async function seedExitRequest(useParent = false): Promise<string> {
   const id = uuidv4();
@@ -63,7 +65,7 @@ async function seedExitRequest(useParent = false): Promise<string> {
 // ==========================================================================
 // TEMPLATE CRUD
 // ==========================================================================
-describe.skipIf(!dbAvailable)("ExitInterviewTemplate CRUD", () => {
+describe("ExitInterviewTemplate CRUD", () => {
   it("should create a template with default values", async () => {
     const id = uuidv4();
     await db("exit_interview_templates").insert({
@@ -137,7 +139,7 @@ describe.skipIf(!dbAvailable)("ExitInterviewTemplate CRUD", () => {
 // ==========================================================================
 // QUESTIONS
 // ==========================================================================
-describe.skipIf(!dbAvailable)("ExitInterviewQuestion CRUD", () => {
+describe("ExitInterviewQuestion CRUD", () => {
   let templateId: string;
 
   beforeAll(async () => {
@@ -235,7 +237,7 @@ describe.skipIf(!dbAvailable)("ExitInterviewQuestion CRUD", () => {
 // ==========================================================================
 // INTERVIEW SCHEDULING & LIFECYCLE
 // ==========================================================================
-describe.skipIf(!dbAvailable)("Interview Scheduling & Lifecycle", () => {
+describe("Interview Scheduling & Lifecycle", () => {
   let exitReqId: string;
   let templateId: string;
 
@@ -316,7 +318,7 @@ describe.skipIf(!dbAvailable)("Interview Scheduling & Lifecycle", () => {
 // ==========================================================================
 // INTERVIEW RESPONSES
 // ==========================================================================
-describe.skipIf(!dbAvailable)("Interview Responses", () => {
+describe("Interview Responses", () => {
   let exitReqId: string;
   let templateId: string;
   let interviewId: string;
@@ -385,7 +387,7 @@ describe.skipIf(!dbAvailable)("Interview Responses", () => {
 // ==========================================================================
 // NPS CALCULATION
 // ==========================================================================
-describe.skipIf(!dbAvailable)("NPS Calculation Logic", () => {
+describe("NPS Calculation Logic", () => {
   const exitIds: string[] = [];
   const interviewIds: string[] = [];
 

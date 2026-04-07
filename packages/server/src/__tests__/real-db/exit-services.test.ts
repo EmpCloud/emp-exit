@@ -4,7 +4,7 @@
 //   asset-return, knowledge-transfer, letter, rehire, notice-buyout
 // =============================================================================
 
-import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, afterEach, beforeEach } from "vitest";
 import knexLib, { Knex } from "knex";
 
 // ---------------------------------------------------------------------------
@@ -67,6 +67,8 @@ afterAll(async () => {
   if (db) await db.destroy();
 });
 
+beforeEach((ctx) => { if (!dbAvailable) ctx.skip(); });
+
 // ---------------------------------------------------------------------------
 // Helper: create an exit request seed row for tests that need one
 // ---------------------------------------------------------------------------
@@ -98,7 +100,7 @@ async function seedExitRequest(overrides: Record<string, any> = {}) {
 // SETTINGS SERVICE
 // ==========================================================================
 
-describe.skipIf(!dbAvailable)("SettingsService (exit_settings)", () => {
+describe("SettingsService (exit_settings)", () => {
   let settingsId: string | null = null;
 
   afterEach(async () => {
@@ -166,7 +168,7 @@ describe.skipIf(!dbAvailable)("SettingsService (exit_settings)", () => {
 // CHECKLIST SERVICE
 // ==========================================================================
 
-describe.skipIf(!dbAvailable)("ChecklistService", () => {
+describe("ChecklistService", () => {
   describe("Templates", () => {
     it("should create a checklist template", async () => {
       const id = `test-tmpl-${TS}`;
@@ -410,7 +412,7 @@ describe.skipIf(!dbAvailable)("ChecklistService", () => {
 // EXIT INTERVIEW SERVICE
 // ==========================================================================
 
-describe.skipIf(!dbAvailable)("ExitInterviewService", () => {
+describe("ExitInterviewService", () => {
   describe("Templates", () => {
     it("should create an interview template", async () => {
       const id = `test-int-tmpl-${TS}`;
@@ -681,7 +683,7 @@ describe.skipIf(!dbAvailable)("ExitInterviewService", () => {
 // ALUMNI SERVICE
 // ==========================================================================
 
-describe.skipIf(!dbAvailable)("AlumniService", () => {
+describe("AlumniService", () => {
   let exitId: string;
 
   beforeAll(async () => {
@@ -753,7 +755,7 @@ describe.skipIf(!dbAvailable)("AlumniService", () => {
 // ANALYTICS SERVICE
 // ==========================================================================
 
-describe.skipIf(!dbAvailable)("AnalyticsService", () => {
+describe("AnalyticsService", () => {
   it("should return attrition rate by month", async () => {
     const rows = await db.raw(
       `SELECT DATE_FORMAT(created_at, '%Y-%m') AS month, COUNT(*) AS exit_count
@@ -815,7 +817,7 @@ describe.skipIf(!dbAvailable)("AnalyticsService", () => {
 // ASSET RETURN SERVICE
 // ==========================================================================
 
-describe.skipIf(!dbAvailable)("AssetReturnService", () => {
+describe("AssetReturnService", () => {
   let exitId: string;
 
   beforeAll(async () => {
@@ -885,7 +887,7 @@ describe.skipIf(!dbAvailable)("AssetReturnService", () => {
 // KNOWLEDGE TRANSFER SERVICE
 // ==========================================================================
 
-describe.skipIf(!dbAvailable)("KnowledgeTransferService", () => {
+describe("KnowledgeTransferService", () => {
   let exitId: string;
 
   beforeAll(async () => {
@@ -990,7 +992,7 @@ describe.skipIf(!dbAvailable)("KnowledgeTransferService", () => {
 // LETTER SERVICE
 // ==========================================================================
 
-describe.skipIf(!dbAvailable)("LetterService", () => {
+describe("LetterService", () => {
   it("should create a letter template", async () => {
     const id = `test-ltr-tmpl-${TS}`;
     await db("letter_templates").insert({
@@ -1078,7 +1080,7 @@ describe.skipIf(!dbAvailable)("LetterService", () => {
 // REHIRE SERVICE
 // ==========================================================================
 
-describe.skipIf(!dbAvailable)("RehireService", () => {
+describe("RehireService", () => {
   let exitId: string;
   let alumniId: string;
 
@@ -1175,7 +1177,7 @@ describe.skipIf(!dbAvailable)("RehireService", () => {
 // NOTICE BUYOUT SERVICE
 // ==========================================================================
 
-describe.skipIf(!dbAvailable)("NoticeBuyoutService", () => {
+describe("NoticeBuyoutService", () => {
   let exitId: string;
 
   beforeAll(async () => {
@@ -1327,7 +1329,7 @@ describe.skipIf(!dbAvailable)("NoticeBuyoutService", () => {
 // FLIGHT RISK (scoreToRiskLevel helper — pure function)
 // ==========================================================================
 
-describe.skipIf(!dbAvailable)("FlightRisk — scoreToRiskLevel", () => {
+describe("FlightRisk — scoreToRiskLevel", () => {
   function scoreToRiskLevel(score: number) {
     if (score >= 80) return "critical";
     if (score >= 60) return "high";

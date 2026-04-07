@@ -19,7 +19,7 @@ process.env.JWT_SECRET = "test-jwt-secret";
 process.env.EMPCLOUD_URL = "http://localhost:3000";
 process.env.LOG_LEVEL = "error";
 
-import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from "vitest";
 import { initDB, closeDB, getDB } from "../../db/adapters";
 import { initEmpCloudDB, closeEmpCloudDB } from "../../db/empcloud";
 
@@ -51,10 +51,12 @@ afterAll(async () => {
   await closeDB();
 });
 
+beforeEach((ctx) => { if (!dbAvailable) ctx.skip(); });
+
 // ============================================================================
 // SETTINGS SERVICE
 // ============================================================================
-describe.skipIf(!dbAvailable)("Settings coverage-2", () => {
+describe("Settings coverage-2", () => {
   it("getSettings returns config", async () => {
     const { getSettings } = await import("../../services/settings/settings.service.js");
     const s = await getSettings(ORG);
@@ -75,7 +77,7 @@ describe.skipIf(!dbAvailable)("Settings coverage-2", () => {
 // ============================================================================
 // ANALYTICS SERVICE
 // ============================================================================
-describe.skipIf(!dbAvailable)("Analytics coverage-2", () => {
+describe("Analytics coverage-2", () => {
   it("getAttritionRate", async () => {
     const { getAttritionRate } = await import("../../services/analytics/analytics.service.js");
     const r = await getAttritionRate(ORG);
@@ -110,7 +112,7 @@ describe.skipIf(!dbAvailable)("Analytics coverage-2", () => {
 // ============================================================================
 // FLIGHT RISK SERVICE
 // ============================================================================
-describe.skipIf(!dbAvailable)("FlightRisk coverage-2", () => {
+describe("FlightRisk coverage-2", () => {
   it("scoreToRiskLevel", async () => {
     const { scoreToRiskLevel } = await import("../../services/analytics/flight-risk.service.js");
     expect(scoreToRiskLevel(10)).toBe("low");
@@ -142,7 +144,7 @@ describe.skipIf(!dbAvailable)("FlightRisk coverage-2", () => {
 // ============================================================================
 // ATTRITION PREDICTION
 // ============================================================================
-describe.skipIf(!dbAvailable)("AttritionPrediction coverage-2", () => {
+describe("AttritionPrediction coverage-2", () => {
   it("generateAttritionPrediction", async () => {
     const { generateAttritionPrediction } = await import("../../services/analytics/attrition-prediction.service.js");
     await generateAttritionPrediction(ORG);
@@ -163,7 +165,7 @@ describe.skipIf(!dbAvailable)("AttritionPrediction coverage-2", () => {
 // ============================================================================
 // CHECKLIST SERVICE
 // ============================================================================
-describe.skipIf(!dbAvailable)("Checklist coverage-2", () => {
+describe("Checklist coverage-2", () => {
   let templateId: string;
   let itemId: string;
 
@@ -228,7 +230,7 @@ describe.skipIf(!dbAvailable)("Checklist coverage-2", () => {
 // ============================================================================
 // CLEARANCE SERVICE
 // ============================================================================
-describe.skipIf(!dbAvailable)("Clearance coverage-2", () => {
+describe("Clearance coverage-2", () => {
   let deptId: string;
 
   it("listDepartments", async () => {
@@ -269,7 +271,7 @@ describe.skipIf(!dbAvailable)("Clearance coverage-2", () => {
 // ============================================================================
 // INTERVIEW SERVICE
 // ============================================================================
-describe.skipIf(!dbAvailable)("ExitInterview coverage-2", () => {
+describe("ExitInterview coverage-2", () => {
   let templateId: string;
   let questionId: string;
 
@@ -345,7 +347,7 @@ describe.skipIf(!dbAvailable)("ExitInterview coverage-2", () => {
 // ============================================================================
 // LETTER SERVICE
 // ============================================================================
-describe.skipIf(!dbAvailable)("Letter coverage-2", () => {
+describe("Letter coverage-2", () => {
   let templateId: string;
 
   it("createTemplate", async () => {
@@ -389,7 +391,7 @@ describe.skipIf(!dbAvailable)("Letter coverage-2", () => {
 // ============================================================================
 // ALUMNI SERVICE
 // ============================================================================
-describe.skipIf(!dbAvailable)("Alumni coverage-2", () => {
+describe("Alumni coverage-2", () => {
   it("listAlumni", async () => {
     const { listAlumni } = await import("../../services/alumni/alumni.service.js");
     const r = await listAlumni(ORG, {});
@@ -400,7 +402,7 @@ describe.skipIf(!dbAvailable)("Alumni coverage-2", () => {
 // ============================================================================
 // NOTICE BUYOUT SERVICE
 // ============================================================================
-describe.skipIf(!dbAvailable)("NoticeBuyout coverage-2", () => {
+describe("NoticeBuyout coverage-2", () => {
   it("listBuyoutRequests", async () => {
     const { listBuyoutRequests } = await import("../../services/buyout/notice-buyout.service.js");
     const r = await listBuyoutRequests(ORG, { page: 1, perPage: 10 });
@@ -420,7 +422,7 @@ describe.skipIf(!dbAvailable)("NoticeBuyout coverage-2", () => {
 // ============================================================================
 // EXIT REQUEST SERVICE
 // ============================================================================
-describe.skipIf(!dbAvailable)("ExitRequest coverage-2", () => {
+describe("ExitRequest coverage-2", () => {
   it("listExits", async () => {
     const { listExits } = await import("../../services/exit/exit-request.service.js");
     const r = await listExits(ORG, {});
@@ -444,7 +446,7 @@ describe.skipIf(!dbAvailable)("ExitRequest coverage-2", () => {
 // ============================================================================
 // KNOWLEDGE TRANSFER SERVICE
 // ============================================================================
-describe.skipIf(!dbAvailable)("KT coverage-2", () => {
+describe("KT coverage-2", () => {
   it("getKT - no exit request", async () => {
     const { getKT } = await import("../../services/kt/knowledge-transfer.service.js");
     try {
@@ -459,7 +461,7 @@ describe.skipIf(!dbAvailable)("KT coverage-2", () => {
 // ============================================================================
 // FNF SERVICE
 // ============================================================================
-describe.skipIf(!dbAvailable)("FnF coverage-2", () => {
+describe("FnF coverage-2", () => {
   it("getFnF - nonexistent", async () => {
     const { getFnF } = await import("../../services/fnf/fnf.service.js");
     try {
@@ -474,7 +476,7 @@ describe.skipIf(!dbAvailable)("FnF coverage-2", () => {
 // ============================================================================
 // ASSET RETURN SERVICE
 // ============================================================================
-describe.skipIf(!dbAvailable)("AssetReturn coverage-2", () => {
+describe("AssetReturn coverage-2", () => {
   it("listAssets - no exit request", async () => {
     const { listAssets } = await import("../../services/asset/asset-return.service.js");
     try {
@@ -489,7 +491,7 @@ describe.skipIf(!dbAvailable)("AssetReturn coverage-2", () => {
 // ============================================================================
 // REHIRE SERVICE
 // ============================================================================
-describe.skipIf(!dbAvailable)("Rehire coverage-2", () => {
+describe("Rehire coverage-2", () => {
   it("listRehireRequests", async () => {
     const { listRehireRequests } = await import("../../services/rehire/rehire.service.js");
     const r = await listRehireRequests(ORG, {});

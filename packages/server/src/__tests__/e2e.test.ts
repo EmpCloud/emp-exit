@@ -3,7 +3,7 @@
 // Runs against live deployment at https://test-exit-api.empcloud.com
 // ============================================================================
 
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach } from "vitest";
 
 const BASE = "https://test-exit-api.empcloud.com/api/v1";
 const HEALTH_BASE = "https://test-exit-api.empcloud.com/health";
@@ -70,10 +70,12 @@ beforeAll(async () => {
   }
 });
 
+beforeEach((ctx) => { if (!apiAvailable) ctx.skip(); });
+
 // ============================================================================
 // WORKFLOW 1: Complete Exit Lifecycle
 // ============================================================================
-describe.skipIf(!apiAvailable)("Workflow 1: Complete Exit Lifecycle", () => {
+describe("Workflow 1: Complete Exit Lifecycle", () => {
   // 1. Get settings
   it("1.1 GET /settings — verify defaults", async () => {
     const { status, body } = await api("/settings");
@@ -369,7 +371,7 @@ describe.skipIf(!apiAvailable)("Workflow 1: Complete Exit Lifecycle", () => {
 // ============================================================================
 // WORKFLOW 2: Exit Interview
 // ============================================================================
-describe.skipIf(!apiAvailable)("Workflow 2: Exit Interview", () => {
+describe("Workflow 2: Exit Interview", () => {
   // 1. Create interview template
   it("2.1 POST /interviews/templates — create Standard Exit Interview", async () => {
     const { status, body } = await api("/interviews/templates", {
@@ -498,7 +500,7 @@ describe.skipIf(!apiAvailable)("Workflow 2: Exit Interview", () => {
 // ============================================================================
 // WORKFLOW 3: Full & Final Settlement
 // ============================================================================
-describe.skipIf(!apiAvailable)("Workflow 3: Full & Final Settlement", () => {
+describe("Workflow 3: Full & Final Settlement", () => {
   // 1. Calculate FnF
   it("3.1 POST /fnf/exit/:exitId/calculate — calculate FnF", async () => {
     const { status, body } = await api(`/fnf/exit/${exitId}/calculate`, {
@@ -567,7 +569,7 @@ describe.skipIf(!apiAvailable)("Workflow 3: Full & Final Settlement", () => {
 // ============================================================================
 // WORKFLOW 4: Asset Return
 // ============================================================================
-describe.skipIf(!apiAvailable)("Workflow 4: Asset Return", () => {
+describe("Workflow 4: Asset Return", () => {
   // 1. Add laptop asset
   it("4.1 POST /assets/exit/:exitId — add MacBook Pro", async () => {
     const { status, body } = await api(`/assets/exit/${exitId}`, {
@@ -638,7 +640,7 @@ describe.skipIf(!apiAvailable)("Workflow 4: Asset Return", () => {
 // ============================================================================
 // WORKFLOW 5: Knowledge Transfer
 // ============================================================================
-describe.skipIf(!apiAvailable)("Workflow 5: Knowledge Transfer", () => {
+describe("Workflow 5: Knowledge Transfer", () => {
   // 1. Create KT plan
   it("5.1 POST /kt/exit/:exitId — create KT plan", async () => {
     const { status, body } = await api(`/kt/exit/${exitId}`, {
@@ -739,7 +741,7 @@ describe.skipIf(!apiAvailable)("Workflow 5: Knowledge Transfer", () => {
 // ============================================================================
 // WORKFLOW 6: Letter Generation
 // ============================================================================
-describe.skipIf(!apiAvailable)("Workflow 6: Letter Generation", () => {
+describe("Workflow 6: Letter Generation", () => {
   // 1. Create experience letter template
   it("6.1 POST /letters/templates — create experience letter template", async () => {
     const { status, body } = await api("/letters/templates", {
@@ -837,7 +839,7 @@ describe.skipIf(!apiAvailable)("Workflow 6: Letter Generation", () => {
 // we test the alumni endpoints differently: opt-in may 404, but list/update
 // should work if prior alumni records exist.
 // ============================================================================
-describe.skipIf(!apiAvailable)("Workflow 7: Alumni", () => {
+describe("Workflow 7: Alumni", () => {
   // 1. Opt-in to alumni — may fail if current user isn't the exit employee
   it("7.1 POST /alumni/opt-in — opt in to alumni network", async () => {
     const { status, body } = await api("/alumni/opt-in", {
@@ -886,7 +888,7 @@ describe.skipIf(!apiAvailable)("Workflow 7: Alumni", () => {
 // ============================================================================
 // WORKFLOW 8: Complete the Exit
 // ============================================================================
-describe.skipIf(!apiAvailable)("Workflow 8: Complete the Exit", () => {
+describe("Workflow 8: Complete the Exit", () => {
   // First, complete remaining checklist items so exit can be completed
   it("8.0a PATCH remaining checklist items to completed", async () => {
     for (let i = 2; i < checklistItemIds.length; i++) {
@@ -932,7 +934,7 @@ describe.skipIf(!apiAvailable)("Workflow 8: Complete the Exit", () => {
 // ============================================================================
 // WORKFLOW 9: Analytics
 // ============================================================================
-describe.skipIf(!apiAvailable)("Workflow 9: Analytics", () => {
+describe("Workflow 9: Analytics", () => {
   // 1. Attrition rate
   it("9.1 GET /analytics/attrition — verify attrition data", async () => {
     const { status, body } = await api("/analytics/attrition");
@@ -977,7 +979,7 @@ describe.skipIf(!apiAvailable)("Workflow 9: Analytics", () => {
 // ============================================================================
 // WORKFLOW 10: Rehire
 // ============================================================================
-describe.skipIf(!apiAvailable)("Workflow 10: Rehire", () => {
+describe("Workflow 10: Rehire", () => {
   // 1. List rehire requests
   it("10.1 GET /rehire — list rehire requests", async () => {
     const { status, body } = await api("/rehire");
@@ -1020,7 +1022,7 @@ describe.skipIf(!apiAvailable)("Workflow 10: Rehire", () => {
 // Uses the main exit which has resignation_date set.
 // However, it's now completed, so we need a fresh exit.
 // ============================================================================
-describe.skipIf(!apiAvailable)("Workflow 11: Notice Buyout", () => {
+describe("Workflow 11: Notice Buyout", () => {
   let buyoutExitId = "";
 
   // Create a fresh exit for buyout testing — cancel any existing one first
