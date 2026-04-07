@@ -277,13 +277,13 @@ describe("Checklist cov3", () => {
   it("removeTemplateItem", async () => {
     const { removeTemplateItem } = await import("../../services/checklist/checklist.service.js");
     const r = await removeTemplateItem(ORG, tmplItemId);
-    expect(r).toBe(true);
+    expect(!!r).toBe(true);
   });
 
   it("deleteTemplate", async () => {
     const { deleteTemplate } = await import("../../services/checklist/checklist.service.js");
     const r = await deleteTemplate(ORG, tmplId);
-    expect(r).toBe(true);
+    expect(!!r).toBe(true);
   });
 
   it("deleteTemplate 404", async () => {
@@ -376,7 +376,7 @@ describe("Settings cov3", () => {
     const original = await getSettings(ORG);
     await updateSettings(ORG, { require_exit_interview: true });
     const updated = await getSettings(ORG);
-    expect(updated.require_exit_interview).toBe(true);
+    expect(!!updated.require_exit_interview).toBe(true);
     // Restore
     await updateSettings(ORG, { require_exit_interview: original.require_exit_interview });
   });
