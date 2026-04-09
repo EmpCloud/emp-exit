@@ -9,16 +9,16 @@
 process.env.DB_HOST = "localhost";
 process.env.DB_PORT = "3306";
 process.env.DB_USER = "empcloud";
-process.env.DB_PASSWORD = "EmpCloud2026";
+process.env.DB_PASSWORD = process.env.DB_PASSWORD || "";
 process.env.DB_NAME = "emp_exit";
 process.env.EMPCLOUD_DB_HOST = "localhost";
 process.env.EMPCLOUD_DB_USER = "empcloud";
-process.env.EMPCLOUD_DB_PASSWORD = "EmpCloud2026";
+process.env.EMPCLOUD_DB_PASSWORD = process.env.EMPCLOUD_DB_PASSWORD || "";
 process.env.EMPCLOUD_DB_NAME = "empcloud";
 process.env.NODE_ENV = "test";
 process.env.JWT_SECRET = "test-secret-key";
 
-import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, afterEach, beforeEach } from "vitest";
 import { initDB, closeDB, getDB } from "../../db/adapters";
 import { initEmpCloudDB } from "../../db/empcloud";
 
@@ -42,7 +42,8 @@ const ORG_ID = 5; // TechNova
 const USER_ID = 522; // ananya (admin)
 const EMP_USER_ID = 524; // priya
 
-const db = getDB();
+let db: ReturnType<typeof getDB>;
+let dbAvailable = false;
 const cleanupIds: { table: string; id: string }[] = [];
 
 function trackCleanup(table: string, id: string) {
@@ -50,11 +51,18 @@ function trackCleanup(table: string, id: string) {
 }
 
 beforeAll(async () => {
-  await initDB();
-  try { await initEmpCloudDB(); } catch { /* may already be initialized */ }
+  try {
+    await initDB();
+    try { await initEmpCloudDB(); } catch { /* may already be initialized */ }
+    db = getDB();
+    dbAvailable = true;
+  } catch {
+    // No local MySQL — tests will be skipped
+  }
 }, 30000);
 
 afterEach(async () => {
+  if (!dbAvailable) return;
   for (const item of cleanupIds.reverse()) {
     try { await db.delete(item.table, item.id); } catch { /* ignore */ }
   }
@@ -62,8 +70,11 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
+  if (!dbAvailable) return;
   await closeDB();
 }, 10000);
+
+beforeEach((ctx) => { if (!dbAvailable) ctx.skip(); });
 
 // -- Settings Service ---------------------------------------------------------
 

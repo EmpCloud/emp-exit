@@ -4,7 +4,7 @@
 //   asset-return, knowledge-transfer, letter, rehire, notice-buyout
 // =============================================================================
 
-import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
+import { describe, it, expect, beforeAll, afterAll, afterEach, beforeEach } from "vitest";
 import knexLib, { Knex } from "knex";
 
 // ---------------------------------------------------------------------------
@@ -12,6 +12,7 @@ import knexLib, { Knex } from "knex";
 // ---------------------------------------------------------------------------
 
 let db: Knex;
+let dbAvailable = false;
 const ORG_ID = 5; // TechNova
 const USER_ID = 522; // admin
 const EMP_USER_ID = 524; // priya
@@ -23,17 +24,22 @@ const cleanup: { table: string; id: string }[] = [];
 const parentCleanup: { table: string; id: string }[] = [];
 
 beforeAll(async () => {
-  db = knexLib({
-    client: "mysql2",
-    connection: {
-      host: "localhost",
-      port: 3306,
-      user: "empcloud",
-      password: "EmpCloud2026",
-      database: "emp_exit",
-    },
-  });
-  await db.raw("SELECT 1");
+  try {
+    db = knexLib({
+      client: "mysql2",
+      connection: {
+        host: "localhost",
+        port: 3306,
+        user: "empcloud",
+        password: process.env.DB_PASSWORD || "",
+        database: "emp_exit",
+      },
+    });
+    await db.raw("SELECT 1");
+    dbAvailable = true;
+  } catch {
+    // No local MySQL available — tests will be skipped
+  }
 });
 
 afterEach(async () => {
@@ -60,6 +66,8 @@ afterAll(async () => {
   parentCleanup.length = 0;
   if (db) await db.destroy();
 });
+
+beforeEach((ctx) => { if (!dbAvailable) ctx.skip(); });
 
 // ---------------------------------------------------------------------------
 // Helper: create an exit request seed row for tests that need one
