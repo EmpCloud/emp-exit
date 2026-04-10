@@ -23,10 +23,10 @@ import type {
 } from "@emp-exit/shared";
 
 const QUESTION_TYPES: { value: InterviewQuestionType; label: string; icon: React.ReactNode }[] = [
-  { value: "text", label: "Text", icon: <AlignLeft className="h-4 w-4" /> },
-  { value: "rating", label: "Rating", icon: <Star className="h-4 w-4" /> },
-  { value: "multiple_choice", label: "Multiple Choice", icon: <List className="h-4 w-4" /> },
-  { value: "yes_no", label: "Yes / No", icon: <ToggleLeft className="h-4 w-4" /> },
+  { value: InterviewQuestionType.TEXT, label: "Text", icon: <AlignLeft className="h-4 w-4" /> },
+  { value: InterviewQuestionType.RATING, label: "Rating", icon: <Star className="h-4 w-4" /> },
+  { value: InterviewQuestionType.MULTIPLE_CHOICE, label: "Multiple Choice", icon: <List className="h-4 w-4" /> },
+  { value: InterviewQuestionType.YES_NO, label: "Yes / No", icon: <ToggleLeft className="h-4 w-4" /> },
 ];
 
 interface TemplateWithQuestions extends ExitInterviewTemplate {
@@ -50,7 +50,7 @@ export function InterviewTemplatesPage() {
   const [showAddQuestion, setShowAddQuestion] = useState(false);
   const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
   const [qText, setQText] = useState("");
-  const [qType, setQType] = useState<InterviewQuestionType>("text");
+  const [qType, setQType] = useState<InterviewQuestionType>(InterviewQuestionType.TEXT);
   const [qOptions, setQOptions] = useState("");
   const [qRequired, setQRequired] = useState(true);
 
@@ -138,7 +138,7 @@ export function InterviewTemplatesPage() {
 
   const resetQuestionForm = () => {
     setQText("");
-    setQType("text");
+    setQType(InterviewQuestionType.TEXT);
     setQOptions("");
     setQRequired(true);
     setShowAddQuestion(false);
