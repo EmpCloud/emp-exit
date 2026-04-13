@@ -21,7 +21,7 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const orgId = req.user!.empcloudOrgId;
-      const fnf = await fnfService.calculateFnF(orgId, req.params.exitId);
+      const fnf = await fnfService.calculateFnF(orgId, req.params.exitId as string);
       sendSuccess(res, fnf);
     } catch (err) {
       next(err);
@@ -35,7 +35,7 @@ router.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const orgId = req.user!.empcloudOrgId;
-      const fnf = await fnfService.getFnF(orgId, req.params.exitId);
+      const fnf = await fnfService.getFnF(orgId, req.params.exitId as string);
       sendSuccess(res, fnf);
     } catch (err) {
       next(err);
@@ -56,7 +56,7 @@ router.put(
           validation: parsed.error.errors.map((e) => e.message),
         });
       }
-      const fnf = await fnfService.updateFnF(orgId, req.params.exitId, parsed.data);
+      const fnf = await fnfService.updateFnF(orgId, req.params.exitId as string, parsed.data);
       sendSuccess(res, fnf);
     } catch (err) {
       next(err);
@@ -72,7 +72,7 @@ router.post(
     try {
       const orgId = req.user!.empcloudOrgId;
       const approvedBy = req.user!.empcloudUserId;
-      const fnf = await fnfService.approveFnF(orgId, req.params.exitId, approvedBy);
+      const fnf = await fnfService.approveFnF(orgId, req.params.exitId as string, approvedBy);
       sendSuccess(res, fnf);
     } catch (err) {
       next(err);
@@ -91,7 +91,7 @@ router.post(
       if (!payment_reference) {
         throw new ValidationError("payment_reference is required");
       }
-      const fnf = await fnfService.markPaid(orgId, req.params.exitId, payment_reference);
+      const fnf = await fnfService.markPaid(orgId, req.params.exitId as string, payment_reference);
       sendSuccess(res, fnf);
     } catch (err) {
       next(err);

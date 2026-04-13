@@ -45,7 +45,7 @@ router.post(
         throw new ValidationError("Invalid template data", parsed.error.flatten().fieldErrors as any);
       }
       const orgId = req.user!.empcloudOrgId;
-      const template = await letterService.createTemplate(orgId, parsed.data);
+      const template = await letterService.createTemplate(orgId, parsed.data as any);
       return sendSuccess(res, template, 201);
     } catch (err) {
       next(err);
@@ -60,7 +60,7 @@ router.put(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const orgId = req.user!.empcloudOrgId;
-      const template = await letterService.updateTemplate(orgId, req.params.id, req.body);
+      const template = await letterService.updateTemplate(orgId, req.params.id as string, req.body);
       return sendSuccess(res, template);
     } catch (err) {
       next(err);

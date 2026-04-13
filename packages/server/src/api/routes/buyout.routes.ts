@@ -67,7 +67,7 @@ router.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const orgId = req.user!.empcloudOrgId;
-      const buyout = await buyoutService.getBuyoutRequest(orgId, req.params.exitId);
+      const buyout = await buyoutService.getBuyoutRequest(orgId, req.params.exitId as string);
       sendSuccess(res, buyout);
     } catch (err) {
       next(err);
@@ -104,7 +104,7 @@ router.post(
     try {
       const orgId = req.user!.empcloudOrgId;
       const approvedBy = req.user!.empcloudUserId;
-      const buyout = await buyoutService.approveBuyout(orgId, req.params.id, approvedBy);
+      const buyout = await buyoutService.approveBuyout(orgId, req.params.id as string, approvedBy);
       sendSuccess(res, buyout);
     } catch (err) {
       next(err);
@@ -124,7 +124,7 @@ router.post(
 
       if (!reason) throw new ValidationError("reason is required");
 
-      const buyout = await buyoutService.rejectBuyout(orgId, req.params.id, rejectedBy, reason);
+      const buyout = await buyoutService.rejectBuyout(orgId, req.params.id as string, rejectedBy, reason);
       sendSuccess(res, buyout);
     } catch (err) {
       next(err);

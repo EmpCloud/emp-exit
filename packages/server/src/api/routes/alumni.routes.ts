@@ -49,7 +49,7 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
 router.get("/:id", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const orgId = req.user!.empcloudOrgId;
-    const profile = await alumniService.getProfile(orgId, req.params.id);
+    const profile = await alumniService.getProfile(orgId, req.params.id as string);
     return sendSuccess(res, profile);
   } catch (err) {
     next(err);

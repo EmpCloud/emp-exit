@@ -52,7 +52,7 @@ router.post(
         throw new ValidationError("Invalid department data", parsed.error.flatten().fieldErrors as any);
       }
 
-      const dept = await clearanceService.createDepartment(req.user!.empcloudOrgId, parsed.data);
+      const dept = await clearanceService.createDepartment(req.user!.empcloudOrgId, parsed.data as any);
       sendSuccess(res, dept, 201);
     } catch (err) {
       next(err);
@@ -68,7 +68,7 @@ router.put(
     try {
       const dept = await clearanceService.updateDepartment(
         req.user!.empcloudOrgId,
-        req.params.id,
+        req.params.id as string,
         req.body,
       );
       sendSuccess(res, dept);
@@ -84,7 +84,7 @@ router.delete(
   authorize("super_admin", "org_admin", "hr_admin"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await clearanceService.deleteDepartment(req.user!.empcloudOrgId, req.params.id);
+      await clearanceService.deleteDepartment(req.user!.empcloudOrgId, req.params.id as string);
       sendSuccess(res, { deleted: true });
     } catch (err) {
       next(err);
@@ -104,7 +104,7 @@ router.post(
     try {
       const records = await clearanceService.createClearanceRecords(
         req.user!.empcloudOrgId,
-        req.params.exitId,
+        req.params.exitId as string,
       );
       sendSuccess(res, records, 201);
     } catch (err) {
@@ -120,7 +120,7 @@ router.get(
     try {
       const status = await clearanceService.getClearanceStatus(
         req.user!.empcloudOrgId,
-        req.params.exitId,
+        req.params.exitId as string,
       );
       sendSuccess(res, status);
     } catch (err) {
@@ -141,8 +141,8 @@ router.put(
 
       const record = await clearanceService.updateClearance(
         req.user!.empcloudOrgId,
-        req.params.clearanceId,
-        parsed.data,
+        req.params.clearanceId as string,
+        parsed.data as any,
         req.user!.empcloudUserId,
       );
       sendSuccess(res, record);

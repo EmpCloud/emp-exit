@@ -55,7 +55,7 @@ router.post("/register", authLimiter, async (req: Request, res: Response, next: 
     if (!parsed.success) {
       throw new ValidationError("Invalid registration data", parsed.error.flatten().fieldErrors as any);
     }
-    const result = await authService.register(parsed.data);
+    const result = await authService.register(parsed.data as any);
     return sendSuccess(res, result, 201);
   } catch (err) {
     next(err);

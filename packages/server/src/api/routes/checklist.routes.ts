@@ -67,7 +67,7 @@ router.post(
         throw new ValidationError("Invalid template data", parsed.error.flatten().fieldErrors as any);
       }
 
-      const template = await checklistService.createTemplate(req.user!.empcloudOrgId, parsed.data);
+      const template = await checklistService.createTemplate(req.user!.empcloudOrgId, parsed.data as any);
       sendSuccess(res, template, 201);
     } catch (err) {
       next(err);
@@ -81,7 +81,7 @@ router.get(
   authorize("super_admin", "org_admin", "hr_admin", "hr_manager"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const template = await checklistService.getTemplate(req.user!.empcloudOrgId, req.params.id);
+      const template = await checklistService.getTemplate(req.user!.empcloudOrgId, req.params.id as string);
       sendSuccess(res, template);
     } catch (err) {
       next(err);
@@ -97,7 +97,7 @@ router.put(
     try {
       const template = await checklistService.updateTemplate(
         req.user!.empcloudOrgId,
-        req.params.id,
+        req.params.id as string,
         req.body,
       );
       sendSuccess(res, template);
@@ -113,7 +113,7 @@ router.delete(
   authorize("super_admin", "org_admin", "hr_admin"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await checklistService.deleteTemplate(req.user!.empcloudOrgId, req.params.id);
+      await checklistService.deleteTemplate(req.user!.empcloudOrgId, req.params.id as string);
       sendSuccess(res, { deleted: true });
     } catch (err) {
       next(err);
@@ -138,8 +138,8 @@ router.post(
 
       const item = await checklistService.addTemplateItem(
         req.user!.empcloudOrgId,
-        req.params.id,
-        parsed.data,
+        req.params.id as string,
+        parsed.data as any,
       );
       sendSuccess(res, item, 201);
     } catch (err) {
@@ -156,7 +156,7 @@ router.put(
     try {
       const item = await checklistService.updateTemplateItem(
         req.user!.empcloudOrgId,
-        req.params.itemId,
+        req.params.itemId as string,
         req.body,
       );
       sendSuccess(res, item);
@@ -172,7 +172,7 @@ router.delete(
   authorize("super_admin", "org_admin", "hr_admin"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await checklistService.removeTemplateItem(req.user!.empcloudOrgId, req.params.itemId);
+      await checklistService.removeTemplateItem(req.user!.empcloudOrgId, req.params.itemId as string);
       sendSuccess(res, { deleted: true });
     } catch (err) {
       next(err);
@@ -214,7 +214,7 @@ router.get(
     try {
       const checklist = await checklistService.getChecklist(
         req.user!.empcloudOrgId,
-        req.params.exitId,
+        req.params.exitId as string,
       );
       sendSuccess(res, checklist);
     } catch (err) {
@@ -235,7 +235,7 @@ router.patch(
 
       const item = await checklistService.updateChecklistItem(
         req.user!.empcloudOrgId,
-        req.params.itemId,
+        req.params.itemId as string,
         parsed.data,
         req.user!.empcloudUserId,
       );

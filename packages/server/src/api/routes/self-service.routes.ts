@@ -31,7 +31,7 @@ router.post(
       const exit = await exitService.submitResignation(
         req.user!.empcloudOrgId,
         req.user!.empcloudUserId,
-        parsed.data,
+        parsed.data as any,
       );
       sendSuccess(res, exit, 201);
     } catch (err) {

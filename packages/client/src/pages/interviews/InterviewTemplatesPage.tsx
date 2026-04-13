@@ -19,8 +19,8 @@ import { cn } from "@/lib/utils";
 import type {
   ExitInterviewTemplate,
   ExitInterviewQuestion,
-  InterviewQuestionType,
 } from "@emp-exit/shared";
+import { InterviewQuestionType } from "@emp-exit/shared";
 
 const QUESTION_TYPES: { value: InterviewQuestionType; label: string; icon: React.ReactNode }[] = [
   { value: InterviewQuestionType.TEXT, label: "Text", icon: <AlignLeft className="h-4 w-4" /> },

@@ -24,7 +24,7 @@ router.post("/exit/:exitId", async (req: Request, res: Response, next: NextFunct
     const orgId = req.user!.empcloudOrgId;
     const kt = await ktService.createKT(
       orgId,
-      req.params.exitId,
+      req.params.exitId as string,
       parsed.data.assignee_id,
       parsed.data.due_date,
     );
@@ -38,7 +38,7 @@ router.post("/exit/:exitId", async (req: Request, res: Response, next: NextFunct
 router.get("/exit/:exitId", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const orgId = req.user!.empcloudOrgId;
-    const kt = await ktService.getKT(orgId, req.params.exitId);
+    const kt = await ktService.getKT(orgId, req.params.exitId as string);
     return sendSuccess(res, kt);
   } catch (err) {
     next(err);
@@ -49,7 +49,7 @@ router.get("/exit/:exitId", async (req: Request, res: Response, next: NextFuncti
 router.put("/exit/:exitId", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const orgId = req.user!.empcloudOrgId;
-    const kt = await ktService.updateKT(orgId, req.params.exitId, req.body);
+    const kt = await ktService.updateKT(orgId, req.params.exitId as string, req.body);
     return sendSuccess(res, kt);
   } catch (err) {
     next(err);
@@ -66,12 +66,12 @@ router.post("/exit/:exitId/items", async (req: Request, res: Response, next: Nex
     const orgId = req.user!.empcloudOrgId;
 
     // First get the KT plan to find its ID
-    const kt = await ktService.getKT(orgId, req.params.exitId);
+    const kt = await ktService.getKT(orgId, req.params.exitId as string);
     if (!kt) {
       throw new ValidationError("No KT plan exists for this exit. Create one first.");
     }
 
-    const item = await ktService.addItem(orgId, kt.id, parsed.data);
+    const item = await ktService.addItem(orgId, kt.id, parsed.data as any);
     return sendSuccess(res, item, 201);
   } catch (err) {
     next(err);
@@ -86,7 +86,7 @@ router.put("/items/:itemId", async (req: Request, res: Response, next: NextFunct
       throw new ValidationError("Invalid KT item data", parsed.error.flatten().fieldErrors as any);
     }
     const orgId = req.user!.empcloudOrgId;
-    const item = await ktService.updateItem(orgId, req.params.itemId, parsed.data);
+    const item = await ktService.updateItem(orgId, req.params.itemId as string, parsed.data);
     return sendSuccess(res, item);
   } catch (err) {
     next(err);

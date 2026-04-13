@@ -52,7 +52,7 @@ router.post(
           validation: parsed.error.errors.map((e) => e.message),
         });
       }
-      const template = await interviewService.createTemplate(orgId, parsed.data);
+      const template = await interviewService.createTemplate(orgId, parsed.data as any);
       sendSuccess(res, template, 201);
     } catch (err) {
       next(err);
@@ -67,7 +67,7 @@ router.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const orgId = req.user!.empcloudOrgId;
-      const template = await interviewService.getTemplate(orgId, req.params.id);
+      const template = await interviewService.getTemplate(orgId, req.params.id as string);
       sendSuccess(res, template);
     } catch (err) {
       next(err);
@@ -82,7 +82,7 @@ router.put(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const orgId = req.user!.empcloudOrgId;
-      const template = await interviewService.updateTemplate(orgId, req.params.id, req.body);
+      const template = await interviewService.updateTemplate(orgId, req.params.id as string, req.body);
       sendSuccess(res, template);
     } catch (err) {
       next(err);
@@ -103,7 +103,7 @@ router.post(
           validation: parsed.error.errors.map((e) => e.message),
         });
       }
-      const question = await interviewService.addQuestion(orgId, req.params.id, parsed.data);
+      const question = await interviewService.addQuestion(orgId, req.params.id as string, parsed.data as any);
       sendSuccess(res, question, 201);
     } catch (err) {
       next(err);
@@ -118,7 +118,7 @@ router.put(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const orgId = req.user!.empcloudOrgId;
-      const question = await interviewService.updateQuestion(orgId, req.params.questionId, req.body);
+      const question = await interviewService.updateQuestion(orgId, req.params.questionId as string, req.body);
       sendSuccess(res, question);
     } catch (err) {
       next(err);
@@ -133,7 +133,7 @@ router.delete(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const orgId = req.user!.empcloudOrgId;
-      await interviewService.removeQuestion(orgId, req.params.questionId);
+      await interviewService.removeQuestion(orgId, req.params.questionId as string);
       sendSuccess(res, { message: "Question removed" });
     } catch (err) {
       next(err);
@@ -151,7 +151,7 @@ router.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const orgId = req.user!.empcloudOrgId;
-      const interview = await interviewService.getInterview(orgId, req.params.exitId);
+      const interview = await interviewService.getInterview(orgId, req.params.exitId as string);
       sendSuccess(res, interview);
     } catch (err) {
       next(err);
@@ -172,7 +172,7 @@ router.post(
       }
       const interview = await interviewService.scheduleInterview(
         orgId,
-        req.params.exitId,
+        req.params.exitId as string,
         template_id,
         conducted_by,
         scheduled_at,
@@ -198,7 +198,7 @@ router.post(
       }
 
       // First get interview ID from exit request
-      const interview = await interviewService.getInterview(orgId, req.params.exitId);
+      const interview = await interviewService.getInterview(orgId, req.params.exitId as string);
       if (!interview) {
         throw new ValidationError("No interview found for this exit request");
       }
@@ -228,7 +228,7 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const orgId = req.user!.empcloudOrgId;
-      const interview = await interviewService.getInterview(orgId, req.params.exitId);
+      const interview = await interviewService.getInterview(orgId, req.params.exitId as string);
       if (!interview) {
         throw new ValidationError("No interview found for this exit request");
       }
@@ -247,7 +247,7 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const orgId = req.user!.empcloudOrgId;
-      const interview = await interviewService.getInterview(orgId, req.params.exitId);
+      const interview = await interviewService.getInterview(orgId, req.params.exitId as string);
       if (!interview) {
         throw new ValidationError("No interview found for this exit request");
       }

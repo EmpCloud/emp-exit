@@ -17,7 +17,7 @@ router.use(authenticate);
 router.get("/exit/:exitId", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const orgId = req.user!.empcloudOrgId;
-    const assets = await assetService.listAssets(orgId, req.params.exitId);
+    const assets = await assetService.listAssets(orgId, req.params.exitId as string);
     return sendSuccess(res, assets);
   } catch (err) {
     next(err);
@@ -32,7 +32,7 @@ router.post("/exit/:exitId", async (req: Request, res: Response, next: NextFunct
       throw new ValidationError("Invalid asset data", parsed.error.flatten().fieldErrors as any);
     }
     const orgId = req.user!.empcloudOrgId;
-    const asset = await assetService.addAsset(orgId, req.params.exitId, parsed.data);
+    const asset = await assetService.addAsset(orgId, req.params.exitId as string, parsed.data as any);
     return sendSuccess(res, asset, 201);
   } catch (err) {
     next(err);
@@ -51,7 +51,7 @@ router.put("/:assetId", async (req: Request, res: Response, next: NextFunction) 
     if (data.status === "returned" || data.status === "damaged") {
       data.verified_by = req.user!.empcloudUserId;
     }
-    const asset = await assetService.updateAsset(orgId, req.params.assetId, data);
+    const asset = await assetService.updateAsset(orgId, req.params.assetId as string, data);
     return sendSuccess(res, asset);
   } catch (err) {
     next(err);

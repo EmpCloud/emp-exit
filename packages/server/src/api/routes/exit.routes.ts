@@ -34,7 +34,7 @@ router.post(
       const exit = await exitService.initiateExit(
         req.user!.empcloudOrgId,
         req.user!.empcloudUserId,
-        parsed.data,
+        parsed.data as any,
       );
       sendSuccess(res, exit, 201);
     } catch (err) {
@@ -72,7 +72,7 @@ router.get(
   "/:id",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const exit = await exitService.getExit(req.user!.empcloudOrgId, req.params.id);
+      const exit = await exitService.getExit(req.user!.empcloudOrgId, req.params.id as string);
       sendSuccess(res, exit);
     } catch (err) {
       next(err);
@@ -93,7 +93,7 @@ router.put(
 
       const exit = await exitService.updateExit(
         req.user!.empcloudOrgId,
-        req.params.id,
+        req.params.id as string,
         parsed.data,
       );
       sendSuccess(res, exit);
@@ -109,7 +109,7 @@ router.post(
   authorize("super_admin", "org_admin", "hr_admin", "hr_manager"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const exit = await exitService.cancelExit(req.user!.empcloudOrgId, req.params.id);
+      const exit = await exitService.cancelExit(req.user!.empcloudOrgId, req.params.id as string);
       sendSuccess(res, exit);
     } catch (err) {
       next(err);
@@ -123,7 +123,7 @@ router.post(
   authorize("super_admin", "org_admin", "hr_admin", "hr_manager"),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const exit = await exitService.completeExit(req.user!.empcloudOrgId, req.params.id);
+      const exit = await exitService.completeExit(req.user!.empcloudOrgId, req.params.id as string);
       sendSuccess(res, exit);
     } catch (err) {
       next(err);
