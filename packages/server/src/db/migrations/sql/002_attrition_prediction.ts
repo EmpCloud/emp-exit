@@ -2,7 +2,7 @@
 // ATTRITION PREDICTION SCHEMA — flight risk scoring + prediction tracking
 // ============================================================================
 
-import { Knex } from "knex";
+import type { Knex } from "knex";
 
 export async function up(knex: Knex): Promise<void> {
   // 1. flight_risk_scores — cached per-employee risk scores

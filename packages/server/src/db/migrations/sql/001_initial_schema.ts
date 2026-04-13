@@ -3,7 +3,7 @@
 // All exit management tables in the emp_exit database.
 // ============================================================================
 
-import { Knex } from "knex";
+import type { Knex } from "knex";
 
 export async function up(knex: Knex): Promise<void> {
   // 1. exit_settings — per-org exit configuration
