@@ -29,6 +29,41 @@ router.post("/opt-in", async (req: Request, res: Response, next: NextFunction) =
   }
 });
 
+// POST /alumni — admin/HR adds an alumni profile on behalf of a former
+// employee (e.g. someone who didn't opt in via self-service). Resolves
+// the employee_id from the exit_request, then reuses the same opt-in
+// service so the storage path is identical.
+router.post("/", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const role = req.user!.role;
+    if (!["org_admin", "hr_admin", "hr_manager"].includes(role)) {
+      throw new ValidationError("Only HR / org admins can add alumni manually");
+    }
+    const { exit_request_id, exitRequestId } = req.body;
+    const exitId = exit_request_id || exitRequestId;
+    if (!exitId) {
+      throw new ValidationError("exit_request_id is required");
+    }
+
+    const orgId = req.user!.empcloudOrgId;
+    // Look up the exit to get its employee_id.
+    const { getDB } = await import("../../db/adapters");
+    const db = getDB();
+    const exit = await db.findOne<any>("exit_requests", {
+      id: exitId,
+      organization_id: orgId,
+    });
+    if (!exit) {
+      throw new ValidationError("Exit request not found in this org");
+    }
+
+    const profile = await alumniService.optIn(orgId, exit.employee_id, exitId);
+    return sendSuccess(res, profile, 201);
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET /alumni — list alumni directory
 router.get("/", async (req: Request, res: Response, next: NextFunction) => {
   try {
