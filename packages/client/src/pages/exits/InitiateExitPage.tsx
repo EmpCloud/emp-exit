@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserMinus, Loader2 } from "lucide-react";
+import { UserMinus, Loader2, Search, X } from "lucide-react";
 import { apiPost, apiGet } from "@/api/client";
 import { cn } from "@/lib/utils";
 
@@ -40,7 +40,16 @@ export function InitiateExitPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [employeeId, setEmployeeId] = useState("");
+  // #4 — instead of asking the user to type a numeric DB id (which broke
+  // when they typed "E-101" because the field was type="number"), present
+  // a search-and-select picker that resolves any of name / email / emp_code
+  // to the underlying user.id.
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [employeeQuery, setEmployeeQuery] = useState("");
+  const [employeeResults, setEmployeeResults] = useState<Employee[]>([]);
+  const [searchingEmployees, setSearchingEmployees] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const employeeId = selectedEmployee ? String(selectedEmployee.id) : "";
   const [exitType, setExitType] = useState("resignation");
   const [reasonCategory, setReasonCategory] = useState("better_opportunity");
   const [reasonDetail, setReasonDetail] = useState("");
@@ -48,6 +57,39 @@ export function InitiateExitPage() {
   const [lastWorkingDate, setLastWorkingDate] = useState("");
   const [noticePeriodDays, setNoticePeriodDays] = useState("30");
   const [noticePeriodWaived, setNoticePeriodWaived] = useState(false);
+
+  // Debounced employee search (300ms). Discards stale responses by
+  // comparing against the latest query at resolve time.
+  useEffect(() => {
+    if (selectedEmployee) return; // user already picked someone
+    const q = employeeQuery.trim();
+    if (!q) {
+      setEmployeeResults([]);
+      return;
+    }
+    const handle = setTimeout(async () => {
+      setSearchingEmployees(true);
+      try {
+        const res = await apiGet<Employee[]>("/users/search", { q });
+        // Only keep this response if the query hasn't changed in the meantime.
+        if (employeeQuery.trim() === q) {
+          setEmployeeResults(res.data ?? []);
+        }
+      } catch {
+        // ignore network errors during typing
+      } finally {
+        setSearchingEmployees(false);
+      }
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [employeeQuery, selectedEmployee]);
+
+  function clearEmployee() {
+    setSelectedEmployee(null);
+    setEmployeeQuery("");
+    setEmployeeResults([]);
+    setShowResults(false);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -90,20 +132,96 @@ export function InitiateExitPage() {
             </div>
           )}
 
-          {/* Employee ID */}
-          <div>
-            <label htmlFor="employee_id" className="block text-sm font-medium text-gray-700 mb-1">
-              Employee ID <span className="text-red-500">*</span>
+          {/* Employee picker — #4 — search by name / email / emp_code,
+              resolves to the underlying user.id on selection. */}
+          <div className="relative">
+            <label htmlFor="employee_search" className="block text-sm font-medium text-gray-700 mb-1">
+              Employee <span className="text-red-500">*</span>
             </label>
-            <input
-              id="employee_id"
-              type="number"
-              required
-              value={employeeId}
-              onChange={(e) => setEmployeeId(e.target.value)}
-              placeholder="Enter employee ID"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
-            />
+            {selectedEmployee ? (
+              <div className="flex items-center justify-between gap-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2.5">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-gray-900">
+                    {selectedEmployee.first_name} {selectedEmployee.last_name}
+                  </p>
+                  <p className="truncate text-xs text-gray-500">
+                    {selectedEmployee.emp_code ? `${selectedEmployee.emp_code} · ` : ""}
+                    {selectedEmployee.email}
+                    {selectedEmployee.designation ? ` · ${selectedEmployee.designation}` : ""}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={clearEmployee}
+                  aria-label="Clear selection"
+                  className="rounded-lg p-1 text-gray-400 hover:bg-white hover:text-gray-600"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="relative">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <input
+                    id="employee_search"
+                    type="text"
+                    autoComplete="off"
+                    value={employeeQuery}
+                    onChange={(e) => {
+                      setEmployeeQuery(e.target.value);
+                      setShowResults(true);
+                    }}
+                    onFocus={() => setShowResults(true)}
+                    onBlur={() => setTimeout(() => setShowResults(false), 150)}
+                    placeholder="Search by name, email, or employee code (e.g. E-101)..."
+                    className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-3 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  />
+                </div>
+                {showResults && employeeQuery.trim() && (
+                  <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg">
+                    {searchingEmployees ? (
+                      <div className="flex items-center gap-2 px-3 py-2 text-xs text-gray-500">
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" /> Searching...
+                      </div>
+                    ) : employeeResults.length === 0 ? (
+                      <p className="px-3 py-2 text-xs text-gray-500">No matching employees.</p>
+                    ) : (
+                      employeeResults.map((emp) => (
+                        <button
+                          key={emp.id}
+                          type="button"
+                          onMouseDown={(e) => {
+                            // onMouseDown so it fires before the input's onBlur
+                            // closes the dropdown.
+                            e.preventDefault();
+                            setSelectedEmployee(emp);
+                            setEmployeeQuery("");
+                            setEmployeeResults([]);
+                            setShowResults(false);
+                          }}
+                          className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left hover:bg-gray-50"
+                        >
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium text-gray-900">
+                              {emp.first_name} {emp.last_name}
+                            </p>
+                            <p className="truncate text-xs text-gray-500">
+                              {emp.emp_code ? `${emp.emp_code} · ` : ""}{emp.email}
+                            </p>
+                          </div>
+                          {emp.designation && (
+                            <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-[10px] text-gray-600">
+                              {emp.designation}
+                            </span>
+                          )}
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+              </>
+            )}
           </div>
 
           {/* Exit Type */}
