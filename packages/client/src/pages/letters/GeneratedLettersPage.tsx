@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import {
   FileSignature,
   Download,
@@ -7,6 +7,7 @@ import {
   Loader2,
   FileText,
   Plus,
+  Settings2,
 } from "lucide-react";
 import { apiGet, apiPost } from "@/api/client";
 import { api } from "@/api/client";
@@ -167,6 +168,16 @@ export function GeneratedLettersPage() {
               Switch exit
             </button>
           )}
+          {/* "Manage templates" — letter templates live at /letters/templates
+              but there was no UI link to it from anywhere, so users couldn't
+              find the create-template flow. */}
+          <Link
+            to="/letters/templates"
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            <Settings2 className="h-4 w-4" />
+            Manage Templates
+          </Link>
           {exitId && (
             <button
               onClick={() => setShowGenerate(!showGenerate)}
@@ -261,6 +272,15 @@ export function GeneratedLettersPage() {
                   </option>
                 ))}
               </select>
+              {templates.length === 0 && (
+                <p className="mt-2 text-xs text-gray-500">
+                  No templates configured.{" "}
+                  <Link to="/letters/templates" className="font-medium text-rose-600 hover:underline">
+                    Create a template
+                  </Link>{" "}
+                  to start generating letters.
+                </p>
+              )}
             </div>
           </div>
           <div className="flex gap-3">
