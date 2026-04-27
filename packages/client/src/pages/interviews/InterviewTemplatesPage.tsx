@@ -196,6 +196,25 @@ export function InterviewTemplatesPage() {
     }
   };
 
+  const handleDeleteTemplate = async (templateId: string, templateName: string) => {
+    if (!confirm(`Delete template "${templateName}" and all its questions? This cannot be undone.`)) {
+      return;
+    }
+    try {
+      await apiDelete(`/interviews/templates/${templateId}`);
+      if (expandedId === templateId) {
+        setExpandedId(null);
+        setExpandedTemplate(null);
+      }
+      if (editingTemplate === templateId) {
+        setEditingTemplate(null);
+      }
+      await fetchTemplates();
+    } catch {
+      setError("Failed to delete template");
+    }
+  };
+
   const handleDragEnd = async () => {
     if (
       dragIndex === null ||
@@ -365,7 +384,7 @@ export function InterviewTemplatesPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-gray-900">{t.name}</span>
-                      {t.is_default && (
+                      {Boolean(t.is_default) && (
                         <span className="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-700">
                           Default
                         </span>
@@ -381,15 +400,28 @@ export function InterviewTemplatesPage() {
                     )}
                   </div>
                 </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    startEditTemplate(t);
-                  }}
-                  className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-                >
-                  <Pencil className="h-4 w-4" />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      startEditTemplate(t);
+                    }}
+                    className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                    title="Edit template"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteTemplate(t.id, t.name);
+                    }}
+                    className="rounded p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600"
+                    title="Delete template"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
 
               {/* Expanded: Questions */}
@@ -446,7 +478,7 @@ export function InterviewTemplatesPage() {
                               {QUESTION_TYPES.find((qt) => qt.value === q.question_type)?.icon}
                               {QUESTION_TYPES.find((qt) => qt.value === q.question_type)?.label}
                             </span>
-                            {q.is_required && (
+                            {Boolean(q.is_required) && (
                               <span className="text-xs text-red-500">Required</span>
                             )}
                           </div>
