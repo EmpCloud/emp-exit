@@ -20,14 +20,55 @@ const LETTER_TYPES: Record<string, string> = {
   noc: "NOC",
 };
 
+interface ExitOption {
+  id: string;
+  status: string;
+  exit_type: string;
+  last_working_date: string | null;
+  employee?: {
+    first_name: string;
+    last_name: string;
+    emp_code: string | null;
+    designation: string | null;
+  } | null;
+}
+
 export function GeneratedLettersPage() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const exitId = searchParams.get("exitId") || "";
   const [letters, setLetters] = useState<any[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showGenerate, setShowGenerate] = useState(false);
   const [generateForm, setGenerateForm] = useState({ template_id: "", letter_type: "experience" });
+
+  // Same in-page picker pattern as the KT page: when no exit is in the URL
+  // we fetch the list and let the user pick one instead of greeting them
+  // with a "?exitId=UUID in the URL" hint.
+  const [exitOptions, setExitOptions] = useState<ExitOption[]>([]);
+  const [loadingExits, setLoadingExits] = useState(false);
+  useEffect(() => {
+    if (exitId) return;
+    let cancelled = false;
+    (async () => {
+      setLoadingExits(true);
+      try {
+        const res = await apiGet<any>("/exits", { perPage: 100 });
+        if (!cancelled) setExitOptions(res.data?.data ?? []);
+      } catch {
+        if (!cancelled) setExitOptions([]);
+      } finally {
+        if (!cancelled) setLoadingExits(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [exitId]);
+
+  function selectExit(id: string) {
+    const next = new URLSearchParams(searchParams);
+    next.set("exitId", id);
+    setSearchParams(next);
+  }
   const [generating, setGenerating] = useState(false);
 
   async function fetchLetters() {
@@ -112,20 +153,87 @@ export function GeneratedLettersPage() {
           <h1 className="text-2xl font-bold text-gray-900">Generated Letters</h1>
           <p className="mt-1 text-sm text-gray-500">View, download, and send generated exit letters.</p>
         </div>
-        {exitId && (
-          <button
-            onClick={() => setShowGenerate(!showGenerate)}
-            className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
-          >
-            <Plus className="h-4 w-4" />
-            Generate Letter
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {exitId && (
+            <button
+              type="button"
+              onClick={() => {
+                const next = new URLSearchParams(searchParams);
+                next.delete("exitId");
+                setSearchParams(next);
+              }}
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Switch exit
+            </button>
+          )}
+          {exitId && (
+            <button
+              onClick={() => setShowGenerate(!showGenerate)}
+              className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+            >
+              <Plus className="h-4 w-4" />
+              Generate Letter
+            </button>
+          )}
+        </div>
       </div>
 
+      {/* In-page exit picker — shown only when no exit is selected via the URL.
+          Clicking a row sets ?exitId=... and the rest of the page renders
+          letters for that exit. */}
       {!exitId && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
-          No exit selected. Pass <code>?exitId=UUID</code> in the URL to view letters for an exit.
+        <div className="rounded-lg border border-gray-200 bg-white">
+          <div className="border-b border-gray-100 px-4 py-3">
+            <h2 className="text-sm font-semibold text-gray-900">Select an exit</h2>
+            <p className="mt-0.5 text-xs text-gray-500">
+              Pick the exit you want to view or generate letters for.
+            </p>
+          </div>
+          {loadingExits ? (
+            <div className="flex h-32 items-center justify-center">
+              <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+            </div>
+          ) : exitOptions.length === 0 ? (
+            <p className="px-4 py-8 text-center text-sm text-gray-500">
+              No exits found. Initiate an exit first to generate its letters.
+            </p>
+          ) : (
+            <ul className="divide-y divide-gray-100">
+              {exitOptions.map((exit) => {
+                const name = exit.employee
+                  ? `${exit.employee.first_name} ${exit.employee.last_name}`
+                  : "(unknown employee)";
+                return (
+                  <li key={exit.id}>
+                    <button
+                      type="button"
+                      onClick={() => selectExit(exit.id)}
+                      className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-rose-50"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-gray-900">{name}</p>
+                        <p className="truncate text-xs text-gray-500">
+                          {exit.employee?.emp_code ? `${exit.employee.emp_code} · ` : ""}
+                          {exit.exit_type.replace(/_/g, " ")}
+                          {exit.last_working_date ? ` · LWD ${formatDate(exit.last_working_date)}` : ""}
+                        </p>
+                      </div>
+                      <span className={
+                        exit.status === "completed"
+                          ? "shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-[11px] font-medium text-green-700 capitalize"
+                          : exit.status === "active"
+                            ? "shrink-0 rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-medium text-blue-700 capitalize"
+                            : "shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-700 capitalize"
+                      }>
+                        {exit.status}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
       )}
 
