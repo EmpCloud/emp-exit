@@ -20,9 +20,50 @@ const KT_STATUS: Record<string, { label: string; color: string }> = {
   completed: { label: "Completed", color: "bg-green-100 text-green-700" },
 };
 
+interface ExitOption {
+  id: string;
+  status: string;
+  exit_type: string;
+  last_working_date: string | null;
+  employee?: {
+    first_name: string;
+    last_name: string;
+    emp_code: string | null;
+    designation: string | null;
+  } | null;
+}
+
 export function KTListPage() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const exitId = searchParams.get("exitId") || "";
+
+  // When no exit is selected via the URL, fetch active exits so the user
+  // can pick one. Without this the page just shows the "?exitId=UUID"
+  // hint and there's no in-UI way to proceed.
+  const [exitOptions, setExitOptions] = useState<ExitOption[]>([]);
+  const [loadingExits, setLoadingExits] = useState(false);
+  useEffect(() => {
+    if (exitId) return;
+    let cancelled = false;
+    (async () => {
+      setLoadingExits(true);
+      try {
+        const res = await apiGet<any>("/exits", { perPage: 100 });
+        if (!cancelled) setExitOptions(res.data?.data ?? []);
+      } catch {
+        if (!cancelled) setExitOptions([]);
+      } finally {
+        if (!cancelled) setLoadingExits(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [exitId]);
+
+  function selectExit(id: string) {
+    const next = new URLSearchParams(searchParams);
+    next.set("exitId", id);
+    setSearchParams(next);
+  }
   const [kt, setKt] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [showItemForm, setShowItemForm] = useState(false);
@@ -58,6 +99,24 @@ export function KTListPage() {
       toast.error(err.response?.data?.error?.message || "Failed to create KT plan");
     } finally {
       setCreating(false);
+    }
+  }
+
+  // Mark the entire KT plan as complete. Backend supports this directly
+  // (PUT /kt/exit/:exitId with { status: "completed" }) and also auto-
+  // completes when the last item flips to completed.
+  const [completingPlan, setCompletingPlan] = useState(false);
+  async function handleCompletePlan() {
+    if (!exitId) return;
+    setCompletingPlan(true);
+    try {
+      await apiPut(`/kt/exit/${exitId}`, { status: "completed" });
+      toast.success("KT plan marked complete");
+      fetchKT();
+    } catch (err: any) {
+      toast.error(err.response?.data?.error?.message || "Failed to complete KT plan");
+    } finally {
+      setCompletingPlan(false);
     }
   }
 
@@ -99,20 +158,88 @@ export function KTListPage() {
           <h1 className="text-2xl font-bold text-gray-900">Knowledge Transfer</h1>
           <p className="mt-1 text-sm text-gray-500">Manage knowledge transfer plans and items.</p>
         </div>
-        {kt && (
-          <button
-            onClick={() => setShowItemForm(!showItemForm)}
-            className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
-          >
-            <Plus className="h-4 w-4" />
-            Add Item
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {exitId && (
+            <button
+              type="button"
+              onClick={() => {
+                const next = new URLSearchParams(searchParams);
+                next.delete("exitId");
+                setSearchParams(next);
+              }}
+              className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Switch exit
+            </button>
+          )}
+          {kt && (
+            <button
+              onClick={() => setShowItemForm(!showItemForm)}
+              className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+            >
+              <Plus className="h-4 w-4" />
+              Add Item
+            </button>
+          )}
+        </div>
       </div>
 
+      {/* Exit picker — shown only when no exit is selected via the URL.
+          Clicking a row sets ?exitId=... and the rest of the page renders
+          the KT plan / items for that exit. */}
       {!exitId && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
-          No exit selected. Pass <code>?exitId=UUID</code> in the URL.
+        <div className="rounded-lg border border-gray-200 bg-white">
+          <div className="border-b border-gray-100 px-4 py-3">
+            <h2 className="text-sm font-semibold text-gray-900">Select an exit</h2>
+            <p className="mt-0.5 text-xs text-gray-500">
+              Pick the exit you want to manage knowledge transfer for.
+            </p>
+          </div>
+          {loadingExits ? (
+            <div className="flex h-32 items-center justify-center">
+              <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+            </div>
+          ) : exitOptions.length === 0 ? (
+            <p className="px-4 py-8 text-center text-sm text-gray-500">
+              No exits found. Initiate an exit first to manage its KT plan.
+            </p>
+          ) : (
+            <ul className="divide-y divide-gray-100">
+              {exitOptions.map((exit) => {
+                const name = exit.employee
+                  ? `${exit.employee.first_name} ${exit.employee.last_name}`
+                  : "(unknown employee)";
+                return (
+                  <li key={exit.id}>
+                    <button
+                      type="button"
+                      onClick={() => selectExit(exit.id)}
+                      className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-rose-50"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-gray-900">{name}</p>
+                        <p className="truncate text-xs text-gray-500">
+                          {exit.employee?.emp_code ? `${exit.employee.emp_code} · ` : ""}
+                          {exit.exit_type.replace(/_/g, " ")}
+                          {exit.last_working_date ? ` · LWD ${formatDate(exit.last_working_date)}` : ""}
+                        </p>
+                      </div>
+                      <span className={cn(
+                        "shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium capitalize",
+                        exit.status === "completed"
+                          ? "bg-green-100 text-green-700"
+                          : exit.status === "active"
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-gray-100 text-gray-700",
+                      )}>
+                        {exit.status}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
       )}
 
@@ -138,9 +265,29 @@ export function KTListPage() {
           <div className="rounded-lg border border-gray-200 bg-white p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">KT Plan</h3>
-              <span className={cn("rounded-full px-3 py-1 text-xs font-medium", KT_STATUS[kt.status]?.color || KT_STATUS.not_started.color)}>
-                {KT_STATUS[kt.status]?.label || kt.status}
-              </span>
+              <div className="flex items-center gap-3">
+                {/* "Mark plan complete" — only enabled when at least one
+                    item exists AND every item is completed. The button
+                    disappears once the plan is already completed. */}
+                {kt.status !== "completed" && Array.isArray(kt.items) && kt.items.length > 0 && (() => {
+                  const allDone = kt.items.every((it: any) => it.status === "completed");
+                  return (
+                    <button
+                      type="button"
+                      onClick={handleCompletePlan}
+                      disabled={!allDone || completingPlan}
+                      title={allDone ? "Mark plan complete" : "Complete every item first"}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      {completingPlan ? "Completing..." : "Mark plan complete"}
+                    </button>
+                  );
+                })()}
+                <span className={cn("rounded-full px-3 py-1 text-xs font-medium", KT_STATUS[kt.status]?.color || KT_STATUS.not_started.color)}>
+                  {KT_STATUS[kt.status]?.label || kt.status}
+                </span>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="flex items-center gap-2 text-gray-600">
@@ -225,13 +372,16 @@ export function KTListPage() {
                     className="flex items-start gap-3 rounded-lg border border-gray-200 bg-white p-4 hover:bg-gray-50"
                   >
                     <button
+                      type="button"
                       onClick={() => toggleItemStatus(item.id, item.status)}
-                      className="mt-0.5 flex-shrink-0"
+                      title={item.status === "completed" ? "Reopen item" : "Mark item complete"}
+                      aria-label={item.status === "completed" ? "Reopen item" : "Mark item complete"}
+                      className="mt-0.5 flex-shrink-0 cursor-pointer rounded-full transition-colors hover:bg-rose-50 p-0.5"
                     >
                       {item.status === "completed" ? (
                         <CheckCircle2 className="h-5 w-5 text-green-600" />
                       ) : (
-                        <Circle className="h-5 w-5 text-gray-300 hover:text-rose-400" />
+                        <Circle className="h-5 w-5 text-gray-400 hover:text-rose-500" />
                       )}
                     </button>
                     <div className="flex-1 min-w-0">

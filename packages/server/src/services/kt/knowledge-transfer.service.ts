@@ -171,5 +171,24 @@ export async function updateItem(
 
   const updated = await db.update("kt_items", itemId, updateData);
   logger.info(`KT item updated: ${itemId} status=${data.status || "unchanged"}`);
+
+  // Auto-complete the plan when this item flips to completed and every
+  // sibling item is now also completed. Saves the user from having to
+  // hunt for a separate "complete plan" action when the work is done.
+  if (data.status === "completed" && kt.status !== "completed") {
+    const siblings = await db.findMany<any>("kt_items", {
+      filters: { kt_id: kt.id },
+      limit: 1000,
+    });
+    const allDone = siblings.data.length > 0 && siblings.data.every((s: any) => s.status === "completed");
+    if (allDone) {
+      await db.update("knowledge_transfers", kt.id, {
+        status: "completed",
+        completed_date: new Date().toISOString().split("T")[0],
+      });
+      logger.info(`KT plan ${kt.id} auto-completed (all items done)`);
+    }
+  }
+
   return updated;
 }

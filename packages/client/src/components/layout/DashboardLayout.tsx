@@ -92,6 +92,11 @@ export function DashboardLayout() {
             <NavLink
               key={item.to}
               to={item.to}
+              // `end` forces exact-path matching. Without this, NavLink uses
+              // prefix-match, so visiting /analytics/flight-risk highlights
+              // both "Analytics" (/analytics) and "Flight Risk"
+              // (/analytics/flight-risk) at the same time.
+              end
               className={({ isActive }) =>
                 cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
