@@ -49,16 +49,18 @@ export function ChecklistTemplatesPage() {
   const [expandedItems, setExpandedItems] = useState<TemplateItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(false);
 
-  // Create template form
+  // Create / edit template form
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingTemplateId, setEditingTemplateId] = useState<string | null>(null);
   const [formName, setFormName] = useState("");
   const [formDescription, setFormDescription] = useState("");
   const [formExitType, setFormExitType] = useState("");
   const [formIsDefault, setFormIsDefault] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Add item form
+  // Add / edit item form
   const [addingItemToId, setAddingItemToId] = useState<string | null>(null);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [itemTitle, setItemTitle] = useState("");
   const [itemDescription, setItemDescription] = useState("");
   const [itemIsMandatory, setItemIsMandatory] = useState(true);
@@ -97,21 +99,41 @@ export function ChecklistTemplatesPage() {
     }
   }
 
-  async function handleCreateTemplate(e: React.FormEvent) {
+  function resetTemplateForm() {
+    setShowCreateForm(false);
+    setEditingTemplateId(null);
+    setFormName("");
+    setFormDescription("");
+    setFormExitType("");
+    setFormIsDefault(false);
+  }
+
+  function startEditTemplate(tmpl: Template) {
+    setEditingTemplateId(tmpl.id);
+    setShowCreateForm(false);
+    setFormName(tmpl.name);
+    setFormDescription(tmpl.description || "");
+    setFormExitType(tmpl.exit_type || "");
+    setFormIsDefault(Boolean(tmpl.is_default));
+  }
+
+  async function handleSubmitTemplateForm(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     try {
-      const body: Record<string, any> = { name: formName };
-      if (formDescription) body.description = formDescription;
-      if (formExitType) body.exit_type = formExitType;
-      if (formIsDefault) body.is_default = true;
+      const body: Record<string, any> = {
+        name: formName,
+        description: formDescription || null,
+        exit_type: formExitType || null,
+        is_default: formIsDefault,
+      };
 
-      await apiPost("/checklists/templates", body);
-      setShowCreateForm(false);
-      setFormName("");
-      setFormDescription("");
-      setFormExitType("");
-      setFormIsDefault(false);
+      if (editingTemplateId) {
+        await apiPut(`/checklists/templates/${editingTemplateId}`, body);
+      } else {
+        await apiPost("/checklists/templates", body);
+      }
+      resetTemplateForm();
       await loadTemplates();
     } catch {
       // handled
@@ -134,25 +156,52 @@ export function ChecklistTemplatesPage() {
     }
   }
 
-  async function handleAddItem(e: React.FormEvent, templateId: string) {
+  function resetItemForm() {
+    setAddingItemToId(null);
+    setEditingItemId(null);
+    setItemTitle("");
+    setItemDescription("");
+    setItemIsMandatory(true);
+  }
+
+  function startEditItem(item: TemplateItem) {
+    setEditingItemId(item.id);
+    setAddingItemToId(null);
+    setItemTitle(item.title);
+    setItemDescription(item.description || "");
+    setItemIsMandatory(Boolean(item.is_mandatory));
+  }
+
+  async function refreshExpanded(templateId: string) {
+    setLoadingItems(true);
+    try {
+      const res = await apiGet<any>(`/checklists/templates/${templateId}`);
+      setExpandedItems(res.data?.items ?? []);
+    } catch {
+      setExpandedItems([]);
+    } finally {
+      setLoadingItems(false);
+    }
+  }
+
+  async function handleSubmitItemForm(e: React.FormEvent, templateId: string) {
     e.preventDefault();
     setSaving(true);
     try {
       const body: Record<string, any> = {
         title: itemTitle,
         is_mandatory: itemIsMandatory,
+        description: itemDescription || null,
       };
-      if (itemDescription) body.description = itemDescription;
 
-      await apiPost(`/checklists/templates/${templateId}/items`, body);
-      setAddingItemToId(null);
-      setItemTitle("");
-      setItemDescription("");
-      setItemIsMandatory(true);
-      // Reload items
-      await toggleExpand(""); // collapse
+      if (editingItemId) {
+        await apiPut(`/checklists/items/${editingItemId}`, body);
+      } else {
+        await apiPost(`/checklists/templates/${templateId}/items`, body);
+      }
+      resetItemForm();
       await loadTemplates();
-      await toggleExpand(templateId); // re-expand
+      await refreshExpanded(templateId);
     } catch {
       // handled
     } finally {
@@ -187,7 +236,10 @@ export function ChecklistTemplatesPage() {
           <p className="mt-1 text-sm text-gray-500">Manage exit checklist templates and items.</p>
         </div>
         <button
-          onClick={() => setShowCreateForm(true)}
+          onClick={() => {
+            resetTemplateForm();
+            setShowCreateForm(true);
+          }}
           className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-rose-700 transition-colors"
         >
           <Plus className="h-4 w-4" />
@@ -195,16 +247,18 @@ export function ChecklistTemplatesPage() {
         </button>
       </div>
 
-      {/* Create Template Form */}
-      {showCreateForm && (
+      {/* Create / Edit Template Form */}
+      {(showCreateForm || editingTemplateId) && (
         <div className="rounded-xl border border-rose-200 bg-rose-50/50 p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-gray-900">Create Template</h3>
-            <button onClick={() => setShowCreateForm(false)} className="text-gray-400 hover:text-gray-600">
+            <h3 className="text-sm font-semibold text-gray-900">
+              {editingTemplateId ? "Edit Template" : "Create Template"}
+            </h3>
+            <button onClick={resetTemplateForm} className="text-gray-400 hover:text-gray-600">
               <X className="h-4 w-4" />
             </button>
           </div>
-          <form onSubmit={handleCreateTemplate} className="space-y-4">
+          <form onSubmit={handleSubmitTemplateForm} className="space-y-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
@@ -255,11 +309,11 @@ export function ChecklistTemplatesPage() {
                 disabled={saving || !formName}
                 className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50"
               >
-                {saving ? "Creating..." : "Create"}
+                {saving ? "Saving..." : editingTemplateId ? "Save changes" : "Create"}
               </button>
               <button
                 type="button"
-                onClick={() => setShowCreateForm(false)}
+                onClick={resetTemplateForm}
                 className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 Cancel
@@ -293,25 +347,34 @@ export function ChecklistTemplatesPage() {
                   <div>
                     <h3 className="text-sm font-semibold text-gray-900">{tmpl.name}</h3>
                     <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-500">
-                      <span>{tmpl.item_count} items</span>
+                      {tmpl.item_count > 0 && <span>{tmpl.item_count} items</span>}
                       {tmpl.exit_type && (
                         <span className="rounded bg-gray-100 px-1.5 py-0.5">
                           {tmpl.exit_type.replace(/_/g, " ")}
                         </span>
                       )}
-                      {tmpl.is_default && (
+                      {Boolean(tmpl.is_default) && (
                         <span className="rounded bg-rose-100 px-1.5 py-0.5 text-rose-700">Default</span>
                       )}
                     </div>
                   </div>
                 </div>
-                <button
-                  onClick={(e) => { e.stopPropagation(); handleDeleteTemplate(tmpl.id); }}
-                  className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500"
-                  title="Delete template"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); startEditTemplate(tmpl); }}
+                    className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                    title="Edit template"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDeleteTemplate(tmpl.id); }}
+                    className="rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500"
+                    title="Delete template"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
 
               {/* Expanded items */}
@@ -340,7 +403,7 @@ export function ChecklistTemplatesPage() {
                                   <p className="text-xs text-gray-500">{item.description}</p>
                                 )}
                                 <div className="flex gap-2 mt-0.5">
-                                  {item.is_mandatory && (
+                                  {Boolean(item.is_mandatory) && (
                                     <span className="text-xs text-red-600">Required</span>
                                   )}
                                   {item.assigned_role && (
@@ -350,23 +413,36 @@ export function ChecklistTemplatesPage() {
                                   )}
                                 </div>
                               </div>
-                              <button
-                                onClick={() => handleDeleteItem(item.id)}
-                                className="rounded p-1 text-gray-400 hover:text-red-500"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </button>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => startEditItem(item)}
+                                  className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                                  title="Edit item"
+                                >
+                                  <Edit2 className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteItem(item.id)}
+                                  className="rounded p-1 text-gray-400 hover:text-red-500"
+                                  title="Delete item"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
                             </div>
                           ))}
                         </div>
                       )}
 
-                      {/* Add item form */}
-                      {addingItemToId === tmpl.id ? (
+                      {/* Add / Edit item form */}
+                      {addingItemToId === tmpl.id || (editingItemId && expandedItems.some((i) => i.id === editingItemId)) ? (
                         <form
-                          onSubmit={(e) => handleAddItem(e, tmpl.id)}
+                          onSubmit={(e) => handleSubmitItemForm(e, tmpl.id)}
                           className="space-y-3 rounded-lg border border-rose-200 bg-white p-4"
                         >
+                          <p className="text-xs font-semibold text-gray-700">
+                            {editingItemId ? "Edit item" : "Add item"}
+                          </p>
                           <input
                             type="text"
                             required
@@ -397,11 +473,11 @@ export function ChecklistTemplatesPage() {
                               disabled={saving || !itemTitle}
                               className="rounded-lg bg-rose-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50"
                             >
-                              Add Item
+                              {saving ? "Saving..." : editingItemId ? "Save changes" : "Add Item"}
                             </button>
                             <button
                               type="button"
-                              onClick={() => setAddingItemToId(null)}
+                              onClick={resetItemForm}
                               className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
                             >
                               Cancel
@@ -410,7 +486,10 @@ export function ChecklistTemplatesPage() {
                         </form>
                       ) : (
                         <button
-                          onClick={() => setAddingItemToId(tmpl.id)}
+                          onClick={() => {
+                            resetItemForm();
+                            setAddingItemToId(tmpl.id);
+                          }}
                           className="inline-flex items-center gap-1.5 text-sm font-medium text-rose-600 hover:text-rose-700"
                         >
                           <Plus className="h-4 w-4" />
