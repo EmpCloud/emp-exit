@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserMinus, Loader2, Search, X } from "lucide-react";
 import { apiPost, apiGet } from "@/api/client";
-import { cn } from "@/lib/utils";
 
 const EXIT_TYPES = [
   { value: "resignation", label: "Resignation" },
@@ -91,9 +90,24 @@ export function InitiateExitPage() {
     setShowResults(false);
   }
 
+  // Date sanity check — last working day must not be before the resignation
+  // date. Surfaced both inline below the date inputs and as a submit guard.
+  const dateError =
+    resignationDate && lastWorkingDate && lastWorkingDate < resignationDate
+      ? "Last working day cannot be earlier than the resignation date"
+      : null;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!selectedEmployee) {
+      setError("Pick an employee to initiate exit for");
+      return;
+    }
+    if (dateError) {
+      setError(dateError);
+      return;
+    }
     setSubmitting(true);
 
     try {
@@ -296,10 +310,17 @@ export function InitiateExitPage() {
                 type="date"
                 value={lastWorkingDate}
                 onChange={(e) => setLastWorkingDate(e.target.value)}
+                min={resignationDate || undefined}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
               />
             </div>
           </div>
+
+          {dateError && (
+            <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+              {dateError}
+            </div>
+          )}
 
           {/* Notice Period */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -334,7 +355,7 @@ export function InitiateExitPage() {
         <div className="flex items-center gap-3">
           <button
             type="submit"
-            disabled={submitting || !employeeId}
+            disabled={submitting || !selectedEmployee || !!dateError}
             className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {submitting ? (
