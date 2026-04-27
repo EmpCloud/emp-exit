@@ -10,10 +10,12 @@ import {
   ChevronLeft,
   ChevronRight,
   UserPlus,
+  Plus,
+  Info,
 } from "lucide-react";
 import { apiGet, apiPost } from "@/api/client";
 import toast from "react-hot-toast";
-import { getInitials } from "@/lib/utils";
+import { getInitials, formatDate } from "@/lib/utils";
 
 export function AlumniListPage() {
   const navigate = useNavigate();
@@ -27,6 +29,54 @@ export function AlumniListPage() {
   const [rehireForm, setRehireForm] = useState({ position: "", department: "", salary: "", notes: "" });
   const [submittingRehire, setSubmittingRehire] = useState(false);
   const perPage = 12;
+
+  // Manually adding alumni — HR picks from completed/cancelled exits and
+  // POSTs /alumni which resolves the employee_id from the exit row.
+  const [addModal, setAddModal] = useState(false);
+  const [exits, setExits] = useState<any[]>([]);
+  const [loadingExits, setLoadingExits] = useState(false);
+  const [selectedExitId, setSelectedExitId] = useState("");
+  const [submittingAdd, setSubmittingAdd] = useState(false);
+
+  async function fetchExitsForPicker() {
+    setLoadingExits(true);
+    try {
+      // Pull recently-completed exits — those are the candidates for
+      // alumni profiles (an employee who hasn't actually left isn't an
+      // alum yet).
+      const res = await apiGet<any>("/exits", { perPage: 100, status: "completed" });
+      if (res.success) setExits(res.data?.data ?? []);
+    } catch {
+      setExits([]);
+    } finally {
+      setLoadingExits(false);
+    }
+  }
+
+  function openAddModal() {
+    setAddModal(true);
+    setSelectedExitId("");
+    fetchExitsForPicker();
+  }
+
+  async function handleAddAlumni(e: React.FormEvent) {
+    e.preventDefault();
+    if (!selectedExitId) return;
+    setSubmittingAdd(true);
+    try {
+      const res = await apiPost<any>("/alumni", { exit_request_id: selectedExitId });
+      if (res.success) {
+        toast.success("Alumni profile added");
+        setAddModal(false);
+        setSelectedExitId("");
+        fetchAlumni();
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error?.message || "Failed to add alumni profile");
+    } finally {
+      setSubmittingAdd(false);
+    }
+  }
 
   async function fetchAlumni() {
     setLoading(true);
@@ -86,9 +136,19 @@ export function AlumniListPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Alumni Network</h1>
-        <p className="mt-1 text-sm text-gray-500">Browse the alumni directory.</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Alumni Network</h1>
+          <p className="mt-1 text-sm text-gray-500">Browse the alumni directory.</p>
+        </div>
+        <button
+          type="button"
+          onClick={openAddModal}
+          className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+        >
+          <Plus className="h-4 w-4" />
+          Add Alumni
+        </button>
       </div>
 
       {/* Search */}
@@ -116,9 +176,19 @@ export function AlumniListPage() {
           <Loader2 className="h-6 w-6 animate-spin text-rose-600" />
         </div>
       ) : alumni.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center text-gray-500">
+        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
           <GraduationCap className="mx-auto h-10 w-10 text-gray-300 mb-3" />
-          No alumni found.
+          <p className="text-sm font-medium text-gray-700">No alumni yet</p>
+          <p className="mt-2 text-sm text-gray-500 max-w-md mx-auto">
+            Alumni profiles are created when a departing employee opts in
+            via their self-service portal. You can also add one manually
+            from a completed exit using the <strong>Add Alumni</strong>{" "}
+            button above.
+          </p>
+          <div className="mt-4 inline-flex items-center gap-2 rounded-md bg-blue-50 px-3 py-1.5 text-xs text-blue-700">
+            <Info className="h-3.5 w-3.5" />
+            Tip: only completed exits can be promoted to alumni.
+          </div>
         </div>
       ) : (
         <>
@@ -287,6 +357,73 @@ export function AlumniListPage() {
                   className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50"
                 >
                   {submittingRehire ? "Submitting..." : "Propose Rehire"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Alumni modal — HR picks a completed exit and POSTs /alumni
+          which resolves the employee_id from the exit row server-side. */}
+      {addModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">Add Alumni Profile</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              Pick a completed exit to add to the alumni directory.
+            </p>
+            <form onSubmit={handleAddAlumni} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Exit *
+                </label>
+                {loadingExits ? (
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading exits...
+                  </div>
+                ) : exits.length === 0 ? (
+                  <p className="text-xs text-gray-500">
+                    No completed exits available. Complete an exit first to
+                    promote that employee to alumni.
+                  </p>
+                ) : (
+                  <select
+                    required
+                    value={selectedExitId}
+                    onChange={(e) => setSelectedExitId(e.target.value)}
+                    className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  >
+                    <option value="">Select an exit...</option>
+                    {exits.map((ex: any) => {
+                      const name = ex.employee
+                        ? `${ex.employee.first_name} ${ex.employee.last_name}`
+                        : `Exit ${ex.id.slice(0, 8)}`;
+                      const lwd = ex.last_working_date ? formatDate(ex.last_working_date) : "no LWD";
+                      return (
+                        <option key={ex.id} value={ex.id}>
+                          {name} — {lwd}
+                          {ex.employee?.emp_code ? ` · ${ex.employee.emp_code}` : ""}
+                        </option>
+                      );
+                    })}
+                  </select>
+                )}
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setAddModal(false)}
+                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingAdd || !selectedExitId || exits.length === 0}
+                  className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50"
+                >
+                  {submittingAdd ? "Adding..." : "Add to Alumni"}
                 </button>
               </div>
             </form>
