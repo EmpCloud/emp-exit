@@ -95,6 +95,18 @@ export async function updateTemplate(
   return updated;
 }
 
+// Delete a template (and its questions, via FK cascade).
+export async function deleteTemplate(orgId: number, templateId: string): Promise<void> {
+  const db = getDB();
+  const existing = await db.findOne<ExitInterviewTemplate>("exit_interview_templates", {
+    id: templateId,
+    organization_id: orgId,
+  });
+  if (!existing) throw new NotFoundError("Interview template", templateId);
+  await db.delete("exit_interview_templates", templateId);
+  logger.info(`Interview template deleted: ${templateId}`);
+}
+
 // ---------------------------------------------------------------------------
 // Question management
 // ---------------------------------------------------------------------------

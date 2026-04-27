@@ -90,6 +90,21 @@ router.put(
   },
 );
 
+// DELETE /templates/:id — delete template (questions cascade in DB)
+router.delete(
+  "/templates/:id",
+  authorize("org_admin", "hr_admin", "hr_manager"),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const orgId = req.user!.empcloudOrgId;
+      await interviewService.deleteTemplate(orgId, req.params.id as string);
+      sendSuccess(res, { message: "Template deleted" });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
 // POST /templates/:id/questions — add a question to template
 router.post(
   "/templates/:id/questions",
