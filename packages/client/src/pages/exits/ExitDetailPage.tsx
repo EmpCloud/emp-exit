@@ -19,6 +19,8 @@ import {
 import { Link as RouterLink } from "react-router-dom";
 import { apiGet, apiPost, apiPatch } from "@/api/client";
 import { cn, formatDate } from "@/lib/utils";
+import toast from "react-hot-toast";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 const STATUS_COLORS: Record<string, string> = {
   initiated: "bg-blue-100 text-blue-700 border-blue-200",
@@ -87,6 +89,18 @@ export function ExitDetailPage() {
   const [buyout, setBuyout] = useState<any>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
+  // ConfirmDialog driver — single dialog instance multiplexed across the
+  // three confirm() calls this page used to make (cancel exit, complete
+  // exit, approve buyout). `pending` is null when closed; otherwise it
+  // carries the action name so the dialog can render the right copy and
+  // route the confirm callback.
+  const [pendingConfirm, setPendingConfirm] = useState<
+    | { kind: "cancel-exit" }
+    | { kind: "complete-exit" }
+    | { kind: "approve-buyout" }
+    | null
+  >(null);
+
   useEffect(() => {
     loadExit();
   }, [id]);
@@ -138,28 +152,30 @@ export function ExitDetailPage() {
   }
 
   async function handleCancel() {
-    if (!confirm("Are you sure you want to cancel this exit request?")) return;
     setActionLoading(true);
     try {
       await apiPost(`/exits/${id}/cancel`);
+      toast.success("Exit cancelled");
       await loadExit();
-    } catch {
-      // handled
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error?.message || "Failed to cancel exit");
     } finally {
       setActionLoading(false);
+      setPendingConfirm(null);
     }
   }
 
   async function handleComplete() {
-    if (!confirm("Mark this exit as completed? This will deactivate the employee account.")) return;
     setActionLoading(true);
     try {
       await apiPost(`/exits/${id}/complete`);
+      toast.success("Exit marked complete");
       await loadExit();
-    } catch {
-      // handled
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error?.message || "Failed to complete exit");
     } finally {
       setActionLoading(false);
+      setPendingConfirm(null);
     }
   }
 
@@ -231,7 +247,7 @@ export function ExitDetailPage() {
         {!isTerminal && (
           <div className="flex items-center gap-2">
             <button
-              onClick={handleCancel}
+              onClick={() => setPendingConfirm({ kind: "cancel-exit" })}
               disabled={actionLoading}
               className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
             >
@@ -239,7 +255,7 @@ export function ExitDetailPage() {
               Cancel Exit
             </button>
             <button
-              onClick={handleComplete}
+              onClick={() => setPendingConfirm({ kind: "complete-exit" })}
               disabled={actionLoading}
               className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
             >
@@ -249,6 +265,28 @@ export function ExitDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Confirmation dialogs replacing the native window.confirm() calls. */}
+      <ConfirmDialog
+        open={pendingConfirm?.kind === "cancel-exit"}
+        title="Cancel this exit?"
+        description="The exit request will be cancelled. The employee account will not be deactivated."
+        confirmText="Cancel Exit"
+        variant="danger"
+        loading={actionLoading}
+        onConfirm={handleCancel}
+        onCancel={() => setPendingConfirm(null)}
+      />
+      <ConfirmDialog
+        open={pendingConfirm?.kind === "complete-exit"}
+        title="Mark this exit as completed?"
+        description="This will deactivate the employee account. This action cannot be easily undone."
+        confirmText="Complete Exit"
+        variant="success"
+        loading={actionLoading}
+        onConfirm={handleComplete}
+        onCancel={() => setPendingConfirm(null)}
+      />
 
       {/* Tabs */}
       <div className="border-b border-gray-200">
@@ -542,18 +580,20 @@ function BuyoutTab({
   const [actionLoading, setActionLoading] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [showReject, setShowReject] = useState(false);
+  const [showApproveConfirm, setShowApproveConfirm] = useState(false);
 
   async function handleApprove() {
     if (!buyout) return;
-    if (!confirm("Approve this buyout? The employee's last working date will be updated.")) return;
     setActionLoading(true);
     try {
       await apiPost(`/buyout/${buyout.id}/approve`);
+      toast.success("Buyout approved");
       onReload();
-    } catch {
-      // handled
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error?.message || "Failed to approve buyout");
     } finally {
       setActionLoading(false);
+      setShowApproveConfirm(false);
     }
   }
 
@@ -562,11 +602,12 @@ function BuyoutTab({
     setActionLoading(true);
     try {
       await apiPost(`/buyout/${buyout.id}/reject`, { reason: rejectReason });
+      toast.success("Buyout rejected");
       setShowReject(false);
       setRejectReason("");
       onReload();
-    } catch {
-      // handled
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error?.message || "Failed to reject buyout");
     } finally {
       setActionLoading(false);
     }
@@ -652,13 +693,23 @@ function BuyoutTab({
       {buyout.status === "pending" && (
         <div className="flex items-center gap-3 pt-2">
           <button
-            onClick={handleApprove}
+            onClick={() => setShowApproveConfirm(true)}
             disabled={actionLoading}
             className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
           >
             {actionLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
             Approve Buyout
           </button>
+          <ConfirmDialog
+            open={showApproveConfirm}
+            title="Approve this buyout?"
+            description="The employee's last working date will be updated and the buyout amount applied to F&F."
+            confirmText="Approve Buyout"
+            variant="success"
+            loading={actionLoading}
+            onConfirm={handleApprove}
+            onCancel={() => setShowApproveConfirm(false)}
+          />
           {!showReject ? (
             <button
               onClick={() => setShowReject(true)}
