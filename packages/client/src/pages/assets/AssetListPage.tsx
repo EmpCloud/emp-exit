@@ -37,7 +37,7 @@ export function AssetListPage() {
   const [assets, setAssets] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ asset_name: "", asset_tag: "", category: "laptop", replacement_cost: 0 });
+  const [form, setForm] = useState({ asset_name: "", asset_tag: "", category: "laptop", replacement_cost: "" });
   const [submitting, setSubmitting] = useState(false);
 
   async function fetchAssets() {
@@ -65,10 +65,16 @@ export function AssetListPage() {
     }
     setSubmitting(true);
     try {
-      await apiPost(`/assets/exit/${exitId}`, form);
+      const payload = {
+        asset_name: form.asset_name,
+        asset_tag: form.asset_tag || undefined,
+        category: form.category,
+        replacement_cost: form.replacement_cost === "" ? 0 : Number(form.replacement_cost),
+      };
+      await apiPost(`/assets/exit/${exitId}`, payload);
       toast.success("Asset added");
       setShowForm(false);
-      setForm({ asset_name: "", asset_tag: "", category: "laptop", replacement_cost: 0 });
+      setForm({ asset_name: "", asset_tag: "", category: "laptop", replacement_cost: "" });
       fetchAssets();
     } catch (err: any) {
       toast.error(err.response?.data?.error?.message || "Failed to add asset");
@@ -99,18 +105,28 @@ export function AssetListPage() {
             Track company asset returns for exiting employees.
           </p>
         </div>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
-        >
-          <Plus className="h-4 w-4" />
-          Add Asset
-        </button>
+        {exitId && (
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+          >
+            <Plus className="h-4 w-4" />
+            Add Asset
+          </button>
+        )}
       </div>
 
       {!exitId && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
-          No exit selected. Navigate here from an exit detail page, or pass <code>?exitId=UUID</code> in the URL.
+        <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
+          <Package className="mx-auto h-10 w-10 text-gray-300 mb-3" />
+          <p className="text-sm font-medium text-gray-900">Open an exit to manage its assets</p>
+          <p className="mt-1 text-sm text-gray-500">
+            Asset returns are tracked per exit. Pick an exit from the{" "}
+            <a href="/exits" className="font-medium text-rose-600 hover:text-rose-700 underline">
+              Exits list
+            </a>
+            , then use the Assets tab on its detail page.
+          </p>
         </div>
       )}
 
@@ -156,9 +172,11 @@ export function AssetListPage() {
               <input
                 type="number"
                 min={0}
+                step="0.01"
                 value={form.replacement_cost}
-                onChange={(e) => setForm({ ...form, replacement_cost: Number(e.target.value) })}
+                onChange={(e) => setForm({ ...form, replacement_cost: e.target.value })}
                 className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                placeholder="0"
               />
             </div>
           </div>
@@ -181,7 +199,7 @@ export function AssetListPage() {
         </form>
       )}
 
-      {loading ? (
+      {!exitId ? null : loading ? (
         <div className="flex h-32 items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-rose-600" />
         </div>
