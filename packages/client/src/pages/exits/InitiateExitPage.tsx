@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserMinus, Loader2 } from "lucide-react";
+import { UserMinus, Loader2, Search, X } from "lucide-react";
 import { apiPost, apiGet } from "@/api/client";
-import { cn } from "@/lib/utils";
 
 const EXIT_TYPES = [
   { value: "resignation", label: "Resignation" },
@@ -30,6 +29,7 @@ interface Employee {
   id: number;
   first_name: string;
   last_name: string;
+  full_name: string;
   email: string;
   emp_code: string | null;
   designation: string | null;
@@ -40,7 +40,13 @@ export function InitiateExitPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [employeeId, setEmployeeId] = useState("");
+  // Employee picker
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [loadingEmployees, setLoadingEmployees] = useState(true);
+  const [employeeSearch, setEmployeeSearch] = useState("");
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [showEmployeeDropdown, setShowEmployeeDropdown] = useState(false);
+
   const [exitType, setExitType] = useState("resignation");
   const [reasonCategory, setReasonCategory] = useState("better_opportunity");
   const [reasonDetail, setReasonDetail] = useState("");
@@ -49,14 +55,55 @@ export function InitiateExitPage() {
   const [noticePeriodDays, setNoticePeriodDays] = useState("30");
   const [noticePeriodWaived, setNoticePeriodWaived] = useState(false);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await apiGet<Employee[]>("/users");
+        if (!cancelled) setEmployees(res.data ?? []);
+      } catch {
+        if (!cancelled) setEmployees([]);
+      } finally {
+        if (!cancelled) setLoadingEmployees(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filteredEmployees = useMemo(() => {
+    const q = employeeSearch.trim().toLowerCase();
+    if (!q) return employees.slice(0, 50);
+    return employees
+      .filter((e) => {
+        const hay = `${e.full_name} ${e.email} ${e.emp_code ?? ""} ${e.designation ?? ""}`.toLowerCase();
+        return hay.includes(q);
+      })
+      .slice(0, 50);
+  }, [employees, employeeSearch]);
+
+  const dateError =
+    resignationDate && lastWorkingDate && lastWorkingDate < resignationDate
+      ? "Last working day cannot be earlier than the resignation date"
+      : null;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!selectedEmployee) {
+      setError("Pick an employee to initiate exit for");
+      return;
+    }
+    if (dateError) {
+      setError(dateError);
+      return;
+    }
     setSubmitting(true);
 
     try {
       const body: Record<string, any> = {
-        employee_id: Number(employeeId),
+        employee_id: selectedEmployee.id,
         exit_type: exitType,
         reason_category: reasonCategory,
       };
@@ -90,20 +137,90 @@ export function InitiateExitPage() {
             </div>
           )}
 
-          {/* Employee ID */}
+          {/* Employee picker */}
           <div>
-            <label htmlFor="employee_id" className="block text-sm font-medium text-gray-700 mb-1">
-              Employee ID <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Employee <span className="text-red-500">*</span>
             </label>
-            <input
-              id="employee_id"
-              type="number"
-              required
-              value={employeeId}
-              onChange={(e) => setEmployeeId(e.target.value)}
-              placeholder="Enter employee ID"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
-            />
+            {selectedEmployee ? (
+              <div className="flex items-center justify-between rounded-lg border border-gray-300 bg-gray-50 px-3 py-2">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{selectedEmployee.full_name}</p>
+                  <p className="text-xs text-gray-500">
+                    {selectedEmployee.email}
+                    {selectedEmployee.emp_code ? ` · ${selectedEmployee.emp_code}` : ""}
+                    {selectedEmployee.designation ? ` · ${selectedEmployee.designation}` : ""}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedEmployee(null);
+                    setEmployeeSearch("");
+                    setShowEmployeeDropdown(true);
+                  }}
+                  className="rounded p-1 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+                  title="Change employee"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  value={employeeSearch}
+                  onChange={(e) => {
+                    setEmployeeSearch(e.target.value);
+                    setShowEmployeeDropdown(true);
+                  }}
+                  onFocus={() => setShowEmployeeDropdown(true)}
+                  placeholder={
+                    loadingEmployees
+                      ? "Loading employees..."
+                      : "Search by name, email, employee code, or designation"
+                  }
+                  className="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                />
+                {showEmployeeDropdown && !loadingEmployees && (
+                  <div className="absolute z-10 mt-1 w-full max-h-72 overflow-auto rounded-lg border border-gray-200 bg-white shadow-lg">
+                    {filteredEmployees.length === 0 ? (
+                      <div className="p-3 text-sm text-gray-500">
+                        {employees.length === 0
+                          ? "No employees available. All active employees may already have an open exit."
+                          : "No matches."}
+                      </div>
+                    ) : (
+                      filteredEmployees.map((emp) => (
+                        <button
+                          key={emp.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedEmployee(emp);
+                            setShowEmployeeDropdown(false);
+                            setEmployeeSearch("");
+                          }}
+                          className="block w-full text-left px-3 py-2 hover:bg-rose-50"
+                        >
+                          <p className="text-sm font-medium text-gray-900">{emp.full_name}</p>
+                          <p className="text-xs text-gray-500">
+                            {emp.email}
+                            {emp.emp_code ? ` · ${emp.emp_code}` : ""}
+                            {emp.designation ? ` · ${emp.designation}` : ""}
+                          </p>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+            {!loadingEmployees && employees.length === 0 && !selectedEmployee && (
+              <p className="mt-2 text-xs text-amber-700">
+                No employees are available. Add employees in EmpCloud or close any open exits before initiating a new one.
+              </p>
+            )}
           </div>
 
           {/* Exit Type */}
@@ -178,10 +295,17 @@ export function InitiateExitPage() {
                 type="date"
                 value={lastWorkingDate}
                 onChange={(e) => setLastWorkingDate(e.target.value)}
+                min={resignationDate || undefined}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
               />
             </div>
           </div>
+
+          {dateError && (
+            <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+              {dateError}
+            </div>
+          )}
 
           {/* Notice Period */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -216,7 +340,7 @@ export function InitiateExitPage() {
         <div className="flex items-center gap-3">
           <button
             type="submit"
-            disabled={submitting || !employeeId}
+            disabled={submitting || !selectedEmployee || !!dateError}
             className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {submitting ? (

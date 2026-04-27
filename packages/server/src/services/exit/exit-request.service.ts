@@ -74,6 +74,16 @@ export async function initiateExit(
 ): Promise<ExitRequest> {
   const db = getDB();
 
+  // Last working day must be on or after the resignation date — guard
+  // server-side so curl/automation can't insert an invalid range (#7).
+  if (
+    data.resignation_date &&
+    data.last_working_date &&
+    data.last_working_date < data.resignation_date
+  ) {
+    throw new ValidationError("Last working day cannot be earlier than the resignation date");
+  }
+
   // Check employee exists in empcloud
   const empDb = getEmpCloudDB();
   const employee = await empDb("users").where({ id: data.employee_id, organization_id: orgId }).first();

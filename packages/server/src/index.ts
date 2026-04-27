@@ -33,6 +33,7 @@ import { rehireRoutes } from "./api/routes/rehire.routes";
 import { emailTemplateRoutes } from "./api/routes/email-template.routes";
 import { npsRoutes } from "./api/routes/nps.routes";
 import { myClearancesRoutes } from "./api/routes/my-clearances.routes";
+import { usersRoutes } from "./api/routes/users.routes";
 import { errorHandler } from "./api/middleware/error.middleware";
 import { apiLimiter } from "./api/middleware/rate-limit.middleware";
 import { swaggerUIHandler, openapiHandler } from "./api/docs";
@@ -104,6 +105,7 @@ v1.use("/settings", settingsRoutes);
 v1.use("/buyout", buyoutRoutes);
 v1.use("/rehire", rehireRoutes);
 v1.use("/email-templates", emailTemplateRoutes);
+v1.use("/users", usersRoutes);
 
 // Alias routes — some clients use flattened paths (e.g. /checklist-templates)
 // instead of the nested resource paths (e.g. /checklists/templates).
