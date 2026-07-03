@@ -52,6 +52,7 @@ const TYPE_LABELS: Record<string, string> = {
   retirement: "Retirement",
   end_of_contract: "End of Contract",
   mutual_separation: "Mutual Separation",
+  absconding: "Absconding",
 };
 
 export function DashboardPage() {

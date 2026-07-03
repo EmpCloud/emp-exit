@@ -22,6 +22,7 @@ export const EXIT_TYPES = [
   { key: ExitType.RETIREMENT, label: "Retirement", color: "#8B5CF6" },
   { key: ExitType.END_OF_CONTRACT, label: "End of Contract", color: "#3B82F6" },
   { key: ExitType.MUTUAL_SEPARATION, label: "Mutual Separation", color: "#6B7280" },
+  { key: ExitType.ABSCONDING, label: "Absconding", color: "#DC2626" },
 ] as const;
 
 // ---------------------------------------------------------------------------

@@ -13,6 +13,7 @@ export enum ExitType {
   RETIREMENT = "retirement",
   END_OF_CONTRACT = "end_of_contract",
   MUTUAL_SEPARATION = "mutual_separation",
+  ABSCONDING = "absconding",
 }
 
 export enum ExitStatus {

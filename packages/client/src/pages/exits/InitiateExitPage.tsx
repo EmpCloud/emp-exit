@@ -9,6 +9,7 @@ const EXIT_TYPES = [
   { value: "retirement", label: "Retirement" },
   { value: "end_of_contract", label: "End of Contract" },
   { value: "mutual_separation", label: "Mutual Separation" },
+  { value: "absconding", label: "Absconding" },
 ];
 
 const REASON_CATEGORIES = [
