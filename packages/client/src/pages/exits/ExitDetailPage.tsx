@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   Loader2,
@@ -31,6 +31,10 @@ import toast from "react-hot-toast";
 import { apiGet, apiPost, apiPatch, apiPut, api } from "@/api/client";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { cn, formatDate } from "@/lib/utils";
+import { Badge, type BadgeTone } from "@/components/ui/Badge";
+import { Button, ButtonLink } from "@/components/ui/Button";
+import { Page, PageActions, PageHeader, PageHeaderContent, PageTitle } from "@/components/ui/Page";
+import { EmptyState, LoadingState } from "@/components/ui/States";
 
 const STATUS_COLORS: Record<string, string> = {
   initiated: "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-900",
@@ -40,6 +44,16 @@ const STATUS_COLORS: Record<string, string> = {
   fnf_processed: "bg-indigo-100 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-900",
   completed: "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300 border-green-200 dark:border-green-900",
   cancelled: "bg-muted text-muted-foreground border-border",
+};
+
+const STATUS_TONES: Record<string, BadgeTone> = {
+  initiated: "info",
+  notice_period: "warning",
+  clearance_pending: "warning",
+  fnf_pending: "brand",
+  fnf_processed: "info",
+  completed: "success",
+  cancelled: "neutral",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -124,6 +138,11 @@ export function ExitDetailPage() {
   const [showEdit, setShowEdit] = useState(false);
   const [editForm, setEditForm] = useState<any>({});
   const [editError, setEditError] = useState<string | null>(null);
+  const editDialogRef = useRef<HTMLDivElement>(null);
+  const editCloseRef = useRef<HTMLButtonElement>(null);
+  const editReturnFocusRef = useRef<HTMLElement | null>(null);
+  const editBusyRef = useRef(actionLoading);
+  editBusyRef.current = actionLoading;
   // Generic in-app confirmation dialog (replaces native confirm()).
   const [confirmState, setConfirmState] = useState<{
     open: boolean;
@@ -149,6 +168,46 @@ export function ExitDetailPage() {
     if (activeTab === "interview") loadInterview();
     if (activeTab === "letters") loadLetters();
   }, [activeTab, id, exit]);
+
+  useEffect(() => {
+    if (!showEdit) return;
+
+    editReturnFocusRef.current = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.requestAnimationFrame(() => editCloseRef.current?.focus());
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !editBusyRef.current) {
+        event.preventDefault();
+        setShowEdit(false);
+        return;
+      }
+      if (event.key !== "Tab" || !editDialogRef.current) return;
+      const focusable = Array.from(
+        editDialogRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      editReturnFocusRef.current?.focus();
+    };
+  }, [showEdit]);
 
   async function loadExit() {
     setLoading(true);
@@ -384,91 +443,81 @@ export function ExitDetailPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-rose-600 dark:text-rose-400" />
-      </div>
-    );
+    return <LoadingState />;
   }
 
   if (!exit) {
     return (
-      <div className="space-y-4">
-        <Link to="/exits" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-muted-foreground">
-          <ArrowLeft className="h-4 w-4" /> Back to exits
-        </Link>
-        <div className="rounded-xl border border-border bg-card p-8 text-center">
-          <p className="text-muted-foreground">Exit request not found.</p>
-        </div>
-      </div>
+      <Page>
+        <ButtonLink to="/exits" variant="ghost" className="w-fit"><ArrowLeft aria-hidden="true" className="size-4" />Back to exits</ButtonLink>
+        <div className="surface-card"><EmptyState title="Exit request not found." icon={UserMinus} /></div>
+      </Page>
     );
   }
 
   const isTerminal = exit.status === "completed" || exit.status === "cancelled";
 
   return (
-    <div className="space-y-6">
+    <Page>
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <Link to="/exits" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-muted-foreground mb-2">
-            <ArrowLeft className="h-4 w-4" /> Back to exits
-          </Link>
-          <h1 className="text-2xl font-bold text-foreground">
+      <PageHeader>
+        <PageHeaderContent>
+          <ButtonLink to="/exits" variant="ghost" className="-ms-3 mb-1 w-fit"><ArrowLeft aria-hidden="true" className="size-4" />Back to exits</ButtonLink>
+          <PageTitle>
             {exit.employee
               ? `${exit.employee.first_name} ${exit.employee.last_name}`
               : `Exit #${exit.id.slice(0, 8)}`}
-          </h1>
+          </PageTitle>
           <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
             <span>{TYPE_LABELS[exit.exit_type] || exit.exit_type}</span>
-            <span className={cn("inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium", STATUS_COLORS[exit.status])}>
+            <Badge tone={STATUS_TONES[exit.status] || "neutral"}>
               {STATUS_LABELS[exit.status] || exit.status}
-            </span>
+            </Badge>
             {exit.employee?.designation && <span>{exit.employee.designation}</span>}
           </div>
-        </div>
+        </PageHeaderContent>
         {!isTerminal && (
-          <div className="flex items-center gap-2">
-            <button
+          <PageActions>
+            <Button
               onClick={openEdit}
               disabled={actionLoading}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/50 disabled:opacity-50"
+              variant="secondary"
             >
               <Pencil className="h-4 w-4" />
               Edit
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleCancel}
               disabled={actionLoading}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/50 disabled:opacity-50"
+              variant="danger"
             >
               <XCircle className="h-4 w-4" />
               Cancel Exit
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={handleComplete}
               disabled={actionLoading}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+              className="border-success bg-success text-success-foreground hover:bg-success/90"
             >
               <CheckCircle className="h-4 w-4" />
               Complete Exit
-            </button>
-          </div>
+            </Button>
+          </PageActions>
         )}
-      </div>
+      </PageHeader>
 
       {/* Tabs */}
-      <div className="border-b border-border">
-        <nav className="-mb-px flex gap-1 overflow-x-auto">
+      <div className="surface-card overflow-hidden p-1.5">
+        <nav className="flex gap-1 overflow-x-auto overscroll-x-contain" aria-label="Exit workflow">
           {TABS.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={cn(
-                "inline-flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors",
+                "inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-lg px-4 text-sm font-semibold transition-[background-color,color] focus-visible:ring-2 focus-visible:ring-ring",
                 activeTab === tab.key
-                  ? "border-rose-500 text-rose-600 dark:text-rose-400"
-                  : "border-transparent text-muted-foreground hover:border-border hover:text-muted-foreground",
+                  ? "bg-brand-50 text-brand-700 dark:bg-brand-950/45 dark:text-brand-300"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
               )}
             >
               <tab.icon className="h-4 w-4" />
@@ -479,7 +528,7 @@ export function ExitDetailPage() {
       </div>
 
       {/* Tab Content */}
-      <div className="rounded-xl border border-border bg-card p-6">
+      <div className="surface-card p-5 sm:p-6">
         {activeTab === "overview" && <OverviewTab exit={exit} />}
         {activeTab === "checklist" && (
           <ChecklistTab
@@ -524,21 +573,30 @@ export function ExitDetailPage() {
 
       {/* Edit Exit modal */}
       {showEdit && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-lg rounded-xl bg-card shadow-xl">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain bg-slate-950/55 p-4 backdrop-blur-sm"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !actionLoading) setShowEdit(false);
+          }}
+        >
+          <div ref={editDialogRef} className="surface-card w-full max-w-lg overflow-hidden shadow-floating" role="dialog" aria-modal="true" aria-labelledby="edit-exit-title" aria-describedby="edit-exit-description">
             <div className="flex items-center justify-between border-b border-border px-5 py-4">
-              <h3 className="text-lg font-semibold text-foreground">Edit Exit Details</h3>
-              <button onClick={() => setShowEdit(false)} className="text-muted-foreground hover:text-muted-foreground">
-                <XCircle className="h-5 w-5" />
+              <div>
+                <h2 id="edit-exit-title" className="text-lg font-semibold text-foreground">Edit Exit Details</h2>
+                <p id="edit-exit-description" className="mt-0.5 text-sm text-muted-foreground">Update the employee’s exit reason and schedule.</p>
+              </div>
+              <button ref={editCloseRef} type="button" aria-label="Close edit dialog" onClick={() => setShowEdit(false)} disabled={actionLoading} className="grid size-11 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50">
+                <XCircle aria-hidden="true" className="h-5 w-5" />
               </button>
             </div>
             <div className="max-h-[70vh] space-y-4 overflow-y-auto px-5 py-4">
               <div>
-                <label className="mb-1 block text-sm font-medium text-muted-foreground">Reason Category</label>
+                <label htmlFor="edit-reason-category" className="field-label">Reason Category</label>
                 <select
+                  id="edit-reason-category"
                   value={editForm.reason_category}
                   onChange={(e) => setEditForm({ ...editForm, reason_category: e.target.value })}
-                  className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-400 focus:outline-none"
+                  className="control"
                 >
                   {REASON_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>{o.label}</option>
@@ -546,57 +604,56 @@ export function ExitDetailPage() {
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-muted-foreground">Reason Detail</label>
+                <label htmlFor="edit-reason-detail" className="field-label">Reason Detail</label>
                 <textarea
+                  id="edit-reason-detail"
                   value={editForm.reason_detail}
                   onChange={(e) => setEditForm({ ...editForm, reason_detail: e.target.value })}
                   rows={3}
-                  className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-400 focus:outline-none"
+                  className="control min-h-28 py-3"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-muted-foreground">Notice Start</label>
-                  <input type="date" value={editForm.notice_start_date}
+                  <label htmlFor="edit-notice-start" className="field-label">Notice Start</label>
+                  <input id="edit-notice-start" type="date" value={editForm.notice_start_date}
                     onChange={(e) => setEditForm({ ...editForm, notice_start_date: e.target.value })}
-                    className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-400 focus:outline-none" />
+                    className="control" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-muted-foreground">Last Working Date</label>
-                  <input type="date" value={editForm.last_working_date}
+                  <label htmlFor="edit-last-working-date" className="field-label">Last Working Date</label>
+                  <input id="edit-last-working-date" type="date" value={editForm.last_working_date}
                     onChange={(e) => setEditForm({ ...editForm, last_working_date: e.target.value })}
-                    className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-400 focus:outline-none" />
+                    className="control" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-muted-foreground">Actual Exit Date</label>
-                  <input type="date" value={editForm.actual_exit_date}
+                  <label htmlFor="edit-actual-exit-date" className="field-label">Actual Exit Date</label>
+                  <input id="edit-actual-exit-date" type="date" value={editForm.actual_exit_date}
                     onChange={(e) => setEditForm({ ...editForm, actual_exit_date: e.target.value })}
-                    className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-400 focus:outline-none" />
+                    className="control" />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-muted-foreground">Notice Period (days)</label>
-                  <input type="number" min={0} value={editForm.notice_period_days}
+                  <label htmlFor="edit-notice-period" className="field-label">Notice Period (days)</label>
+                  <input id="edit-notice-period" type="number" min={0} value={editForm.notice_period_days}
                     onChange={(e) => setEditForm({ ...editForm, notice_period_days: e.target.value })}
-                    className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-400 focus:outline-none" />
+                    className="control" />
                 </div>
               </div>
               <label className="flex items-center gap-2 text-sm text-muted-foreground">
-                <input type="checkbox" checked={!!editForm.notice_period_waived}
+                <input type="checkbox" checked={!!editForm.notice_period_waived} className="size-5 rounded border-border text-primary focus:ring-primary"
                   onChange={(e) => setEditForm({ ...editForm, notice_period_waived: e.target.checked })} />
                 Notice period waived
               </label>
-              {editError && <p className="text-sm text-red-600 dark:text-red-400">{editError}</p>}
+              {editError && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{editError}</p>}
             </div>
             <div className="flex justify-end gap-2 border-t border-border px-5 py-4">
-              <button onClick={() => setShowEdit(false)} disabled={actionLoading}
-                className="rounded-lg border border-border bg-card text-foreground px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/50 disabled:opacity-50">
+              <Button onClick={() => setShowEdit(false)} disabled={actionLoading} variant="secondary">
                 Cancel
-              </button>
-              <button onClick={handleSaveEdit} disabled={actionLoading}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50">
+              </Button>
+              <Button onClick={handleSaveEdit} disabled={actionLoading}>
                 {actionLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                 Save Changes
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -613,7 +670,7 @@ export function ExitDetailPage() {
         onConfirm={() => confirmState?.onConfirm()}
         onCancel={() => setConfirmState(null)}
       />
-    </div>
+    </Page>
   );
 }
 
@@ -626,11 +683,11 @@ function OverviewTab({ exit }: { exit: any }) {
     { label: "Exit Type", value: TYPE_LABELS[exit.exit_type] || exit.exit_type },
     { label: "Status", value: STATUS_LABELS[exit.status] || exit.status },
     { label: "Reason Category", value: exit.reason_category?.replace(/_/g, " ") },
-    { label: "Reason Detail", value: exit.reason_detail || "--" },
-    { label: "Resignation Date", value: exit.resignation_date ? formatDate(exit.resignation_date) : "--" },
-    { label: "Notice Start", value: exit.notice_start_date ? formatDate(exit.notice_start_date) : "--" },
-    { label: "Last Working Date", value: exit.last_working_date ? formatDate(exit.last_working_date) : "--" },
-    { label: "Actual Exit Date", value: exit.actual_exit_date ? formatDate(exit.actual_exit_date) : "--" },
+    { label: "Reason Detail", value: exit.reason_detail || "—" },
+    { label: "Resignation Date", value: exit.resignation_date ? formatDate(exit.resignation_date) : "—" },
+    { label: "Notice Start", value: exit.notice_start_date ? formatDate(exit.notice_start_date) : "—" },
+    { label: "Last Working Date", value: exit.last_working_date ? formatDate(exit.last_working_date) : "—" },
+    { label: "Actual Exit Date", value: exit.actual_exit_date ? formatDate(exit.actual_exit_date) : "—" },
     { label: "Notice Period", value: `${exit.notice_period_days} days${exit.notice_period_waived ? " (waived)" : ""}` },
     { label: "Initiated", value: formatDate(exit.created_at) },
   ];
@@ -720,7 +777,7 @@ function ChecklistTab({
       </div>
       <div className="w-full bg-muted rounded-full h-2">
         <div
-          className="bg-rose-500 h-2 rounded-full transition-all"
+          className="h-2 rounded-full bg-primary transition-[width]"
           style={{ width: `${checklist.progress}%` }}
         />
       </div>
@@ -736,7 +793,7 @@ function ChecklistTab({
                 <p className="text-xs text-muted-foreground mt-0.5 italic">{item.remarks}</p>
               )}
             </div>
-            <div className="flex items-center gap-2 ml-4">
+            <div className="ms-4 flex items-center gap-2">
               <span
                 className={cn(
                   "inline-flex rounded-full px-2 py-0.5 text-xs font-medium",
@@ -819,7 +876,7 @@ function KtTab({
 
       {/* Progress bar */}
       <div className="h-2 w-full rounded-full bg-muted">
-        <div className="h-2 rounded-full bg-rose-500 transition-all" style={{ width: `${progress}%` }} />
+        <div className="h-2 rounded-full bg-primary transition-[width]" style={{ width: `${progress}%` }} />
       </div>
 
       {kt.notes && (
@@ -849,7 +906,7 @@ function KtTab({
                   </a>
                 )}
               </div>
-              <div className="ml-4 flex items-center gap-2">
+              <div className="ms-4 flex items-center gap-2">
                 <span
                   className={cn(
                     "inline-flex rounded-full px-2 py-0.5 text-xs font-medium",
@@ -919,7 +976,7 @@ function ClearanceTab({
       </div>
       <div className="w-full bg-muted rounded-full h-2">
         <div
-          className="bg-rose-500 h-2 rounded-full transition-all"
+          className="h-2 rounded-full bg-primary transition-[width]"
           style={{ width: `${clearance.progress}%` }}
         />
       </div>
@@ -1102,7 +1159,7 @@ function FnFTab({
           disabled={!isEditable}
           readOnly={!isEditable}
           step="0.01"
-          className="w-32 rounded border border-border bg-card text-foreground px-2 py-1 text-right text-sm font-mono focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 disabled:bg-muted/50 disabled:text-muted-foreground read-only:bg-muted/50 read-only:text-muted-foreground"
+          className="control w-32 text-end font-mono disabled:bg-muted/50 read-only:bg-muted/50"
         />
       </div>
     </div>
@@ -1194,7 +1251,7 @@ function FnFTab({
           onChange={(e) => setRemarks(e.target.value)}
           disabled={!isEditable}
           rows={2}
-          className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-400 focus:outline-none disabled:bg-muted/50"
+          className="control disabled:bg-muted/50"
         />
       </div>
 
@@ -1213,7 +1270,7 @@ function FnFTab({
               value={payRef}
               onChange={(e) => setPayRef(e.target.value)}
               placeholder="e.g. NEFT-FNF-2026-0042"
-              className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-400 focus:outline-none"
+              className="control"
             />
           </div>
           <button
@@ -1533,7 +1590,7 @@ function InterviewTab({
         disabled={isReadOnly}
         onChange={(e) => handleAnswerChange(q.id, "text", e.target.value)}
         rows={2}
-        className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-400 focus:outline-none disabled:bg-muted/50"
+        className="control disabled:bg-muted/50"
       />
     );
   }
@@ -1558,7 +1615,7 @@ function InterviewTab({
                 <select
                   value={templateId}
                   onChange={(e) => setTemplateId(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-400 focus:outline-none"
+                  className="control"
                 >
                   <option value="" disabled>Select a template…</option>
                   {templates.map((t) => (
@@ -1572,7 +1629,7 @@ function InterviewTab({
                   <div className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2">
                     <span className="text-sm text-foreground">
                       {interviewer.first_name} {interviewer.last_name}
-                      <span className="ml-1 text-xs text-muted-foreground">
+                      <span className="ms-1 text-xs text-muted-foreground">
                         {interviewer.emp_code || interviewer.email}
                       </span>
                     </span>
@@ -1586,14 +1643,14 @@ function InterviewTab({
                   </div>
                 ) : (
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <input
                       value={intvQuery}
                       onChange={(e) => { setIntvQuery(e.target.value); setShowIntvResults(true); }}
                       onFocus={() => setShowIntvResults(true)}
                       onBlur={() => setTimeout(() => setShowIntvResults(false), 150)}
                       placeholder="Search employee by name or email…"
-                      className="w-full rounded-lg border border-border bg-card text-foreground py-2 pl-9 pr-3 text-sm focus:border-rose-400 focus:outline-none"
+                      className="control ps-9 pe-3"
                     />
                     {showIntvResults && (intvSearching || intvResults.length > 0) && (
                       <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded-lg border border-border bg-card shadow-lg">
@@ -1608,7 +1665,7 @@ function InterviewTab({
                               className="block w-full px-3 py-2 text-left text-sm hover:bg-muted/50"
                             >
                               {u.first_name} {u.last_name}
-                              <span className="ml-1 text-xs text-muted-foreground">{u.emp_code || u.email}</span>
+                              <span className="ms-1 text-xs text-muted-foreground">{u.emp_code || u.email}</span>
                             </button>
                           ))
                         )}
@@ -1623,7 +1680,7 @@ function InterviewTab({
                   type="date"
                   value={scheduledAt}
                   onChange={(e) => setScheduledAt(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-400 focus:outline-none"
+                  className="control"
                 />
               </div>
               <div className="flex justify-end">
@@ -1675,7 +1732,7 @@ function InterviewTab({
               <div key={q.id} className="rounded-lg border border-border p-4">
                 <p className="mb-2 text-sm font-medium text-foreground">
                   {idx + 1}. {q.question_text}
-                  {q.is_required ? <span className="ml-1 text-red-500">*</span> : null}
+                  {q.is_required ? <span className="ms-1 text-red-500">*</span> : null}
                 </p>
                 {renderQuestionInput(q)}
               </div>
@@ -1878,7 +1935,7 @@ function AssetsTab({
             <select
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
-              className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-400 focus:outline-none"
+              className="control"
             >
               {ASSET_CATEGORIES.map((c) => (
                 <option key={c.value} value={c.value}>{c.label}</option>
@@ -1891,7 +1948,7 @@ function AssetsTab({
               value={form.asset_name}
               onChange={(e) => setForm({ ...form, asset_name: e.target.value })}
               placeholder="e.g. Dell Latitude 5430"
-              className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-400 focus:outline-none"
+              className="control"
             />
           </div>
           <div>
@@ -1900,7 +1957,7 @@ function AssetsTab({
               value={form.asset_tag}
               onChange={(e) => setForm({ ...form, asset_tag: e.target.value })}
               placeholder="e.g. LAP-2231"
-              className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-400 focus:outline-none"
+              className="control"
             />
           </div>
           <div>
@@ -1911,7 +1968,7 @@ function AssetsTab({
               onChange={(e) => setForm({ ...form, replacement_cost: e.target.value })}
               placeholder="0"
               step="0.01"
-              className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-400 focus:outline-none"
+              className="control"
             />
           </div>
           <div className="sm:col-span-2 flex justify-end">
@@ -1956,7 +2013,7 @@ function AssetsTab({
                     <p className="mt-0.5 text-xs italic text-muted-foreground">{a.condition_notes}</p>
                   )}
                 </div>
-                <div className="ml-4 flex items-center gap-2">
+                <div className="ms-4 flex items-center gap-2">
                   <span
                     className={cn(
                       "inline-flex rounded-full px-2 py-0.5 text-xs font-medium",
@@ -1971,7 +2028,7 @@ function AssetsTab({
                     <select
                       value={a.status}
                       onChange={(e) => handleStatusChange(a.id, e.target.value)}
-                      className="rounded-md border border-border bg-card text-foreground px-2 py-1 text-xs focus:border-rose-400 focus:outline-none"
+                      className="control min-h-9 px-2 text-xs"
                     >
                       {ASSET_STATUSES.map((s) => (
                         <option key={s} value={s}>{s}</option>
@@ -2153,7 +2210,7 @@ function LettersTab({
               <select
                 value={selectedTemplateId}
                 onChange={(e) => setSelectedTemplateId(e.target.value)}
-                className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-400 focus:outline-none"
+                className="control"
               >
                 <option value="" disabled>Select a template…</option>
                 {templates.map((t) => (
@@ -2203,7 +2260,7 @@ function LettersTab({
                   Issued: {l.issued_date ? formatDate(l.issued_date) : "—"}
                 </p>
               </div>
-              <div className="ml-4 flex items-center gap-2">
+              <div className="ms-4 flex items-center gap-2">
                 <button
                   onClick={() => handleView(l.id)}
                   disabled={busyId === l.id}
@@ -2266,13 +2323,14 @@ function BuyoutTab({
   const [actionLoading, setActionLoading] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [showReject, setShowReject] = useState(false);
+  const [showApproveConfirm, setShowApproveConfirm] = useState(false);
 
   async function handleApprove() {
     if (!buyout) return;
-    if (!confirm("Approve this buyout? The employee's last working date will be updated.")) return;
     setActionLoading(true);
     try {
       await apiPost(`/buyout/${buyout.id}/approve`);
+      setShowApproveConfirm(false);
       onReload();
     } catch {
       // handled
@@ -2368,7 +2426,7 @@ function BuyoutTab({
 
       {buyout.status === "approved" && (
         <div className="rounded-lg bg-green-50 dark:bg-green-950/40 border border-green-200 dark:border-green-900 p-3 text-sm text-green-700 dark:text-green-300">
-          Approved on {buyout.approved_at ? formatDate(buyout.approved_at) : "--"}.
+          Approved on {buyout.approved_at ? formatDate(buyout.approved_at) : "—"}.
           The buyout amount will be added to the notice period recovery in the F&F settlement.
         </div>
       )}
@@ -2376,7 +2434,8 @@ function BuyoutTab({
       {buyout.status === "pending" && (
         <div className="flex items-center gap-3 pt-2">
           <button
-            onClick={handleApprove}
+            type="button"
+            onClick={() => setShowApproveConfirm(true)}
             disabled={actionLoading}
             className="inline-flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
           >
@@ -2398,7 +2457,7 @@ function BuyoutTab({
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
                 placeholder="Rejection reason..."
-                className="flex-1 rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-500 focus:outline-none"
+                className="control flex-1"
               />
               <button
                 onClick={handleReject}
@@ -2417,6 +2476,15 @@ function BuyoutTab({
           )}
         </div>
       )}
+      <ConfirmDialog
+        open={showApproveConfirm}
+        title="Approve notice buyout?"
+        message="The employee's requested last working date will be applied and the buyout amount will move into the final settlement."
+        confirmLabel="Approve buyout"
+        loading={actionLoading}
+        onConfirm={handleApprove}
+        onCancel={() => setShowApproveConfirm(false)}
+      />
     </div>
   );
 }

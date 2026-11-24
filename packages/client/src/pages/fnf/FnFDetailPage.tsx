@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Calculator,
@@ -12,6 +12,7 @@ import {
 import { apiGet, apiPost, apiPut } from "@/api/client";
 import { cn, formatDate } from "@/lib/utils";
 import type { FnFSettlement, FnFStatus } from "@emp-exit/shared";
+import { EmptyState, LoadingState } from "@/components/ui/States";
 
 const STATUS_CONFIG: Record<string, { bg: string; label: string }> = {
   draft: { bg: "bg-muted text-muted-foreground", label: "Draft" },
@@ -98,6 +99,10 @@ export function FnFDetailPage() {
   const [saving, setSaving] = useState(false);
   const [payRef, setPayRef] = useState("");
   const [showPayModal, setShowPayModal] = useState(false);
+  const payDialogRef = useRef<HTMLDivElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+  const payBusyRef = useRef(false);
+  payBusyRef.current = saving;
 
   // Editable fields (in smallest currency units)
   const [basicSalaryDue, setBasicSalaryDue] = useState(0);
@@ -108,6 +113,43 @@ export function FnFDetailPage() {
   const [noticePayRecovery, setNoticePayRecovery] = useState(0);
   const [otherDeductions, setOtherDeductions] = useState(0);
   const [remarks, setRemarks] = useState("");
+
+  useEffect(() => {
+    if (!showPayModal) return;
+    returnFocusRef.current = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.requestAnimationFrame(() => document.getElementById("payment-reference")?.focus());
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !payBusyRef.current) {
+        event.preventDefault();
+        setShowPayModal(false);
+        setPayRef("");
+        return;
+      }
+      if (event.key !== "Tab" || !payDialogRef.current) return;
+      const focusable = Array.from(payDialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+      ));
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      returnFocusRef.current?.focus();
+    };
+  }, [showPayModal]);
 
   const fetchFnF = useCallback(async () => {
     if (!exitId) return;
@@ -231,7 +273,7 @@ export function FnFDetailPage() {
           onChange={(e) => onChange(Math.round(parseFloat(e.target.value || "0") * 100))}
           disabled={disabled || !isEditable}
           readOnly={!isEditable}
-          className="w-32 rounded border border-border bg-card text-foreground px-2 py-1 text-right text-sm font-mono focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 disabled:bg-muted/50 disabled:text-muted-foreground read-only:bg-muted/50 read-only:text-muted-foreground"
+          className="control w-32 text-right font-mono disabled:bg-muted/50 disabled:text-muted-foreground read-only:bg-muted/50 read-only:text-muted-foreground"
           step="0.01"
         />
       </div>
@@ -239,20 +281,16 @@ export function FnFDetailPage() {
   );
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-rose-200 dark:border-rose-900 border-t-rose-600" />
-      </div>
-    );
+    return <div className="surface-card"><LoadingState /></div>;
   }
 
   const statusInfo = fnf ? STATUS_CONFIG[fnf.status] || STATUS_CONFIG.draft : null;
 
   return (
-    <div className="space-y-6">
+    <div className="app-page">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="page-header">
+        <div className="page-header__content">
           <button
             onClick={() => navigate(-1)}
             className="mb-2 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
@@ -260,18 +298,18 @@ export function FnFDetailPage() {
             <ArrowLeft className="h-4 w-4" />
             Back
           </button>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <Calculator className="h-6 w-6 text-rose-600 dark:text-rose-400" />
+          <h1 className="page-title flex items-center gap-2">
+            <Calculator className="size-6 text-primary" />
             Full & Final Settlement
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="page-subtitle">
             Exit #{exitId?.slice(0, 8)}
           </p>
         </div>
         {statusInfo && (
           <span
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium",
+              "status-pill",
               statusInfo.bg,
             )}
           >
@@ -283,7 +321,7 @@ export function FnFDetailPage() {
       {error && (
         <div className="rounded-lg border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 p-3 text-sm text-red-700 dark:text-red-300">
           {error}
-          <button onClick={() => setError(null)} className="ml-2 underline">
+          <button onClick={() => setError(null)} className="ms-2 underline">
             dismiss
           </button>
         </div>
@@ -291,20 +329,18 @@ export function FnFDetailPage() {
 
       {/* Calculate button if no FnF exists */}
       {!fnf && (
-        <div className="rounded-lg border border-border bg-card p-8 text-center">
-          <Calculator className="mx-auto h-12 w-12 text-muted-foreground/50" />
-          <h3 className="mt-4 text-sm font-medium text-foreground">No FnF settlement yet</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Calculate the full and final settlement for this exit.
-          </p>
-          <button
-            onClick={handleCalculate}
-            disabled={saving}
-            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-rose-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50 transition-colors"
-          >
-            <Calculator className="h-4 w-4" />
-            {saving ? "Calculating..." : "Calculate FnF"}
-          </button>
+        <div className="surface-card">
+          <EmptyState
+            icon={Calculator}
+            title="No FnF settlement yet"
+            description="Calculate the full and final settlement for this exit."
+            action={(
+              <button onClick={handleCalculate} disabled={saving} className="button-primary">
+                <Calculator className="h-4 w-4" />
+                {saving ? "Calculating..." : "Calculate FnF"}
+              </button>
+            )}
+          />
         </div>
       )}
 
@@ -313,7 +349,7 @@ export function FnFDetailPage() {
         <>
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Earnings */}
-            <div className="rounded-lg border border-border bg-card shadow-sm">
+            <div className="surface-card overflow-hidden">
               <div className="border-b border-border px-6 py-4">
                 <h2 className="font-semibold text-foreground flex items-center gap-2">
                   <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
@@ -358,7 +394,7 @@ export function FnFDetailPage() {
             </div>
 
             {/* Deductions */}
-            <div className="rounded-lg border border-border bg-card shadow-sm">
+            <div className="surface-card overflow-hidden">
               <div className="border-b border-border px-6 py-4">
                 <h2 className="font-semibold text-foreground flex items-center gap-2">
                   <AlertTriangle className="h-5 w-5 text-red-500" />
@@ -417,21 +453,21 @@ export function FnFDetailPage() {
           </div>
 
           {/* Remarks */}
-          <div className="rounded-lg border border-border bg-card p-5">
+          <div className="surface-card p-5">
             <label className="block text-sm font-medium text-muted-foreground mb-2">Remarks</label>
             <textarea
               value={remarks}
               onChange={(e) => setRemarks(e.target.value)}
               disabled={!isEditable}
               rows={3}
-              className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 disabled:bg-muted/50 disabled:text-muted-foreground"
+              className="control min-h-24 resize-y py-3 disabled:bg-muted/50 disabled:text-muted-foreground"
               placeholder="Optional remarks..."
             />
           </div>
 
           {/* Breakdown info */}
           {fnf.breakdown_json && (
-            <div className="rounded-lg border border-border bg-card p-5">
+            <div className="surface-card p-5">
               <h3 className="text-sm font-medium text-muted-foreground mb-3">Calculation Details</h3>
               <CalculationDetails raw={fnf.breakdown_json} />
             </div>
@@ -455,7 +491,7 @@ export function FnFDetailPage() {
                 <button
                   onClick={handleCalculate}
                   disabled={saving}
-                  className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/50 disabled:opacity-50 transition-colors"
+                  className="button-secondary"
                 >
                   <RefreshCw className="h-4 w-4" />
                   Recalculate
@@ -463,7 +499,7 @@ export function FnFDetailPage() {
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50 transition-colors"
+                  className="button-primary"
                 >
                   {saving ? "Saving..." : "Save Changes"}
                 </button>
@@ -494,32 +530,43 @@ export function FnFDetailPage() {
 
       {/* Mark Paid Modal */}
       {showPayModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-card p-6 shadow-xl">
-            <h3 className="text-lg font-semibold text-foreground mb-4">Mark as Paid</h3>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain bg-slate-950/55 p-4 backdrop-blur-sm"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !payBusyRef.current) {
+              setShowPayModal(false);
+              setPayRef("");
+            }
+          }}
+        >
+          <div ref={payDialogRef} className="surface-card max-h-[90dvh] w-full max-w-md overflow-y-auto p-6 shadow-floating" role="dialog" aria-modal="true" aria-labelledby="mark-paid-title" tabIndex={-1}>
+            <h3 id="mark-paid-title" className="text-lg font-semibold text-foreground mb-4">Mark as Paid</h3>
             <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-1">
+              <label htmlFor="payment-reference" className="block text-sm font-medium text-muted-foreground mb-1">
                 Payment Reference
               </label>
               <input
+                id="payment-reference"
                 type="text"
                 value={payRef}
                 onChange={(e) => setPayRef(e.target.value)}
-                className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                className="control"
                 placeholder="e.g. TXN-12345 or bank reference"
               />
             </div>
             <div className="mt-4 flex gap-2 justify-end">
               <button
+                type="button"
                 onClick={() => {
                   setShowPayModal(false);
                   setPayRef("");
                 }}
-                className="rounded-lg border border-border bg-card text-foreground px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
+                className="button-secondary"
               >
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={handleMarkPaid}
                 disabled={!payRef.trim() || saving}
                 className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors"

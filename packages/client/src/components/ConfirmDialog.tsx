@@ -1,4 +1,8 @@
+import { useEffect, useId, useRef } from "react";
 import { AlertTriangle, Loader2 } from "lucide-react";
+
+import { Button } from "@/components/ui/Button";
+import { cn } from "@/lib/utils";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -29,57 +33,109 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
-  if (!open) return null;
+  const titleId = useId();
+  const descriptionId = useId();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+  const onCancelRef = useRef(onCancel);
+  const loadingRef = useRef(loading);
 
-  const confirmClasses =
-    tone === "danger"
-      ? "bg-red-600 hover:bg-red-700"
-      : "bg-rose-600 hover:bg-rose-700";
+  onCancelRef.current = onCancel;
+  loadingRef.current = loading;
+
+  useEffect(() => {
+    if (!open) return;
+
+    returnFocusRef.current = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.requestAnimationFrame(() => cancelRef.current?.focus());
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !loadingRef.current) {
+        event.preventDefault();
+        onCancelRef.current();
+        return;
+      }
+      if (event.key !== "Tab" || !dialogRef.current) return;
+
+      const focusable = Array.from(
+        dialogRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      returnFocusRef.current?.focus();
+    };
+  }, [open]);
+
+  if (!open) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      onClick={loading ? undefined : onCancel}
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain bg-slate-950/55 p-4 backdrop-blur-sm"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget && !loading) onCancel();
+      }}
     >
       <div
-        className="w-full max-w-md rounded-xl bg-card shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
+        ref={dialogRef}
+        className="surface-card w-full max-w-md overflow-hidden shadow-floating"
+        role="alertdialog"
         aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={descriptionId}
       >
-        <div className="flex items-start gap-3 px-5 pt-5">
-          <div
-            className={
-              "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full " +
-              (tone === "danger" ? "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400" : "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400")
-            }
+        <div className="flex items-start gap-4 px-5 pt-5 sm:px-6 sm:pt-6">
+          <span
+            aria-hidden="true"
+            className={cn(
+              "grid size-11 shrink-0 place-items-center rounded-xl",
+              tone === "danger"
+                ? "bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-300"
+                : "bg-brand-50 text-brand-600 dark:bg-brand-950/50 dark:text-brand-300",
+            )}
           >
-            <AlertTriangle className="h-5 w-5" />
-          </div>
-          <div className="min-w-0">
-            <h3 className="text-base font-semibold text-foreground">{title}</h3>
-            <p className="mt-1 text-sm text-muted-foreground">{message}</p>
+            <AlertTriangle className="size-5" />
+          </span>
+          <div className="min-w-0 pt-0.5">
+            <h2 id={titleId} className="text-lg font-semibold tracking-tight text-foreground">{title}</h2>
+            <p id={descriptionId} className="mt-1.5 text-sm leading-6 text-muted-foreground">{message}</p>
           </div>
         </div>
-        <div className="mt-5 flex justify-end gap-2 border-t border-border px-5 py-4">
-          <button
+        <div className="mt-6 flex flex-col-reverse gap-2 border-t border-border bg-muted/35 px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
+          <Button
+            ref={cancelRef}
             onClick={onCancel}
             disabled={loading}
-            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/50 disabled:opacity-50"
+            variant="secondary"
           >
             {cancelLabel}
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={onConfirm}
             disabled={loading}
-            className={
-              "inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-white disabled:opacity-50 " +
-              confirmClasses
-            }
+            variant={tone === "danger" ? "danger" : "primary"}
           >
-            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+            {loading ? <Loader2 aria-hidden="true" className="size-4 animate-spin" /> : null}
             {confirmLabel}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

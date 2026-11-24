@@ -1,10 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Shield, Loader2, Settings, X } from "lucide-react";
 import { apiGet, apiPut } from "@/api/client";
 import { cn, formatDate } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { Page, PageActions, PageDescription, PageHeader, PageHeaderContent, PageTitle } from "@/components/ui/Page";
+import { Button, ButtonLink } from "@/components/ui/Button";
+import { EmptyState, LoadingState } from "@/components/ui/States";
+import { FieldLabel, Textarea } from "@/components/ui/Field";
+import { Table, TableScroll, TableShell } from "@/components/ui/Table";
 
 const CLEARANCE_STATUS_COLORS: Record<string, string> = {
   pending: "bg-muted text-muted-foreground",
@@ -44,10 +49,52 @@ export function ClearanceRecordsPage() {
   // Reject dialog (replaces the native prompt)
   const [rejectTarget, setRejectTarget] = useState<MyClearance | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const rejectDialogRef = useRef<HTMLDivElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+  const rejectBusyRef = useRef(false);
+  const rejectOpen = rejectTarget !== null;
+  rejectBusyRef.current = Boolean(rejectTarget && actionLoading === rejectTarget.id);
 
   useEffect(() => {
     loadClearances();
   }, []);
+
+  useEffect(() => {
+    if (!rejectOpen) return;
+    returnFocusRef.current = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.requestAnimationFrame(() => document.getElementById("clearance-reject-reason")?.focus());
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !rejectBusyRef.current) {
+        event.preventDefault();
+        setRejectTarget(null);
+        return;
+      }
+      if (event.key !== "Tab" || !rejectDialogRef.current) return;
+      const focusable = Array.from(rejectDialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+      ));
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      returnFocusRef.current?.focus();
+    };
+  }, [rejectOpen]);
 
   async function loadClearances() {
     setLoading(true);
@@ -95,51 +142,45 @@ export function ClearanceRecordsPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-rose-600 dark:text-rose-400" />
-      </div>
-    );
+    return <div className="surface-card"><LoadingState label={t("common.loading")} /></div>;
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">{t("clearance.recordsTitle")}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t("clearance.recordsSubtitle")}
-          </p>
-        </div>
-        <Link
+    <Page>
+      <PageHeader>
+        <PageHeaderContent>
+          <PageTitle>{t("clearance.recordsTitle")}</PageTitle>
+          <PageDescription>{t("clearance.recordsSubtitle")}</PageDescription>
+        </PageHeaderContent>
+        <PageActions>
+        <ButtonLink
           to="/clearance/departments"
-          className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
+          variant="secondary"
         >
-          <Settings className="h-4 w-4" />
+          <Settings aria-hidden="true" className="size-4" />
           {t("clearance.manageDepartments")}
-        </Link>
-      </div>
+        </ButtonLink>
+        </PageActions>
+      </PageHeader>
 
       {clearances.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-12 text-center">
-          <Shield className="mx-auto h-12 w-12 text-muted-foreground/50 mb-3" />
-          <p className="text-sm text-muted-foreground">{t("clearance.noPending")}</p>
-        </div>
+        <div className="surface-card"><EmptyState icon={Shield} title={t("clearance.noPending")} /></div>
       ) : (
-        <div className="rounded-xl border border-border bg-card overflow-x-auto -mx-4 lg:mx-0">
-          <table className="w-full text-left text-sm">
+        <TableShell>
+          <TableScroll>
+          <Table>
             <thead>
-              <tr className="border-b border-border text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                <th className="px-6 py-3">{t("clearance.colDepartment")}</th>
-                <th className="px-6 py-3">{t("clearance.colEmployee")}</th>
-                <th className="px-6 py-3">{t("common.status")}</th>
-                <th className="px-6 py-3">{t("clearance.colPendingAmount")}</th>
-                <th className="px-6 py-3 text-right">{t("common.actions")}</th>
+              <tr>
+                <th scope="col">{t("clearance.colDepartment")}</th>
+                <th scope="col">{t("clearance.colEmployee")}</th>
+                <th scope="col">{t("common.status")}</th>
+                <th scope="col">{t("clearance.colPendingAmount")}</th>
+                <th scope="col" className="text-end">{t("common.actions")}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody>
               {clearances.map((c) => (
-                <tr key={c.id} className="hover:bg-muted/50">
+                <tr key={c.id}>
                   <td className="px-6 py-4 font-medium text-foreground">
                     {c.department?.name || t("clearance.unknown")}
                   </td>
@@ -167,25 +208,27 @@ export function ClearanceRecordsPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-muted-foreground">
-                    {c.pending_amount > 0 ? formatINR(c.pending_amount) : "--"}
+                    {c.pending_amount > 0 ? formatINR(c.pending_amount) : "—"}
                   </td>
                   <td className="px-6 py-4">
                     {c.status === "pending" && (
                       <div className="flex items-center justify-end gap-2">
-                        <button
+                        <Button
                           onClick={() => handleApprove(c.id)}
                           disabled={actionLoading === c.id}
-                          className="rounded-lg bg-green-50 dark:bg-green-950/40 px-3 py-1.5 text-xs font-medium text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-950/40 disabled:opacity-50"
+                          variant="secondary"
+                          className="border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-900 dark:text-emerald-300 dark:hover:bg-emerald-950/50"
                         >
                           {t("clearance.approve")}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           onClick={() => { setRejectTarget(c); setRejectReason(""); }}
                           disabled={actionLoading === c.id}
-                          className="rounded-lg bg-red-50 dark:bg-red-950/40 px-3 py-1.5 text-xs font-medium text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-950/40 disabled:opacity-50"
+                          variant="ghost"
+                          className="text-danger hover:bg-red-50 dark:hover:bg-red-950/50"
                         >
                           {t("clearance.reject")}
-                        </button>
+                        </Button>
                       </div>
                     )}
                     {c.status !== "pending" && c.approved_at && (
@@ -197,58 +240,66 @@ export function ClearanceRecordsPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
+          </Table>
+          </TableScroll>
+        </TableShell>
       )}
 
       {/* Reject dialog (replaces the native prompt) */}
       {rejectTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-xl bg-card p-6 shadow-xl">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain bg-slate-950/55 p-4 backdrop-blur-sm"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !rejectBusyRef.current) setRejectTarget(null);
+          }}
+        >
+          <div ref={rejectDialogRef} className="surface-card w-full max-w-md p-6 shadow-floating" role="dialog" aria-modal="true" aria-labelledby="reject-clearance-title" tabIndex={-1}>
             <div className="mb-4 flex items-start justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-foreground">{t("clearance.rejectTitle")}</h3>
+                <h3 id="reject-clearance-title" className="text-lg font-semibold text-foreground">{t("clearance.rejectTitle")}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {rejectTarget.department?.name || "Department"}
                   {rejectTarget.employee ? ` · ${rejectTarget.employee.first_name} ${rejectTarget.employee.last_name}` : ""}
                 </p>
               </div>
               <button
+                type="button"
                 onClick={() => setRejectTarget(null)}
-                className="rounded-md p-1 text-muted-foreground hover:bg-muted"
+                className="grid size-11 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+                aria-label={t("common.cancel")}
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <label className="mb-1 block text-sm font-medium text-muted-foreground">{t("clearance.reasonLabel")}</label>
-            <textarea
+            <FieldLabel htmlFor="clearance-reject-reason">{t("clearance.reasonLabel")}</FieldLabel>
+            <Textarea
+              id="clearance-reject-reason"
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               rows={3}
               autoFocus
               placeholder={t("clearance.reasonPlaceholder")}
-              className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
             />
             <div className="mt-5 flex justify-end gap-3">
-              <button
+              <Button
                 onClick={() => setRejectTarget(null)}
                 disabled={actionLoading === rejectTarget.id}
-                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/50"
+                variant="secondary"
               >
                 {t("common.cancel")}
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleConfirmReject}
                 disabled={!rejectReason.trim() || actionLoading === rejectTarget.id}
-                className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                variant="danger"
               >
                 {actionLoading === rejectTarget.id && <Loader2 className="h-4 w-4 animate-spin" />}
                 {t("clearance.reject")}
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </Page>
   );
 }

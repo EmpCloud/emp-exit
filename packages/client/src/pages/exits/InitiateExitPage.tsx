@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserMinus, Loader2, Search, X } from "lucide-react";
 import { apiPost, apiGet } from "@/api/client";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent } from "@/components/ui/Card";
+import { Page, PageDescription, PageHeader, PageHeaderContent, PageTitle } from "@/components/ui/Page";
 
 const EXIT_TYPES = [
   { value: "resignation", label: "Resignation" },
@@ -149,16 +152,13 @@ export function InitiateExitPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Initiate Exit</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Start a new exit process for an employee.</p>
-      </div>
+    <Page>
+      <PageHeader><PageHeaderContent><PageTitle>Initiate Exit</PageTitle><PageDescription>Start a new exit process for an employee.</PageDescription></PageHeaderContent></PageHeader>
 
-      <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
-        <div className="rounded-xl border border-border bg-card p-6 space-y-5">
+      <form onSubmit={handleSubmit} className="max-w-3xl space-y-5">
+        <Card><CardContent className="space-y-5 pt-6">
           {error && (
-            <div className="rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 px-4 py-3 text-sm text-red-700 dark:text-red-300">
+            <div role="alert" className="rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 px-4 py-3 text-sm text-red-700 dark:text-red-300">
               {error}
             </div>
           )}
@@ -166,7 +166,7 @@ export function InitiateExitPage() {
           {/* Employee picker — #4 — search by name / email / emp_code,
               resolves to the underlying user.id on selection. */}
           <div className="relative">
-            <label htmlFor="employee_search" className="block text-sm font-medium text-muted-foreground mb-1">
+            <label htmlFor="employee_search" className="field-label">
               Employee <span className="text-red-500">*</span>
             </label>
             {selectedEmployee ? (
@@ -185,19 +185,23 @@ export function InitiateExitPage() {
                   type="button"
                   onClick={clearEmployee}
                   aria-label="Clear selection"
-                  className="rounded-lg p-1 text-muted-foreground hover:bg-card hover:text-muted-foreground"
+                  className="grid size-11 shrink-0 place-items-center rounded-lg text-muted-foreground hover:bg-card hover:text-foreground"
                 >
-                  <X className="h-4 w-4" />
+                  <X aria-hidden="true" className="h-4 w-4" />
                 </button>
               </div>
             ) : (
               <>
                 <div className="relative">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <input
                     id="employee_search"
                     type="text"
                     autoComplete="off"
+                    role="combobox"
+                    aria-autocomplete="list"
+                    aria-expanded={showResults && !!employeeQuery.trim()}
+                    aria-controls="employee-search-results"
                     value={employeeQuery}
                     onChange={(e) => {
                       setEmployeeQuery(e.target.value);
@@ -206,14 +210,14 @@ export function InitiateExitPage() {
                     onFocus={() => setShowResults(true)}
                     onBlur={() => setTimeout(() => setShowResults(false), 150)}
                     placeholder="Search by name, email, or employee code (e.g. E-101)..."
-                    className="w-full rounded-lg border border-border bg-card text-foreground py-2 pl-9 pr-3 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                    className="control ps-9 pe-3"
                   />
                 </div>
                 {showResults && employeeQuery.trim() && (
-                  <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-lg border border-border bg-card shadow-lg">
+                  <div id="employee-search-results" role="listbox" className="absolute z-20 mt-1 w-full overflow-hidden rounded-lg border border-border bg-popover text-popover-foreground shadow-floating">
                     {searchingEmployees ? (
                       <div className="flex items-center gap-2 px-3 py-2 text-xs text-muted-foreground">
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" /> Searching...
+                        <Loader2 aria-hidden="true" className="h-3.5 w-3.5 animate-spin" /> Searching…
                       </div>
                     ) : employeeResults.length === 0 ? (
                       <p className="px-3 py-2 text-xs text-muted-foreground">No matching employees.</p>
@@ -222,6 +226,8 @@ export function InitiateExitPage() {
                         <button
                           key={emp.id}
                           type="button"
+                          role="option"
+                          aria-selected="false"
                           onMouseDown={(e) => {
                             // onMouseDown so it fires before the input's onBlur
                             // closes the dropdown.
@@ -231,7 +237,13 @@ export function InitiateExitPage() {
                             setEmployeeResults([]);
                             setShowResults(false);
                           }}
-                          className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left hover:bg-muted/50"
+                          onClick={() => {
+                            setSelectedEmployee(emp);
+                            setEmployeeQuery("");
+                            setEmployeeResults([]);
+                            setShowResults(false);
+                          }}
+                          className="flex min-h-11 w-full items-center justify-between gap-3 px-3 py-2 text-start hover:bg-muted/50"
                         >
                           <div className="min-w-0">
                             <p className="truncate text-sm font-medium text-foreground">
@@ -257,14 +269,14 @@ export function InitiateExitPage() {
 
           {/* Exit Type */}
           <div>
-            <label htmlFor="exit_type" className="block text-sm font-medium text-muted-foreground mb-1">
+            <label htmlFor="exit_type" className="field-label">
               Exit Type <span className="text-red-500">*</span>
             </label>
             <select
               id="exit_type"
               value={exitType}
               onChange={(e) => setExitType(e.target.value)}
-              className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+              className="control"
             >
               {EXIT_TYPES.map((t) => (
                 <option key={t.value} value={t.value}>{t.label}</option>
@@ -274,14 +286,14 @@ export function InitiateExitPage() {
 
           {/* Reason Category */}
           <div>
-            <label htmlFor="reason_category" className="block text-sm font-medium text-muted-foreground mb-1">
+            <label htmlFor="reason_category" className="field-label">
               Reason Category <span className="text-red-500">*</span>
             </label>
             <select
               id="reason_category"
               value={reasonCategory}
               onChange={(e) => setReasonCategory(e.target.value)}
-              className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+              className="control"
             >
               {REASON_CATEGORIES.map((r) => (
                 <option key={r.value} value={r.value}>{r.label}</option>
@@ -291,7 +303,7 @@ export function InitiateExitPage() {
 
           {/* Reason Detail */}
           <div>
-            <label htmlFor="reason_detail" className="block text-sm font-medium text-muted-foreground mb-1">
+            <label htmlFor="reason_detail" className="field-label">
               Reason Notes
             </label>
             <textarea
@@ -300,14 +312,14 @@ export function InitiateExitPage() {
               onChange={(e) => setReasonDetail(e.target.value)}
               rows={3}
               placeholder="Additional details about the reason for exit..."
-              className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+              className="control min-h-28 py-3"
             />
           </div>
 
           {/* Dates */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="resignation_date" className="block text-sm font-medium text-muted-foreground mb-1">
+              <label htmlFor="resignation_date" className="field-label">
                 Resignation Date
               </label>
               <input
@@ -315,11 +327,11 @@ export function InitiateExitPage() {
                 type="date"
                 value={resignationDate}
                 onChange={(e) => setResignationDate(e.target.value)}
-                className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                className="control"
               />
             </div>
             <div>
-              <label htmlFor="last_working_date" className="block text-sm font-medium text-muted-foreground mb-1">
+              <label htmlFor="last_working_date" className="field-label">
                 Last Working Date
               </label>
               <input
@@ -328,7 +340,7 @@ export function InitiateExitPage() {
                 value={lastWorkingDate}
                 onChange={(e) => { setLastWorkingDate(e.target.value); setLwdManuallySet(true); }}
                 min={resignationDate || undefined}
-                className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                className="control"
               />
               {resignationDate && !lwdManuallySet && lastWorkingDate && !dateError && (
                 <p className="mt-1 text-xs text-muted-foreground">
@@ -339,7 +351,7 @@ export function InitiateExitPage() {
           </div>
 
           {dateError && (
-            <div className="rounded-md border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 px-3 py-2 text-xs text-red-700 dark:text-red-300">
+            <div role="alert" className="rounded-md border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 px-3 py-2 text-xs text-red-700 dark:text-red-300">
               {dateError}
             </div>
           )}
@@ -347,7 +359,7 @@ export function InitiateExitPage() {
           {/* Notice Period */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="notice_period_days" className="block text-sm font-medium text-muted-foreground mb-1">
+              <label htmlFor="notice_period_days" className="field-label">
                 Notice Period (days)
               </label>
               <input
@@ -356,7 +368,7 @@ export function InitiateExitPage() {
                 min={0}
                 value={noticePeriodDays}
                 onChange={(e) => setNoticePeriodDays(e.target.value)}
-                className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                className="control"
               />
             </div>
             <div className="flex items-end pb-1">
@@ -365,37 +377,36 @@ export function InitiateExitPage() {
                   type="checkbox"
                   checked={noticePeriodWaived}
                   onChange={(e) => setNoticePeriodWaived(e.target.checked)}
-                  className="h-4 w-4 rounded border-border text-rose-600 dark:text-rose-400 focus:ring-rose-500"
+                  className="size-5 rounded border-border text-primary focus:ring-primary"
                 />
                 <span className="text-sm text-muted-foreground">Waive notice period</span>
               </label>
             </div>
           </div>
-        </div>
+        </CardContent></Card>
 
         {/* Actions */}
         <div className="flex items-center gap-3">
-          <button
+          <Button
             type="submit"
             disabled={submitting || !selectedEmployee || !!dateError}
-            className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {submitting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
             ) : (
-              <UserMinus className="h-4 w-4" />
+              <UserMinus aria-hidden="true" className="h-4 w-4" />
             )}
             Initiate Exit
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={() => navigate("/exits")}
-            className="rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
+            variant="secondary"
           >
             Cancel
-          </button>
+          </Button>
         </div>
       </form>
-    </div>
+    </Page>
   );
 }

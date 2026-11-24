@@ -1,5 +1,11 @@
+import { ArrowLeft } from "lucide-react";
+
+export function hasEmpCloudReturnLink() {
+  return localStorage.getItem("sso_source") === "empcloud";
+}
+
 export function BackToDashboard() {
-  const isSSO = localStorage.getItem('sso_source') === 'empcloud';
+  const isSSO = hasEmpCloudReturnLink();
   if (!isSSO) return null;
 
   const returnUrl =
@@ -9,9 +15,11 @@ export function BackToDashboard() {
   return (
     <a
       href={returnUrl}
-      className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+      aria-label="Back to EMP Cloud"
+      className="inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm font-semibold text-muted-foreground transition-[background-color,color] hover:bg-muted hover:text-foreground"
     >
-      <span>&larr; EMP Cloud</span>
+      <ArrowLeft className="size-4 rtl:rotate-180" aria-hidden="true" />
+      <span>EMP Cloud</span>
     </a>
   );
 }

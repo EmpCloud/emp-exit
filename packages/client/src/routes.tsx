@@ -1,6 +1,9 @@
 import { lazy } from "react";
 import { Route, Navigate, useParams } from "react-router-dom";
+import { FileQuestion, ArrowLeft } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { ButtonLink } from "@/components/ui/Button";
 import { isAdmin, EMPLOYEE_HOME } from "@/lib/auth-store";
 
 // Guards an admin-only page: employees are bounced to their self-service hub
@@ -14,6 +17,28 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 function ExitResignationRedirect() {
   const { id } = useParams<{ id: string }>();
   return <Navigate to={`/exits/${id}`} replace />;
+}
+
+function NotFoundPage() {
+  const { t } = useTranslation();
+
+  return (
+    <main className="grid min-h-dvh place-items-center bg-background px-4 py-12">
+      <section className="surface-card w-full max-w-md p-8 text-center shadow-card" aria-labelledby="not-found-title">
+        <span className="mx-auto grid size-12 place-items-center rounded-xl bg-primary/10 text-primary">
+          <FileQuestion className="size-6" aria-hidden="true" />
+        </span>
+        <p className="mt-5 text-sm font-semibold uppercase tracking-[0.16em] text-primary">404</p>
+        <h1 id="not-found-title" className="mt-2 text-2xl font-bold tracking-tight text-foreground">
+          Page Not Found
+        </h1>
+        <ButtonLink to="/" variant="secondary" className="mt-6 w-full">
+          <ArrowLeft className="size-4 rtl:rotate-180" aria-hidden="true" />
+          <span>{t("common.back")}</span>
+        </ButtonLink>
+      </section>
+    </main>
+  );
 }
 
 // Lazy-loaded pages
@@ -226,7 +251,7 @@ export function AppRoutes() {
       </Route>
 
       {/* 404 */}
-      <Route path="*" element={<div className="p-8"><h1 className="text-2xl font-bold text-foreground">Page Not Found</h1></div>} />
+      <Route path="*" element={<NotFoundPage />} />
     </>
   );
 }

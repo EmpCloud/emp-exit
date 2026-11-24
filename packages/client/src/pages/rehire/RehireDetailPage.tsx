@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   UserPlus,
-  Loader2,
   ArrowLeft,
   CheckCircle,
   XCircle,
@@ -13,6 +12,9 @@ import {
 } from "lucide-react";
 import { apiGet, apiPut, apiPost } from "@/api/client";
 import toast from "react-hot-toast";
+import { EmptyState, LoadingState } from "@/components/ui/States";
+import { formatDate } from "@/lib/utils";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 const STATUS_COLORS: Record<string, string> = {
   proposed: "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300",
@@ -43,6 +45,7 @@ export function RehireDetailPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [notes, setNotes] = useState("");
+  const [showCompleteConfirm, setShowCompleteConfirm] = useState(false);
 
   async function fetchDetail() {
     setLoading(true);
@@ -78,8 +81,11 @@ export function RehireDetailPage() {
     }
   }
 
-  async function handleComplete() {
-    if (!confirm("This will reactivate the employee in the system. Continue?")) return;
+  function handleComplete() {
+    setShowCompleteConfirm(true);
+  }
+
+  async function confirmComplete() {
     setActionLoading(true);
     try {
       const res = await apiPost<any>(`/rehire/${id}/complete`);
@@ -91,51 +97,53 @@ export function RehireDetailPage() {
       toast.error(err.response?.data?.error?.message || "Failed to complete rehire");
     } finally {
       setActionLoading(false);
+      setShowCompleteConfirm(false);
     }
   }
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-rose-600 dark:text-rose-400" />
-      </div>
-    );
+    return <LoadingState label="Loading rehire request" />;
   }
 
   if (!data) {
     return (
-      <div className="text-center text-muted-foreground py-12">Rehire request not found.</div>
+      <div className="surface-card"><EmptyState icon={UserPlus} title="Rehire request not found." /></div>
     );
   }
 
   const employeeName = data.employee
     ? `${data.employee.first_name} ${data.employee.last_name}`
     : `Employee #${data.employee_id}`;
+  const activeLocale = document.documentElement.lang || navigator.language;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
+    <div className="app-page">
+      <header className="page-header">
+        <div className="flex items-start gap-3">
         <button
           onClick={() => navigate("/rehire")}
-          className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-muted-foreground"
+          className="button-secondary size-11 shrink-0 p-0"
+          aria-label="Back to rehire proposals"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Rehire: {employeeName}</h1>
-          <span className={`mt-1 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_COLORS[data.status] || "bg-muted text-muted-foreground"}`}>
+        <div className="page-header__content">
+          <p className="page-header__eyebrow">Rehire workflow</p>
+          <h1 className="page-title">Rehire: {employeeName}</h1>
+          <span className={`status-pill mt-2 border-transparent capitalize ${STATUS_COLORS[data.status] || "bg-muted text-muted-foreground"}`}>
             {data.status}
           </span>
         </div>
-      </div>
+        </div>
+      </header>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Left: Old profile */}
-        <div className="rounded-lg border border-border bg-card p-6">
-          <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+        <section className="surface-card p-5 sm:p-6">
+          <h2 className="mb-4 flex items-center gap-2 text-base font-semibold text-foreground">
             <Clock className="h-4 w-4 text-muted-foreground" />
             Previous Employment
-          </h3>
+          </h2>
           <dl className="space-y-3">
             <div>
               <dt className="text-xs text-muted-foreground">Name</dt>
@@ -186,14 +194,14 @@ export function RehireDetailPage() {
               </div>
             )}
           </dl>
-        </div>
+        </section>
 
         {/* Right: Proposed position */}
-        <div className="rounded-lg border border-border bg-card p-6">
-          <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+        <section className="surface-card p-5 sm:p-6">
+          <h2 className="mb-4 flex items-center gap-2 text-base font-semibold text-foreground">
             <Briefcase className="h-4 w-4 text-muted-foreground" />
             Proposed New Position
-          </h3>
+          </h2>
           <dl className="space-y-3">
             <div>
               <dt className="text-xs text-muted-foreground">Position</dt>
@@ -207,7 +215,7 @@ export function RehireDetailPage() {
               <dt className="text-xs text-muted-foreground">Proposed Salary</dt>
               <dd className="text-sm font-semibold text-foreground flex items-center gap-1">
                 <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
-                {(data.proposed_salary / 100).toLocaleString("en-IN")}
+                {new Intl.NumberFormat(activeLocale).format(data.proposed_salary / 100)}
               </dd>
             </div>
             {data.original_exit_date && (
@@ -227,7 +235,7 @@ export function RehireDetailPage() {
             )}
             <div>
               <dt className="text-xs text-muted-foreground">Proposed On</dt>
-              <dd className="text-sm text-muted-foreground">{new Date(data.created_at).toLocaleDateString()}</dd>
+              <dd className="text-sm text-muted-foreground">{formatDate(data.created_at, activeLocale)}</dd>
             </div>
           </dl>
 
@@ -237,13 +245,13 @@ export function RehireDetailPage() {
               <p className="text-sm text-muted-foreground whitespace-pre-line">{data.notes}</p>
             </div>
           )}
-        </div>
+        </section>
       </div>
 
       {/* Actions */}
       {data.status !== "hired" && data.status !== "rejected" && (
-        <div className="rounded-lg border border-border bg-card p-6">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Actions</h3>
+        <section className="surface-card p-5 sm:p-6">
+          <h2 className="mb-4 text-base font-semibold text-foreground">Actions</h2>
 
           <div className="mb-4">
             <label className="block text-xs text-muted-foreground mb-1">Add Note (optional)</label>
@@ -251,7 +259,7 @@ export function RehireDetailPage() {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
-              className="block w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+              className="control min-h-24 py-3"
               placeholder="Reason for status change..."
             />
           </div>
@@ -261,7 +269,7 @@ export function RehireDetailPage() {
               <button
                 onClick={() => handleStatusUpdate("screening")}
                 disabled={actionLoading}
-                className="inline-flex items-center gap-2 rounded-lg bg-yellow-500 px-4 py-2 text-sm font-medium text-white hover:bg-yellow-600 disabled:opacity-50"
+                className="button-base border border-amber-500 bg-amber-500 text-white hover:bg-amber-600"
               >
                 Move to Screening
               </button>
@@ -271,7 +279,7 @@ export function RehireDetailPage() {
                 <button
                   onClick={() => handleStatusUpdate("approved")}
                   disabled={actionLoading}
-                  className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+                  className="button-base border border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700"
                 >
                   <CheckCircle className="h-4 w-4" />
                   Approve
@@ -279,7 +287,7 @@ export function RehireDetailPage() {
                 <button
                   onClick={() => handleStatusUpdate("rejected")}
                   disabled={actionLoading}
-                  className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                  className="button-danger"
                 >
                   <XCircle className="h-4 w-4" />
                   Reject
@@ -290,15 +298,26 @@ export function RehireDetailPage() {
               <button
                 onClick={handleComplete}
                 disabled={actionLoading}
-                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+                className="button-base border border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700"
               >
                 <UserPlus className="h-4 w-4" />
                 Complete Rehire & Reactivate
               </button>
             )}
           </div>
-        </div>
+        </section>
       )}
+      <ConfirmDialog
+        open={showCompleteConfirm}
+        title="Complete rehire?"
+        message="This will reactivate the employee in the system and complete the rehire workflow."
+        confirmLabel="Complete rehire"
+        cancelLabel="Cancel"
+        tone="primary"
+        loading={actionLoading}
+        onConfirm={confirmComplete}
+        onCancel={() => setShowCompleteConfirm(false)}
+      />
     </div>
   );
 }

@@ -13,6 +13,7 @@
     "noData": "No hay datos disponibles",
     "success": "Éxito",
     "error": "Error",
+    "retry": "Reintentar",
     "confirm": "Confirmar",
     "back": "Volver",
     "next": "Siguiente",
@@ -52,6 +53,7 @@
     "changeLanguage": "Cambiar idioma",
     "openNavigationMenu": "Abrir menú de navegación",
     "closeNavigationMenu": "Cerrar menú de navegación",
+    "skipToMainContent": "Saltar al contenido principal",
     "unknown": "Desconocido",
     "user": "Usuario"
   },
@@ -75,7 +77,14 @@
     "myExit": "Mi salida",
     "myInterview": "Mi entrevista",
     "myKt": "Mi KT",
-    "logout": "Cerrar sesión"
+    "logout": "Cerrar sesión",
+    "overview": "Resumen",
+    "exitOperations": "Operaciones de salida",
+    "settlement": "Liquidación",
+    "handoverAssets": "Entrega y activos",
+    "alumniInsights": "Exalumnos e información",
+    "administration": "Administración",
+    "selfService": "Autoservicio"
   },
   "roles": {
     "superAdmin": "Superadministrador",

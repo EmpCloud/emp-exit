@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { DoorOpen, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { Button } from "@/components/ui/Button";
 import { useLogin } from "@/api/hooks";
 import { useAuthStore, homeFor } from "@/lib/auth-store";
 import toast from "react-hot-toast";
@@ -15,9 +17,11 @@ export function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setLoginError(null);
     try {
       const res = await loginMutation.mutateAsync({ email, password });
       if (res.success) {
@@ -25,32 +29,34 @@ export function LoginPage() {
         toast.success(`Welcome back, ${res.data.user.firstName}!`);
         navigate(homeFor(res.data.user));
       } else {
-        toast.error(res.error?.message || "Login failed");
+        setLoginError(res.error?.message || "Login failed");
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.error?.message || "Login failed. Check your credentials.");
+      setLoginError(err.response?.data?.error?.message || "Login failed. Check your credentials.");
     }
   }
 
   return (
-    <div className="flex min-h-screen">
+    <main className="flex min-h-dvh bg-background">
       {/* Left panel — brand */}
-      <div className="hidden lg:flex lg:w-1/2 items-center justify-center bg-gradient-to-br from-rose-600 to-rose-800 p-12">
-        <div className="max-w-md text-white">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-card/20">
-              <DoorOpen className="h-7 w-7 text-white" />
+      <section className="relative hidden overflow-hidden bg-gradient-to-br from-brand-950 via-brand-800 to-brand-600 px-12 py-16 lg:flex lg:w-[54%] lg:items-center lg:justify-center xl:px-20">
+        <div aria-hidden="true" className="absolute -start-24 -top-24 size-80 rounded-full bg-white/5 blur-2xl" />
+        <div aria-hidden="true" className="absolute -bottom-36 -end-24 size-[30rem] rounded-full bg-brand-400/20 blur-3xl" />
+        <div className="relative max-w-xl text-white">
+          <div className="mb-10 flex items-center gap-3">
+            <div className="grid size-12 place-items-center rounded-2xl border border-white/20 bg-white/10 shadow-lg backdrop-blur-sm">
+              <DoorOpen className="size-7 text-white" aria-hidden="true" />
             </div>
-            <span className="text-2xl font-bold">EMP Exit</span>
+            <span className="text-2xl font-bold tracking-tight">EMP Exit</span>
           </div>
-          <h2 className="text-3xl font-bold leading-tight mb-4">
+          <h1 className="mb-5 max-w-lg text-4xl font-bold leading-tight tracking-tight xl:text-5xl">
             Streamline employee exit management
-          </h2>
-          <p className="text-rose-100 text-lg leading-relaxed">
+          </h1>
+          <p className="max-w-lg text-lg leading-8 text-brand-100">
             Manage resignations, clearance, knowledge transfer, FnF settlements,
             exit interviews, and alumni networking -- all in one place.
           </p>
-          <div className="mt-10 grid grid-cols-2 gap-4">
+          <ul className="mt-10 grid grid-cols-2 gap-x-6 gap-y-4" aria-label="EMP Exit capabilities">
             {[
               "Exit workflows",
               "Clearance tracking",
@@ -61,89 +67,112 @@ export function LoginPage() {
               "Letter generation",
               "Analytics",
             ].map((feature) => (
-              <div key={feature} className="flex items-center gap-2 text-sm text-rose-100">
-                <div className="h-1.5 w-1.5 rounded-full bg-rose-300" />
-                {feature}
-              </div>
+              <li key={feature} className="flex items-center gap-3 text-sm font-medium text-brand-50">
+                <span aria-hidden="true" className="size-1.5 rounded-full bg-brand-200 shadow-[0_0_0_4px_rgba(255,255,255,0.08)]" />
+                <span>{feature}</span>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
-      </div>
+      </section>
 
       {/* Right panel — form */}
-      <div className="relative flex w-full lg:w-1/2 items-center justify-center bg-muted/50 px-4">
+      <section className="relative flex w-full items-center justify-center overflow-hidden bg-background px-4 py-24 sm:px-6 lg:w-[46%] lg:py-16">
+        <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,hsl(var(--primary)/0.08),transparent_38%)] dark:bg-[radial-gradient(circle_at_50%_40%,hsl(var(--primary)/0.12),transparent_42%)]" />
         {/* Theme toggle — pinned top-right (login is outside DashboardLayout) */}
-        <div className="absolute right-4 top-4">
+        <div className="absolute end-4 top-4 z-10 flex items-center gap-1 rounded-xl border border-border bg-card/80 p-1 shadow-sm backdrop-blur-sm sm:end-6 sm:top-6">
+          <LanguageSwitcher />
           <ThemeToggle />
         </div>
-        <div className="w-full max-w-sm">
+        <div className="relative w-full max-w-md">
           {/* Mobile logo */}
           <div className="mb-8 flex items-center justify-center gap-3 lg:hidden">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-600">
-              <DoorOpen className="h-6 w-6 text-white" />
+            <div className="grid size-11 place-items-center rounded-xl bg-primary shadow-md">
+              <DoorOpen className="size-6 text-primary-foreground" aria-hidden="true" />
             </div>
             <span className="text-xl font-bold text-foreground">EMP Exit</span>
           </div>
 
-          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-            <h2 className="text-2xl font-bold text-foreground">Welcome back</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Sign in to manage employee exits</p>
+          <div className="surface-card p-6 shadow-card sm:p-8">
+            <h2 className="text-2xl font-bold tracking-tight text-foreground">Welcome back</h2>
+            <p className="mt-1.5 text-sm leading-6 text-muted-foreground">Sign in to manage employee exits</p>
 
             {sessionExpired && (
-              <div className="mt-4 flex items-start gap-2 rounded-lg border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/40 px-3 py-2.5 text-sm text-amber-800 dark:text-amber-300">
-                <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+              <div role="status" className="mt-5 flex items-start gap-2.5 rounded-lg border border-warning/30 bg-warning/10 px-3.5 py-3 text-sm leading-5 text-foreground">
+                <AlertCircle className="mt-0.5 size-4 flex-shrink-0 text-warning" aria-hidden="true" />
                 <span>Your session has expired. Please log in again.</span>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+            {loginError && (
+              <div id="login-error" role="alert" className="mt-5 flex items-start gap-2.5 rounded-lg border border-danger/30 bg-danger/10 px-3.5 py-3 text-sm leading-5 text-danger dark:text-red-300">
+                <AlertCircle className="mt-0.5 size-4 flex-shrink-0" aria-hidden="true" />
+                <span>{loginError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="mt-6 space-y-5" aria-busy={loginMutation.isPending}>
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-muted-foreground">
+                <label htmlFor="email" className="field-label">
                   Email address
                 </label>
                 <input
                   id="email"
+                  name="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setLoginError(null);
+                  }}
                   required
                   autoComplete="email"
-                  className="mt-1 block w-full rounded-lg border border-border bg-card text-foreground px-3 py-2.5 text-sm shadow-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  spellCheck={false}
+                  aria-invalid={Boolean(loginError)}
+                  aria-describedby={loginError ? "login-error" : undefined}
+                  className="control"
                   placeholder="you@company.com"
                 />
               </div>
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-muted-foreground">
+                <label htmlFor="password" className="field-label">
                   Password
                 </label>
-                <div className="relative mt-1">
+                <div className="relative">
                   <input
                     id="password"
+                    name="password"
                     type={showPassword ? "text" : "password"}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setLoginError(null);
+                    }}
                     required
                     autoComplete="current-password"
-                    className="block w-full rounded-lg border border-border bg-card text-foreground px-3 py-2.5 pr-10 text-sm shadow-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                    aria-invalid={Boolean(loginError)}
+                    aria-describedby={loginError ? "login-error" : undefined}
+                    className="control pe-12"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground"
-                    tabIndex={-1}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-pressed={showPassword}
+                    className="absolute end-0 top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? <EyeOff className="size-4" aria-hidden="true" /> : <Eye className="size-4" aria-hidden="true" />}
                   </button>
                 </div>
               </div>
-              <button
+              <Button
                 type="submit"
                 disabled={loginMutation.isPending}
-                className="w-full rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full"
               >
-                {loginMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                {loginMutation.isPending && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
                 {loginMutation.isPending ? "Signing in..." : "Sign in"}
-              </button>
+              </Button>
             </form>
           </div>
 
@@ -151,7 +180,7 @@ export function LoginPage() {
             Part of the EMP HRMS ecosystem
           </p>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

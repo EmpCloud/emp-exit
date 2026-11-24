@@ -17,6 +17,7 @@ import type {
   ExitInterviewTemplate,
   InterviewQuestionType,
 } from "@emp-exit/shared";
+import { EmptyState, LoadingState } from "@/components/ui/States";
 
 interface InterviewDetail extends ExitInterview {
   responses: (ExitInterviewResponse & { question?: ExitInterviewQuestion })[];
@@ -138,7 +139,7 @@ export function MyExitInterviewPage() {
             onChange={(e) => handleAnswerChange(q.id, "text", e.target.value)}
             rows={4}
             disabled={isReadOnly}
-            className="w-full rounded-lg border border-border bg-card text-foreground px-4 py-3 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 disabled:bg-muted/50 disabled:text-muted-foreground"
+            className="control min-h-28 resize-y py-3 disabled:bg-muted/50 disabled:text-muted-foreground"
             placeholder="Share your thoughts..."
           />
         );
@@ -152,7 +153,7 @@ export function MyExitInterviewPage() {
                 disabled={isReadOnly}
                 onClick={() => handleAnswerChange(q.id, "rating", star)}
                 className={cn(
-                  "p-1 transition-all",
+                  "grid size-11 place-items-center rounded-lg transition-[color,transform] focus-visible:ring-2 focus-visible:ring-ring",
                   isReadOnly ? "cursor-default" : "cursor-pointer hover:scale-125",
                 )}
               >
@@ -167,7 +168,7 @@ export function MyExitInterviewPage() {
               </button>
             ))}
             {answer.rating && (
-              <span className="ml-3 text-sm font-medium text-muted-foreground">{answer.rating} / 5</span>
+              <span className="ms-3 text-sm font-medium text-muted-foreground">{answer.rating} / 5</span>
             )}
           </div>
         );
@@ -215,7 +216,7 @@ export function MyExitInterviewPage() {
                 disabled={isReadOnly}
                 onClick={() => handleAnswerChange(q.id, "text", opt.val)}
                 className={cn(
-                  "flex-1 rounded-lg border-2 px-6 py-3 text-sm font-medium transition-all",
+                  "min-h-11 flex-1 rounded-lg border-2 px-6 py-3 text-sm font-medium transition-[background-color,border-color,color]",
                   answer.text === opt.val
                     ? opt.bg
                     : "border-border text-muted-foreground hover:border-border",
@@ -234,44 +235,34 @@ export function MyExitInterviewPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-rose-200 dark:border-rose-900 border-t-rose-600" />
-      </div>
-    );
+    return <div className="surface-card"><LoadingState /></div>;
   }
 
   // No interview scheduled (covers both "no active exit" and "exit but no
   // interview yet" — in both cases there is nothing for the employee to fill in)
   if (!interview) {
     return (
-      <div className="space-y-6">
+      <div className="app-page">
         <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <MessageSquare className="h-6 w-6 text-rose-600 dark:text-rose-400" />
+          <h1 className="page-title flex items-center gap-2">
+            <MessageSquare className="size-6 text-primary" />
             My Exit Interview
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">Submit your exit interview responses.</p>
         </div>
-        <div className="rounded-lg border border-border bg-card p-12 text-center">
-          <Clock className="mx-auto h-12 w-12 text-muted-foreground/50" />
-          <h3 className="mt-4 text-sm font-medium text-foreground">Interview not yet scheduled</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Your exit interview has not been scheduled yet. HR will reach out soon.
-          </p>
-        </div>
+        <div className="surface-card"><EmptyState icon={Clock} title="Interview not yet scheduled" description="Your exit interview has not been scheduled yet. HR will reach out soon." /></div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="app-page mx-auto max-w-3xl">
       {/* Header */}
       <div className="text-center">
         <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-rose-100 dark:bg-rose-950/40 mb-3">
           <MessageSquare className="h-7 w-7 text-rose-600 dark:text-rose-400" />
         </div>
-        <h1 className="text-2xl font-bold text-foreground">Exit Interview</h1>
+        <h1 className="page-title">Exit Interview</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {template?.name || "Please share your feedback"} — your responses help us improve.
         </p>
@@ -305,7 +296,7 @@ export function MyExitInterviewPage() {
       {error && (
         <div className="rounded-lg border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 p-3 text-sm text-red-700 dark:text-red-300">
           {error}
-          <button onClick={() => setError(null)} className="ml-2 underline">
+          <button onClick={() => setError(null)} className="ms-2 underline">
             dismiss
           </button>
         </div>
@@ -314,7 +305,7 @@ export function MyExitInterviewPage() {
       {/* Questions */}
       <div className="space-y-5">
         {questions.map((q, idx) => (
-          <div key={q.id} className="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <div key={q.id} className="surface-card p-6">
             <div className="flex items-start gap-4">
               <span className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-rose-100 dark:bg-rose-950/40 text-sm font-bold text-rose-700 dark:text-rose-300 flex-shrink-0">
                 {idx + 1}
@@ -322,7 +313,7 @@ export function MyExitInterviewPage() {
               <div className="flex-1">
                 <p className="font-medium text-foreground text-base">
                   {q.question_text}
-                  {Boolean(Number(q.is_required)) && <span className="ml-1 text-red-500">*</span>}
+                  {Boolean(Number(q.is_required)) && <span className="ms-1 text-red-500">*</span>}
                 </p>
                 <div className="mt-4">{renderQuestionInput(q)}</div>
               </div>
@@ -333,7 +324,7 @@ export function MyExitInterviewPage() {
 
       {/* Overall feedback */}
       {questions.length > 0 && (
-        <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
+        <div className="surface-card p-6">
           <h3 className="font-semibold text-foreground mb-5">Overall Feedback</h3>
 
           {/* Overall rating */}
@@ -348,7 +339,7 @@ export function MyExitInterviewPage() {
                   disabled={isReadOnly}
                   onClick={() => setOverallRating(num)}
                   className={cn(
-                    "flex h-10 w-10 items-center justify-center rounded-lg text-sm font-semibold transition-all",
+                    "grid size-11 place-items-center rounded-lg text-sm font-semibold transition-[background-color,color,box-shadow]",
                     overallRating >= num
                       ? "bg-rose-600 text-white shadow-sm"
                       : "bg-muted text-muted-foreground hover:bg-muted",
@@ -376,7 +367,7 @@ export function MyExitInterviewPage() {
                   disabled={isReadOnly}
                   onClick={() => setWouldRecommend(opt.val)}
                   className={cn(
-                    "flex-1 rounded-lg border-2 px-6 py-3 text-sm font-medium transition-all",
+                    "min-h-11 flex-1 rounded-lg border-2 px-6 py-3 text-sm font-medium transition-[background-color,border-color,color]",
                     wouldRecommend === opt.val
                       ? opt.color
                       : "border-border text-muted-foreground hover:border-border",
@@ -397,7 +388,7 @@ export function MyExitInterviewPage() {
           <button
             onClick={handleSubmit}
             disabled={submitting}
-            className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-8 py-3 text-sm font-semibold text-white shadow-sm hover:bg-rose-700 disabled:opacity-50 transition-colors"
+            className="button-primary px-8"
           >
             <Send className="h-4 w-4" />
             {submitting ? "Submitting..." : "Submit My Responses"}

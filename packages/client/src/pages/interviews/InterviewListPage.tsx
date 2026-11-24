@@ -10,6 +10,11 @@ import {
 } from "lucide-react";
 import { apiGet } from "@/api/client";
 import { cn, formatDate } from "@/lib/utils";
+import { Page, PageActions, PageDescription, PageHeader, PageHeaderContent, PageTitle } from "@/components/ui/Page";
+import { Button } from "@/components/ui/Button";
+import { EmptyState, LoadingState } from "@/components/ui/States";
+import { Select } from "@/components/ui/Field";
+import { Table, TableScroll, TableShell } from "@/components/ui/Table";
 
 interface InterviewListItem {
   id: string;
@@ -75,46 +80,42 @@ export function InterviewListPage() {
   }, [fetchInterviews]);
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-rose-200 dark:border-rose-900 border-t-rose-600" />
-      </div>
-    );
+    return <div className="surface-card"><LoadingState /></div>;
   }
 
   return (
-    <div className="space-y-6">
+    <Page>
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <MessageSquare className="h-6 w-6 text-rose-600 dark:text-rose-400" />
+      <PageHeader>
+        <PageHeaderContent>
+          <PageTitle className="flex items-center gap-2">
+            <MessageSquare aria-hidden="true" className="size-6 text-primary" />
             Exit Interviews
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            View and manage scheduled exit interviews.
-          </p>
-        </div>
-        <button
+          </PageTitle>
+          <PageDescription>View and manage scheduled exit interviews.</PageDescription>
+        </PageHeaderContent>
+        <PageActions>
+        <Button
           onClick={() => navigate("/interviews/templates")}
-          className="inline-flex items-center gap-2 rounded-lg border border-rose-300 dark:border-rose-900 bg-card px-4 py-2 text-sm font-medium text-rose-700 dark:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+          variant="secondary"
         >
-          <Calendar className="h-4 w-4" />
+          <Calendar aria-hidden="true" className="size-4" />
           Manage Templates
-        </button>
-      </div>
+        </Button>
+        </PageActions>
+      </PageHeader>
 
       {/* Filter */}
-      <div className="flex items-center gap-3">
-        <select
+      <div className="surface-card flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <Select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-muted-foreground focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+          className="sm:max-w-64"
         >
           {STATUS_FILTERS.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
-        </select>
+        </Select>
         <span className="text-sm text-muted-foreground">
           {interviews.length} interview{interviews.length === 1 ? "" : "s"}
         </span>
@@ -122,40 +123,28 @@ export function InterviewListPage() {
 
       {/* List */}
       {interviews.length === 0 ? (
-        <div className="rounded-lg border border-border bg-card p-10 text-center">
-          <MessageSquare className="mx-auto h-12 w-12 text-muted-foreground/50" />
-          <h3 className="mt-4 text-sm font-medium text-foreground">No exit interviews yet</h3>
-          <p className="mt-2 mx-auto max-w-md text-sm text-muted-foreground">
-            Interviews are scheduled from an exit request. Open an exit and use its Interview tab to
-            schedule one.
-          </p>
-          <button
-            onClick={() => navigate("/exits")}
-            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 transition-colors"
-          >
-            View Exits
-          </button>
-        </div>
+        <div className="surface-card"><EmptyState icon={MessageSquare} title="No exit interviews yet" description="Interviews are scheduled from an exit request. Open an exit and use its Interview tab to schedule one." action={<Button onClick={() => navigate("/exits")}>View Exits</Button>} /></div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-border bg-card">
-          <table className="min-w-full divide-y divide-border">
-            <thead className="bg-muted/50">
+        <TableShell>
+          <TableScroll>
+          <Table>
+            <thead>
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Employee</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Scheduled</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Rating</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Status</th>
-                <th className="px-6 py-3" />
+                <th scope="col">Employee</th>
+                <th scope="col">Scheduled</th>
+                <th scope="col">Rating</th>
+                <th scope="col">Status</th>
+                <th scope="col"><span className="sr-only">Actions</span></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody>
               {interviews.map((iv) => {
                 const cfg = STATUS_CONFIG[iv.status] || STATUS_CONFIG.scheduled;
                 const name = iv.employee
                   ? `${iv.employee.first_name} ${iv.employee.last_name}`
                   : "—";
                 return (
-                  <tr key={iv.id} className="hover:bg-muted/50">
+                  <tr key={iv.id}>
                     <td className="px-6 py-4">
                       <p className="text-sm font-medium text-foreground">{name}</p>
                       {iv.employee?.designation && (
@@ -192,9 +181,10 @@ export function InterviewListPage() {
                 );
               })}
             </tbody>
-          </table>
-        </div>
+          </Table>
+          </TableScroll>
+        </TableShell>
       )}
-    </div>
+    </Page>
   );
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   GraduationCap,
@@ -16,6 +16,89 @@ import {
 import { apiGet, apiPost } from "@/api/client";
 import toast from "react-hot-toast";
 import { getInitials, formatDate } from "@/lib/utils";
+import { EmptyState, LoadingState } from "@/components/ui/States";
+
+function ModalShell({
+  titleId,
+  onClose,
+  busy = false,
+  children,
+}: {
+  titleId: string;
+  onClose: () => void;
+  busy?: boolean;
+  children: ReactNode;
+}) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+  const closeRef = useRef(onClose);
+  const busyRef = useRef(busy);
+  closeRef.current = onClose;
+  busyRef.current = busy;
+
+  useEffect(() => {
+    returnFocusRef.current = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    window.requestAnimationFrame(() => {
+      const firstControl = dialogRef.current?.querySelector<HTMLElement>(
+        'input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+      );
+      (firstControl ?? dialogRef.current)?.focus();
+    });
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !busyRef.current) {
+        event.preventDefault();
+        closeRef.current();
+        return;
+      }
+      if (event.key !== "Tab" || !dialogRef.current) return;
+
+      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>(
+        'input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+      ));
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      returnFocusRef.current?.focus();
+    };
+  }, []);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain bg-slate-950/55 p-4 backdrop-blur-sm"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget && !busyRef.current) closeRef.current();
+      }}
+    >
+      <div
+        ref={dialogRef}
+        className="surface-card w-full max-w-md p-6 shadow-floating"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
 
 export function AlumniListPage() {
   const navigate = useNavigate();
@@ -135,57 +218,56 @@ export function AlumniListPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Alumni Network</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Browse the alumni directory.</p>
+    <div className="app-page">
+      <header className="page-header">
+        <div className="page-header__content">
+          <p className="page-header__eyebrow">Alumni & Insights</p>
+          <h1 className="page-title">Alumni Network</h1>
+          <p className="page-subtitle">Browse the alumni directory.</p>
         </div>
         <button
           type="button"
           onClick={openAddModal}
-          className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+          className="button-primary"
         >
           <Plus className="h-4 w-4" />
           Add Alumni
         </button>
-      </div>
+      </header>
 
       {/* Search */}
-      <form onSubmit={handleSearch} className="flex gap-3">
+      <form onSubmit={handleSearch} className="surface-card flex flex-col gap-3 p-4 sm:flex-row">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search aria-hidden="true" className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
+            aria-label="Search alumni"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search alumni by name, email, or designation..."
-            className="block w-full rounded-lg border border-border bg-card text-foreground pl-10 pr-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+            className="control ps-10"
           />
         </div>
         <button
           type="submit"
-          className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+          className="button-primary"
         >
           Search
         </button>
       </form>
 
       {loading ? (
-        <div className="flex h-32 items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-rose-600 dark:text-rose-400" />
-        </div>
+        <LoadingState label="Loading alumni" />
       ) : alumni.length === 0 ? (
-        <div className="rounded-lg border border-border bg-card p-8 text-center">
-          <GraduationCap className="mx-auto h-10 w-10 text-muted-foreground/50 mb-3" />
-          <p className="text-sm font-medium text-muted-foreground">No alumni yet</p>
-          <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto">
+        <div className="surface-card">
+          <EmptyState icon={GraduationCap} title="No alumni yet" />
+          <p className="mx-auto -mt-8 max-w-md px-6 pb-8 text-center text-sm text-muted-foreground">
             Alumni profiles are created when a departing employee opts in
             via their self-service portal. You can also add one manually
             from a completed exit using the <strong>Add Alumni</strong>{" "}
             button above.
           </p>
-          <div className="mt-4 inline-flex items-center gap-2 rounded-md bg-blue-50 dark:bg-blue-950/40 px-3 py-1.5 text-xs text-blue-700 dark:text-blue-300">
+          <div className="mx-auto mb-8 flex w-fit items-center gap-2 rounded-md bg-blue-50 px-3 py-1.5 text-xs text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
             <Info className="h-3.5 w-3.5" />
             Tip: only completed exits can be promoted to alumni.
           </div>
@@ -200,7 +282,7 @@ export function AlumniListPage() {
               return (
                 <div
                   key={a.id}
-                  className="rounded-lg border border-border bg-card p-5 transition-colors duration-150 hover:border-brand-400"
+                  className="surface-card surface-card--interactive p-5"
                 >
                   <div className="flex items-start gap-3">
                     <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-sm font-semibold">
@@ -250,7 +332,7 @@ export function AlumniListPage() {
                         setRehireModal(a);
                         setRehireForm({ position: "", department: "", salary: "", notes: "" });
                       }}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 px-3 py-1.5 text-xs font-medium text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-950/40 transition-colors"
+                      className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-brand-50 px-3 text-xs font-semibold text-brand-700 transition-colors hover:bg-brand-100 dark:bg-brand-950/40 dark:text-brand-300 dark:hover:bg-brand-950/70"
                     >
                       <UserPlus className="h-3.5 w-3.5" />
                       Propose Rehire
@@ -263,7 +345,7 @@ export function AlumniListPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-muted-foreground">
                 Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} of {total}
               </p>
@@ -271,14 +353,16 @@ export function AlumniListPage() {
                 <button
                   onClick={() => setPage(Math.max(1, page - 1))}
                   disabled={page === 1}
-                  className="rounded-lg border border-border p-2 text-muted-foreground hover:bg-muted/50 disabled:opacity-50"
+                  className="button-secondary size-11 p-0"
+                  aria-label="Previous page"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setPage(Math.min(totalPages, page + 1))}
                   disabled={page === totalPages}
-                  className="rounded-lg border border-border p-2 text-muted-foreground hover:bg-muted/50 disabled:opacity-50"
+                  className="button-secondary size-11 p-0"
+                  aria-label="Next page"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>
@@ -290,56 +374,59 @@ export function AlumniListPage() {
 
       {/* Rehire Proposal Modal */}
       {rehireModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-card p-6 shadow-xl">
-            <h3 className="text-lg font-semibold text-foreground mb-4">
+        <ModalShell titleId="rehire-proposal-title" busy={submittingRehire} onClose={() => setRehireModal(null)}>
+            <h2 id="rehire-proposal-title" className="mb-4 text-lg font-semibold text-foreground">
               Propose Rehire
-            </h3>
+            </h2>
             <p className="text-sm text-muted-foreground mb-4">
               For: {rehireModal.first_name ? `${rehireModal.first_name} ${rehireModal.last_name || ""}` : `Alumni #${rehireModal.employee_id}`}
             </p>
             <form onSubmit={handleProposeRehire} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Position *</label>
+                <label htmlFor="rehire-position" className="block text-sm font-medium text-muted-foreground mb-1">Position *</label>
                 <input
+                  id="rehire-position"
                   type="text"
                   required
                   value={rehireForm.position}
                   onChange={(e) => setRehireForm({ ...rehireForm, position: e.target.value })}
-                  className="block w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  className="control"
                   placeholder="e.g. Senior Engineer"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Department</label>
+                <label htmlFor="rehire-department" className="block text-sm font-medium text-muted-foreground mb-1">Department</label>
                 <input
+                  id="rehire-department"
                   type="text"
                   value={rehireForm.department}
                   onChange={(e) => setRehireForm({ ...rehireForm, department: e.target.value })}
-                  className="block w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  className="control"
                   placeholder="e.g. Engineering"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Proposed Salary *</label>
+                <label htmlFor="rehire-salary" className="block text-sm font-medium text-muted-foreground mb-1">Proposed Salary *</label>
                 <input
+                  id="rehire-salary"
                   type="number"
                   required
                   min={0}
                   step="0.01"
                   value={rehireForm.salary}
                   onChange={(e) => setRehireForm({ ...rehireForm, salary: e.target.value })}
-                  className="block w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  className="control"
                   placeholder="Monthly salary"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Notes</label>
+                <label htmlFor="rehire-notes" className="block text-sm font-medium text-muted-foreground mb-1">Notes</label>
                 <textarea
+                  id="rehire-notes"
                   value={rehireForm.notes}
                   onChange={(e) => setRehireForm({ ...rehireForm, notes: e.target.value })}
                   rows={2}
-                  className="block w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  className="control min-h-24 py-3"
                   placeholder="Additional notes..."
                 />
               </div>
@@ -347,35 +434,33 @@ export function AlumniListPage() {
                 <button
                   type="button"
                   onClick={() => setRehireModal(null)}
-                  className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/50"
+                  className="button-secondary"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submittingRehire}
-                  className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50"
+                  className="button-primary"
                 >
                   {submittingRehire ? "Submitting..." : "Propose Rehire"}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+        </ModalShell>
       )}
 
       {/* Add Alumni modal — HR picks a completed exit and POSTs /alumni
           which resolves the employee_id from the exit row server-side. */}
       {addModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-lg bg-card p-6 shadow-xl">
-            <h3 className="text-lg font-semibold text-foreground mb-1">Add Alumni Profile</h3>
+        <ModalShell titleId="add-alumni-title" busy={submittingAdd} onClose={() => setAddModal(false)}>
+            <h2 id="add-alumni-title" className="mb-1 text-lg font-semibold text-foreground">Add Alumni Profile</h2>
             <p className="text-sm text-muted-foreground mb-4">
               Pick a completed exit to add to the alumni directory.
             </p>
             <form onSubmit={handleAddAlumni} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">
+                <label htmlFor="alumni-exit" className="block text-sm font-medium text-muted-foreground mb-1">
                   Exit *
                 </label>
                 {loadingExits ? (
@@ -389,10 +474,11 @@ export function AlumniListPage() {
                   </p>
                 ) : (
                   <select
+                    id="alumni-exit"
                     required
                     value={selectedExitId}
                     onChange={(e) => setSelectedExitId(e.target.value)}
-                    className="block w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                    className="control"
                   >
                     <option value="">Select an exit...</option>
                     {exits.map((ex: any) => {
@@ -414,21 +500,20 @@ export function AlumniListPage() {
                 <button
                   type="button"
                   onClick={() => setAddModal(false)}
-                  className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/50"
+                  className="button-secondary"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submittingAdd || !selectedExitId || exits.length === 0}
-                  className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50"
+                  className="button-primary"
                 >
                   {submittingAdd ? "Adding..." : "Add to Alumni"}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+        </ModalShell>
       )}
     </div>
   );

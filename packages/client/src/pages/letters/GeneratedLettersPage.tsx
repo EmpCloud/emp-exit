@@ -15,6 +15,10 @@ import { apiGet, apiPost } from "@/api/client";
 import { api } from "@/api/client";
 import toast from "react-hot-toast";
 import { cn, formatDate } from "@/lib/utils";
+import { Button, ButtonLink } from "@/components/ui/Button";
+import { FieldLabel, Input, Select } from "@/components/ui/Field";
+import { Page, PageActions, PageDescription, PageHeader, PageHeaderContent, PageTitle } from "@/components/ui/Page";
+import { EmptyState, LoadingState } from "@/components/ui/States";
 
 const LETTER_TYPES: Record<string, string> = {
   experience: "Experience Letter",
@@ -166,15 +170,12 @@ export function GeneratedLettersPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Generated Letters</h1>
-          <p className="mt-1 text-sm text-muted-foreground">View, download, and send generated exit letters.</p>
-        </div>
-        <div className="flex items-center gap-2">
+    <Page>
+      <PageHeader>
+        <PageHeaderContent><PageTitle>Generated Letters</PageTitle><PageDescription>View, download, and send generated exit letters.</PageDescription></PageHeaderContent>
+        <PageActions>
           {exitId && (
-            <button
+            <Button
               type="button"
               onClick={() => {
                 const next = new URLSearchParams(searchParams);
@@ -182,32 +183,32 @@ export function GeneratedLettersPage() {
                 setSearchParams(next);
                 setShowGenerate(false);
               }}
-              className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/50"
+              variant="secondary"
             >
               Switch exit
-            </button>
+            </Button>
           )}
           {/* "Manage templates" — letter templates live at /letters/templates
               but there was no UI link to it from anywhere, so users couldn't
               find the create-template flow. */}
-          <Link
+          <ButtonLink
             to="/letters/templates"
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/50"
+            variant="secondary"
           >
             <Settings2 className="h-4 w-4" />
             Manage Templates
-          </Link>
+          </ButtonLink>
           {exitId && (
-            <button
+            <Button
               onClick={() => setShowGenerate(!showGenerate)}
-              className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+              aria-expanded={showGenerate}
             >
               <Plus className="h-4 w-4" />
               Generate Letter
-            </button>
+            </Button>
           )}
-        </div>
-      </div>
+        </PageActions>
+      </PageHeader>
 
       {/* In-page exit picker — shown only when no exit is selected via the URL.
           Clicking a card sets ?exitId=... and the rest of the page renders
@@ -227,7 +228,7 @@ export function GeneratedLettersPage() {
           });
 
         return (
-          <div className="space-y-4">
+          <section className="surface-card space-y-4 p-5 sm:p-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-base font-semibold text-foreground">Select an exit</h2>
@@ -236,43 +237,30 @@ export function GeneratedLettersPage() {
                 </p>
               </div>
               <div className="relative w-full sm:w-72">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input
+                <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
                   value={exitSearch}
                   onChange={(e) => setExitSearch(e.target.value)}
                   placeholder="Search by name, code, designation…"
-                  className="w-full rounded-lg border border-border bg-card py-2 pl-9 pr-3 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  aria-label="Search exits"
+                  className="ps-9"
                 />
               </div>
             </div>
 
             {loadingExits ? (
-              <div className="flex h-40 items-center justify-center rounded-xl border border-border bg-card">
-                <Loader2 className="h-6 w-6 animate-spin text-rose-500" />
-              </div>
+              <LoadingState label="Loading exits" className="min-h-40" />
             ) : visible.length === 0 ? (
-              <div className="rounded-xl border border-border bg-card p-10 text-center">
-                <FileSignature className="mx-auto h-10 w-10 text-muted-foreground/50" />
-                <p className="mt-3 text-sm text-muted-foreground">
-                  {exitSearch
-                    ? "No exits match your search."
-                    : "No active exits found. Initiate an exit first to generate its letters."}
-                </p>
-              </div>
+              <EmptyState icon={FileSignature} className="min-h-40" title={exitSearch ? "No exits match your search." : "No active exits found. Initiate an exit first to generate its letters."} />
             ) : (
-              <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-                <table className="min-w-full divide-y divide-border">
-                  <thead className="bg-muted/50">
+              <div className="data-table-shell"><div className="data-table-scroll">
+                <table className="data-table">
+                  <thead>
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Employee</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Emp Code</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Exit Type</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Last Working Date</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Status</th>
-                      <th className="px-6 py-3" />
+                      <th scope="col">Employee</th><th scope="col">Emp Code</th><th scope="col">Exit Type</th><th scope="col">Last Working Date</th><th scope="col">Status</th><th scope="col"><span className="sr-only">Select</span></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border">
+                  <tbody>
                     {visible.map((exit) => {
                       const name = exit.employee
                         ? `${exit.employee.first_name} ${exit.employee.last_name}`
@@ -282,7 +270,7 @@ export function GeneratedLettersPage() {
                         <tr
                           key={exit.id}
                           onClick={() => selectExit(exit.id)}
-                          className="cursor-pointer transition-colors hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                          className="cursor-pointer"
                         >
                           <td className="whitespace-nowrap px-6 py-4">
                             <div className="flex items-center gap-3">
@@ -307,34 +295,42 @@ export function GeneratedLettersPage() {
                             {exit.last_working_date ? formatDate(exit.last_working_date) : "—"}
                           </td>
                           <td className="whitespace-nowrap px-6 py-4">
-                            <span className={cn("inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium", st.color)}>
+                            <span className={cn("status-pill border-transparent", st.color)}>
                               {st.label}
                             </span>
                           </td>
                           <td className="whitespace-nowrap px-6 py-4 text-right">
-                            <span className="inline-flex items-center gap-1 text-sm font-medium text-rose-600 dark:text-rose-400">
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                selectExit(exit.id);
+                              }}
+                              aria-label={`Select ${name}`}
+                              className="inline-flex min-h-10 items-center gap-1 rounded-lg px-2 text-sm font-medium text-rose-600 hover:bg-rose-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:text-rose-400 dark:hover:bg-rose-950/40"
+                            >
                               Select
-                              <ChevronRight className="h-4 w-4" />
-                            </span>
+                              <ChevronRight aria-hidden="true" className="h-4 w-4" />
+                            </button>
                           </td>
                         </tr>
                       );
                     })}
                   </tbody>
                 </table>
-              </div>
+              </div></div>
             )}
-          </div>
+          </section>
         );
       })()}
 
       {exitId && showGenerate && (
-        <form onSubmit={handleGenerate} className="rounded-lg border border-border bg-card p-6 space-y-4">
+        <form onSubmit={handleGenerate} className="surface-card space-y-5 p-5 sm:p-6">
           <h3 className="text-lg font-semibold text-foreground">Generate Letter</h3>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-muted-foreground">Template</label>
-              <select
+              <FieldLabel htmlFor="letter-template">Template</FieldLabel>
+              <Select id="letter-template"
                 value={generateForm.template_id}
                 onChange={(e) => {
                   const tpl = templates.find((t) => t.id === e.target.value);
@@ -343,7 +339,6 @@ export function GeneratedLettersPage() {
                     letter_type: tpl?.letter_type || "experience",
                   });
                 }}
-                className="mt-1 block w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
               >
                 <option value="">Select a template...</option>
                 {templates.map((t: any) => (
@@ -351,7 +346,7 @@ export function GeneratedLettersPage() {
                     {t.name} ({t.letter_type?.replace("_", " ")})
                   </option>
                 ))}
-              </select>
+              </Select>
               {templates.length === 0 && (
                 <p className="mt-2 text-xs text-muted-foreground">
                   No templates configured.{" "}
@@ -364,40 +359,34 @@ export function GeneratedLettersPage() {
             </div>
           </div>
           <div className="flex gap-3">
-            <button
+            <Button
               type="submit"
               disabled={generating}
-              className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50"
             >
               {generating ? "Generating..." : "Generate"}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => setShowGenerate(false)}
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/50"
+              variant="secondary"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </form>
       )}
 
       {/* Letters list — only relevant once an exit is selected. */}
       {exitId && (loading ? (
-        <div className="flex h-32 items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-rose-600 dark:text-rose-400" />
-        </div>
+        <LoadingState label="Loading generated letters" className="surface-card" />
       ) : letters.length === 0 ? (
-        <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
-          <FileSignature className="mx-auto h-10 w-10 text-muted-foreground/50 mb-3" />
-          No letters generated yet.
-        </div>
+        <EmptyState title="No letters generated yet." icon={FileSignature} className="surface-card" />
       ) : (
         <div className="space-y-3">
           {letters.map((letter: any) => (
             <div
               key={letter.id}
-              className="flex items-center justify-between rounded-lg border border-border bg-card p-4 hover:border-brand-400"
+              className="surface-card surface-card--interactive flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between"
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-50 dark:bg-rose-950/40">
@@ -414,25 +403,25 @@ export function GeneratedLettersPage() {
                 </div>
               </div>
               <div className="flex gap-2">
-                <button
+                <Button
                   onClick={() => handleDownload(letter.id, letter.letter_type)}
-                  className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted/50"
+                  variant="secondary" className="min-h-9 px-3 text-xs"
                 >
                   <Download className="h-3.5 w-3.5" />
                   Download
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => handleSend(letter.id)}
-                  className="inline-flex items-center gap-1 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-rose-700"
+                  className="min-h-9 px-3 text-xs"
                 >
                   <Send className="h-3.5 w-3.5" />
                   Send
-                </button>
+                </Button>
               </div>
             </div>
           ))}
         </div>
       ))}
-    </div>
+    </Page>
   );
 }

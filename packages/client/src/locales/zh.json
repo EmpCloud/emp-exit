@@ -13,6 +13,7 @@
     "noData": "暂无数据",
     "success": "成功",
     "error": "错误",
+    "retry": "重试",
     "confirm": "确认",
     "back": "返回",
     "next": "下一步",
@@ -52,6 +53,7 @@
     "changeLanguage": "切换语言",
     "openNavigationMenu": "打开导航菜单",
     "closeNavigationMenu": "关闭导航菜单",
+    "skipToMainContent": "跳转到主要内容",
     "unknown": "未知",
     "user": "用户"
   },
@@ -75,7 +77,14 @@
     "myExit": "我的离职",
     "myInterview": "我的面谈",
     "myKt": "我的KT",
-    "logout": "退出登录"
+    "logout": "退出登录",
+    "overview": "概览",
+    "exitOperations": "离职运营",
+    "settlement": "结算",
+    "handoverAssets": "交接与资产",
+    "alumniInsights": "校友与洞察",
+    "administration": "管理",
+    "selfService": "自助服务"
   },
   "roles": {
     "superAdmin": "超级管理员",

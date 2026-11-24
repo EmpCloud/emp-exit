@@ -13,6 +13,7 @@
     "noData": "لا توجد بيانات متاحة",
     "success": "نجاح",
     "error": "خطأ",
+    "retry": "حاول مرة أخرى",
     "confirm": "تأكيد",
     "back": "رجوع",
     "next": "التالي",
@@ -52,6 +53,7 @@
     "changeLanguage": "تغيير اللغة",
     "openNavigationMenu": "فتح قائمة التنقل",
     "closeNavigationMenu": "إغلاق قائمة التنقل",
+    "skipToMainContent": "الانتقال إلى المحتوى الرئيسي",
     "unknown": "غير معروف",
     "user": "مستخدم"
   },
@@ -75,7 +77,14 @@
     "myExit": "مغادرتي",
     "myInterview": "مقابلتي",
     "myKt": "تسليمي للمعرفة",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "overview": "نظرة عامة",
+    "exitOperations": "عمليات المغادرة",
+    "settlement": "التسوية",
+    "handoverAssets": "التسليم والأصول",
+    "alumniInsights": "الخريجون والرؤى",
+    "administration": "الإدارة",
+    "selfService": "الخدمة الذاتية"
   },
   "roles": {
     "superAdmin": "مدير عام",

@@ -3,11 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   Calculator,
   DollarSign,
-  Loader2,
   ArrowRight,
 } from "lucide-react";
 import { apiGet } from "@/api/client";
 import { cn, formatDate } from "@/lib/utils";
+import { Page, PageDescription, PageHeader, PageHeaderContent, PageTitle } from "@/components/ui/Page";
+import { Button } from "@/components/ui/Button";
+import { EmptyState, LoadingState } from "@/components/ui/States";
+import { Select } from "@/components/ui/Field";
+import { Table, TableScroll, TableShell } from "@/components/ui/Table";
 
 const STATUS_CONFIG: Record<string, { bg: string; label: string }> = {
   draft: { bg: "bg-muted text-muted-foreground", label: "Draft" },
@@ -76,77 +80,69 @@ export function FnFListPage() {
   }, [statusFilter]);
 
   return (
-    <div className="space-y-6">
+    <Page>
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-          <Calculator className="h-6 w-6 text-rose-600 dark:text-rose-400" />
-          Full & Final Settlements
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Manage FnF calculations, approvals, and payments.
-        </p>
-      </div>
+      <PageHeader>
+        <PageHeaderContent>
+          <PageTitle className="flex items-center gap-2">
+            <Calculator aria-hidden="true" className="size-6 text-primary" />
+            Full &amp; Final Settlements
+          </PageTitle>
+          <PageDescription>Manage FnF calculations, approvals, and payments.</PageDescription>
+        </PageHeaderContent>
+      </PageHeader>
 
       {/* Filter */}
-      <div className="flex items-center gap-3">
-        <select
+      <div className="surface-card flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <Select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-muted-foreground focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+          className="sm:max-w-64"
         >
           {STATUS_FILTERS.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
             </option>
           ))}
-        </select>
+        </Select>
         <span className="text-sm text-muted-foreground">
-          {loading ? "Loading…" : `${rows.length} settlement${rows.length === 1 ? "" : "s"}`}
+          {loading ? null : `${rows.length} settlement${rows.length === 1 ? "" : "s"}`}
         </span>
       </div>
 
       {/* List */}
       {loading ? (
-        <div className="flex h-64 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-rose-600 dark:text-rose-400" />
-        </div>
+        <div className="surface-card"><LoadingState /></div>
       ) : rows.length === 0 ? (
-        <div className="rounded-lg border border-border bg-card p-10 text-center">
-          <DollarSign className="mx-auto h-12 w-12 text-muted-foreground/50" />
-          <h3 className="mt-4 text-sm font-medium text-foreground">No FnF settlements yet</h3>
-          <p className="mt-2 mx-auto max-w-lg text-sm text-muted-foreground">
-            FnF settlements are created from an exit request. Open an exit and calculate its
-            full &amp; final settlement to see it here.
-          </p>
-          <button
-            onClick={() => navigate("/exits")}
-            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 transition-colors"
-          >
-            View Exits
-            <ArrowRight className="h-4 w-4" />
-          </button>
+        <div className="surface-card">
+          <EmptyState
+            icon={DollarSign}
+            title="No FnF settlements yet"
+            description="FnF settlements are created from an exit request. Open an exit and calculate its full & final settlement to see it here."
+            action={<Button onClick={() => navigate("/exits")}>View Exits <ArrowRight aria-hidden="true" className="size-4" /></Button>}
+          />
         </div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-border bg-card">
-          <table className="min-w-full divide-y divide-border">
-            <thead className="bg-muted/50">
+        <TableShell>
+          <TableScroll>
+          <Table>
+            <thead>
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Employee</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Last Working Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Net Payable</th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">Status</th>
-                <th className="px-6 py-3" />
+                <th scope="col">Employee</th>
+                <th scope="col">Last Working Date</th>
+                <th scope="col">Net Payable</th>
+                <th scope="col">Status</th>
+                <th scope="col"><span className="sr-only">Actions</span></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody>
               {rows.map((r) => {
                 const cfg = STATUS_CONFIG[r.status] || STATUS_CONFIG.draft;
                 const name = r.employee
                   ? `${r.employee.first_name} ${r.employee.last_name}`
                   : "—";
                 return (
-                  <tr key={r.id} className="hover:bg-muted/50">
+                  <tr key={r.id}>
                     <td className="px-6 py-4">
                       <Link
                         to={`/fnf/${r.exit_request_id}`}
@@ -187,14 +183,15 @@ export function FnFListPage() {
                 );
               })}
             </tbody>
-          </table>
-        </div>
+          </Table>
+          </TableScroll>
+        </TableShell>
       )}
 
       {/* Workflow legend */}
-      <div className="rounded-lg border border-border bg-card p-5">
+      <div className="surface-card p-5">
         <h4 className="mb-4 text-center text-sm font-medium text-muted-foreground">Settlement Workflow</h4>
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex flex-wrap items-center justify-center gap-2">
           {["draft", "calculated", "approved", "paid"].map((status, idx) => {
             const cfg = STATUS_CONFIG[status];
             return (
@@ -213,6 +210,6 @@ export function FnFListPage() {
           })}
         </div>
       </div>
-    </div>
+    </Page>
   );
 }

@@ -13,6 +13,7 @@
     "noData": "データがありません",
     "success": "成功",
     "error": "エラー",
+    "retry": "再試行",
     "confirm": "確認",
     "back": "戻る",
     "next": "次へ",
@@ -52,6 +53,7 @@
     "changeLanguage": "言語を変更",
     "openNavigationMenu": "ナビゲーションメニューを開く",
     "closeNavigationMenu": "ナビゲーションメニューを閉じる",
+    "skipToMainContent": "メインコンテンツへ移動",
     "unknown": "不明",
     "user": "ユーザー"
   },
@@ -75,7 +77,14 @@
     "myExit": "自分の退職",
     "myInterview": "自分の面談",
     "myKt": "自分のKT",
-    "logout": "ログアウト"
+    "logout": "ログアウト",
+    "overview": "概要",
+    "exitOperations": "退職手続き",
+    "settlement": "精算",
+    "handoverAssets": "引き継ぎと資産",
+    "alumniInsights": "アルムナイと分析",
+    "administration": "管理",
+    "selfService": "セルフサービス"
   },
   "roles": {
     "superAdmin": "スーパー管理者",

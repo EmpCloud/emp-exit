@@ -21,6 +21,8 @@ import type {
   ExitInterviewQuestion,
 } from "@emp-exit/shared";
 import { InterviewQuestionType } from "@emp-exit/shared";
+import { EmptyState, LoadingState } from "@/components/ui/States";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 const QUESTION_TYPES: { value: InterviewQuestionType; label: string; icon: React.ReactNode }[] = [
   { value: InterviewQuestionType.TEXT, label: "Text", icon: <AlignLeft className="h-4 w-4" /> },
@@ -69,6 +71,8 @@ export function InterviewTemplatesPage() {
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const [error, setError] = useState<string | null>(null);
+  const [deleteTemplateTarget, setDeleteTemplateTarget] = useState<{ id: string; name: string } | null>(null);
+  const [deletingTemplate, setDeletingTemplate] = useState(false);
 
   const fetchTemplates = useCallback(async () => {
     try {
@@ -206,10 +210,14 @@ export function InterviewTemplatesPage() {
     }
   };
 
-  const handleDeleteTemplate = async (templateId: string, templateName: string) => {
-    if (!confirm(`Delete template "${templateName}" and all its questions? This cannot be undone.`)) {
-      return;
-    }
+  const handleDeleteTemplate = (templateId: string, templateName: string) => {
+    setDeleteTemplateTarget({ id: templateId, name: templateName });
+  };
+
+  const confirmDeleteTemplate = async () => {
+    if (!deleteTemplateTarget) return;
+    setDeletingTemplate(true);
+    const templateId = deleteTemplateTarget.id;
     try {
       await apiDelete(`/interviews/templates/${templateId}`);
       if (expandedId === templateId) {
@@ -219,9 +227,12 @@ export function InterviewTemplatesPage() {
       if (editingTemplate === templateId) {
         setEditingTemplate(null);
       }
+      setDeleteTemplateTarget(null);
       await fetchTemplates();
     } catch {
       setError("Failed to delete template");
+    } finally {
+      setDeletingTemplate(false);
     }
   };
 
@@ -261,23 +272,19 @@ export function InterviewTemplatesPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-rose-200 dark:border-rose-900 border-t-rose-600" />
-      </div>
-    );
+    return <div className="surface-card"><LoadingState /></div>;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="app-page">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <MessageSquare className="h-6 w-6 text-rose-600 dark:text-rose-400" />
+      <div className="page-header">
+        <div className="page-header__content">
+          <h1 className="page-title flex items-center gap-2">
+            <MessageSquare className="size-6 text-primary" />
             Interview Templates
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="page-subtitle">
             Manage exit interview question templates.
           </p>
         </div>
@@ -289,7 +296,7 @@ export function InterviewTemplatesPage() {
             setFormDesc("");
             setFormDefault(false);
           }}
-          className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-rose-700 transition-colors"
+          className="button-primary"
         >
           <Plus className="h-4 w-4" />
           New Template
@@ -299,7 +306,7 @@ export function InterviewTemplatesPage() {
       {error && (
         <div className="rounded-lg border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 p-3 text-sm text-red-700 dark:text-red-300">
           {error}
-          <button onClick={() => setError(null)} className="ml-2 underline">
+          <button onClick={() => setError(null)} className="ms-2 underline">
             dismiss
           </button>
         </div>
@@ -307,7 +314,7 @@ export function InterviewTemplatesPage() {
 
       {/* Create / Edit Template Form */}
       {(showCreate || editingTemplate) && (
-        <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
+        <div className="surface-card p-6">
           <h2 className="text-lg font-semibold text-foreground mb-4">
             {editingTemplate ? "Edit Template" : "Create Template"}
           </h2>
@@ -318,7 +325,7 @@ export function InterviewTemplatesPage() {
                 type="text"
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
-                className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                className="control"
                 placeholder="e.g. Standard Exit Interview"
               />
             </div>
@@ -328,7 +335,7 @@ export function InterviewTemplatesPage() {
                 value={formDesc}
                 onChange={(e) => setFormDesc(e.target.value)}
                 rows={2}
-                className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                className="control min-h-24 py-3"
                 placeholder="Optional description..."
               />
             </div>
@@ -348,7 +355,7 @@ export function InterviewTemplatesPage() {
                     ? () => handleUpdateTemplate(editingTemplate)
                     : handleCreateTemplate
                 }
-                className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 transition-colors"
+                className="button-primary"
               >
                 {editingTemplate ? "Save Changes" : "Create Template"}
               </button>
@@ -357,7 +364,7 @@ export function InterviewTemplatesPage() {
                   setShowCreate(false);
                   setEditingTemplate(null);
                 }}
-                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
+                className="button-secondary"
               >
                 Cancel
               </button>
@@ -368,21 +375,17 @@ export function InterviewTemplatesPage() {
 
       {/* Templates List */}
       {templates.length === 0 ? (
-        <div className="rounded-lg border border-border bg-card p-12 text-center">
-          <MessageSquare className="mx-auto h-12 w-12 text-muted-foreground/50" />
-          <h3 className="mt-4 text-sm font-medium text-foreground">No templates yet</h3>
-          <p className="mt-1 text-sm text-muted-foreground">Create your first exit interview template.</p>
-        </div>
+        <div className="surface-card"><EmptyState icon={MessageSquare} title="No templates yet" description="Create your first exit interview template." /></div>
       ) : (
         <div className="space-y-3">
           {templates.map((t) => (
             <div
               key={t.id}
-              className="rounded-lg border border-border bg-card shadow-sm overflow-hidden"
+              className="surface-card overflow-hidden"
             >
               {/* Template header row */}
               <div
-                className="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                className="flex min-h-16 cursor-pointer items-center justify-between px-6 py-4 transition-colors hover:bg-muted/50"
                 onClick={() => setExpandedId(expandedId === t.id ? null : t.id)}
               >
                 <div className="flex items-center gap-3">
@@ -416,7 +419,7 @@ export function InterviewTemplatesPage() {
                       e.stopPropagation();
                       startEditTemplate(t);
                     }}
-                    className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-muted-foreground"
+                    className="grid size-11 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
                     title="Edit template"
                   >
                     <Pencil className="h-4 w-4" />
@@ -426,7 +429,7 @@ export function InterviewTemplatesPage() {
                       e.stopPropagation();
                       handleDeleteTemplate(t.id, t.name);
                     }}
-                    className="rounded p-1.5 text-muted-foreground hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-600 dark:text-red-400"
+                    className="grid size-11 place-items-center rounded-lg text-muted-foreground hover:bg-red-50 hover:text-red-600 dark:bg-transparent dark:text-red-400 dark:hover:bg-red-950/40"
                     title="Delete template"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -446,7 +449,7 @@ export function InterviewTemplatesPage() {
                         resetQuestionForm();
                         setShowAddQuestion(true);
                       }}
-                      className="inline-flex items-center gap-1 rounded-lg border border-rose-300 dark:border-rose-900 bg-card px-3 py-1.5 text-xs font-medium text-rose-700 dark:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                      className="button-secondary px-3 text-xs text-primary"
                     >
                       <Plus className="h-3 w-3" />
                       Add Question
@@ -502,13 +505,15 @@ export function InterviewTemplatesPage() {
                         <div className="flex gap-1">
                           <button
                             onClick={() => startEditQuestion(q)}
-                            className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-muted-foreground"
+                            className="grid size-11 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+                            aria-label="Edit question"
                           >
                             <Pencil className="h-3.5 w-3.5" />
                           </button>
                           <button
                             onClick={() => handleDeleteQuestion(q.id)}
-                            className="rounded p-1 text-muted-foreground hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-600 dark:text-red-400"
+                            className="grid size-11 place-items-center rounded-lg text-muted-foreground hover:bg-red-50 hover:text-red-600 dark:bg-transparent dark:text-red-400 dark:hover:bg-red-950/40"
+                            aria-label="Delete question"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
@@ -519,7 +524,7 @@ export function InterviewTemplatesPage() {
 
                   {/* Add / Edit Question Form */}
                   {showAddQuestion && (
-                    <div className="mt-3 rounded-lg border border-rose-200 dark:border-rose-900 bg-card p-4">
+                    <div className="mt-3 rounded-xl border border-brand-200 bg-card p-4 shadow-sm dark:border-brand-900">
                       <h4 className="text-sm font-medium text-foreground mb-3">
                         {editingQuestionId ? "Edit Question" : "Add Question"}
                       </h4>
@@ -532,7 +537,7 @@ export function InterviewTemplatesPage() {
                             value={qText}
                             onChange={(e) => setQText(e.target.value)}
                             rows={2}
-                            className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                            className="control min-h-20 resize-y py-3"
                             placeholder="Enter your question..."
                           />
                         </div>
@@ -547,7 +552,7 @@ export function InterviewTemplatesPage() {
                                   key={qt.value}
                                   onClick={() => setQType(qt.value)}
                                   className={cn(
-                                    "flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors",
+                                    "min-h-11 flex items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-colors",
                                     qType === qt.value
                                       ? "border-rose-300 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300"
                                       : "border-border text-muted-foreground hover:bg-muted/50",
@@ -580,7 +585,7 @@ export function InterviewTemplatesPage() {
                               type="text"
                               value={qOptions}
                               onChange={(e) => setQOptions(e.target.value)}
-                              className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                              className="control"
                               placeholder="e.g. Very Satisfied, Satisfied, Neutral, Dissatisfied"
                             />
                           </div>
@@ -588,14 +593,14 @@ export function InterviewTemplatesPage() {
                         <div className="flex gap-2">
                           <button
                             onClick={editingQuestionId ? handleUpdateQuestion : handleAddQuestion}
-                            className="inline-flex items-center gap-1 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-rose-700 transition-colors"
+                            className="button-primary px-3 text-xs"
                           >
                             <Check className="h-3 w-3" />
                             {editingQuestionId ? "Save" : "Add"}
                           </button>
                           <button
                             onClick={resetQuestionForm}
-                            className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
+                            className="button-secondary px-3 text-xs"
                           >
                             <X className="h-3 w-3" />
                             Cancel
@@ -610,6 +615,17 @@ export function InterviewTemplatesPage() {
           ))}
         </div>
       )}
+      <ConfirmDialog
+        open={deleteTemplateTarget !== null}
+        title="Delete interview template?"
+        message={`Delete template “${deleteTemplateTarget?.name ?? ""}” and all its questions? This cannot be undone.`}
+        confirmLabel="Delete template"
+        cancelLabel="Cancel"
+        tone="danger"
+        loading={deletingTemplate}
+        onConfirm={confirmDeleteTemplate}
+        onCancel={() => setDeleteTemplateTarget(null)}
+      />
     </div>
   );
 }

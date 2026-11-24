@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { UserMinus, Loader2 } from "lucide-react";
 import { apiPost } from "@/api/client";
 import { homeFor } from "@/lib/auth-store";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent } from "@/components/ui/Card";
+import { FieldLabel, Input, Select, Textarea } from "@/components/ui/Field";
+import { Page, PageDescription, PageHeader, PageHeaderContent, PageTitle } from "@/components/ui/Page";
 
 const REASON_CATEGORIES = [
   { value: "better_opportunity", label: "Better Opportunity" },
@@ -52,30 +56,27 @@ export function ResignationPage() {
 
   if (success) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Submit Resignation</h1>
-        </div>
-        <div className="rounded-xl border border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-950/40 p-8 text-center">
-          <UserMinus className="mx-auto h-12 w-12 text-green-500 mb-4" />
+      <Page>
+        <PageHeader><PageHeaderContent><PageTitle>Submit Resignation</PageTitle></PageHeaderContent></PageHeader>
+        <Card className="border-emerald-200 bg-emerald-50/70 dark:border-emerald-900 dark:bg-emerald-950/30">
+          <CardContent className="py-10 text-center">
+          <span className="mx-auto mb-4 grid size-14 place-items-center rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-300"><UserMinus aria-hidden="true" className="size-7" /></span>
           <h2 className="text-lg font-semibold text-green-800 dark:text-green-300">Resignation Submitted</h2>
           <p className="mt-2 text-sm text-green-700 dark:text-green-300">
             Your resignation has been submitted successfully. Redirecting to your exit status...
           </p>
-        </div>
-      </div>
+          </CardContent>
+        </Card>
+      </Page>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Submit Resignation</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Submit your resignation request.</p>
-      </div>
+    <Page>
+      <PageHeader><PageHeaderContent><PageTitle>Submit Resignation</PageTitle><PageDescription>Submit your resignation request.</PageDescription></PageHeaderContent></PageHeader>
 
-      <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">
-        <div className="rounded-xl border border-border bg-card p-6 space-y-5">
+      <form onSubmit={handleSubmit} className="max-w-3xl space-y-5">
+        <Card><CardContent className="space-y-5 pt-6">
           {error && (
             <div className="rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 px-4 py-3 text-sm text-red-700 dark:text-red-300">
               {error}
@@ -84,77 +85,72 @@ export function ResignationPage() {
 
           {/* Reason Category */}
           <div>
-            <label htmlFor="reason_category" className="block text-sm font-medium text-muted-foreground mb-1">
+            <FieldLabel htmlFor="reason_category">
               Reason for Leaving <span className="text-red-500">*</span>
-            </label>
-            <select
+            </FieldLabel>
+            <Select
               id="reason_category"
               required
               value={reasonCategory}
               onChange={(e) => setReasonCategory(e.target.value)}
-              className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
             >
               <option value="" disabled>Select a reason…</option>
               {REASON_CATEGORIES.map((r) => (
                 <option key={r.value} value={r.value}>{r.label}</option>
               ))}
-            </select>
+            </Select>
           </div>
 
           {/* Reason Detail */}
           <div>
-            <label htmlFor="reason_detail" className="block text-sm font-medium text-muted-foreground mb-1">
+            <FieldLabel htmlFor="reason_detail">
               Additional Details
-            </label>
-            <textarea
+            </FieldLabel>
+            <Textarea
               id="reason_detail"
               value={reasonDetail}
               onChange={(e) => setReasonDetail(e.target.value)}
               rows={4}
               placeholder="Please share any additional details about your decision..."
-              className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
             />
           </div>
 
           {/* Dates */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="resignation_date" className="block text-sm font-medium text-muted-foreground mb-1">
+              <FieldLabel htmlFor="resignation_date">
                 Resignation Date <span className="text-red-500">*</span>
-              </label>
-              <input
+              </FieldLabel>
+              <Input
                 id="resignation_date"
                 type="date"
                 required
                 value={resignationDate}
                 onChange={(e) => setResignationDate(e.target.value)}
-                className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
               />
             </div>
             <div>
-              <label htmlFor="last_working_date" className="block text-sm font-medium text-muted-foreground mb-1">
+              <FieldLabel htmlFor="last_working_date">
                 Preferred Last Working Date
-              </label>
-              <input
+              </FieldLabel>
+              <Input
                 id="last_working_date"
                 type="date"
                 value={lastWorkingDate}
                 onChange={(e) => setLastWorkingDate(e.target.value)}
-                className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
               />
               <p className="mt-1 text-xs text-muted-foreground">
                 Subject to notice period requirements.
               </p>
             </div>
           </div>
-        </div>
+        </CardContent></Card>
 
         {/* Actions */}
         <div className="flex items-center gap-3">
-          <button
+          <Button
             type="submit"
             disabled={submitting || !resignationDate || !reasonCategory}
-            className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {submitting ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -162,16 +158,16 @@ export function ResignationPage() {
               <UserMinus className="h-4 w-4" />
             )}
             Submit Resignation
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={() => navigate(homeFor())}
-            className="rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
+            variant="secondary"
           >
             Cancel
-          </button>
+          </Button>
         </div>
       </form>
-    </div>
+    </Page>
   );
 }

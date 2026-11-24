@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Loader2,
   Calculator,
@@ -8,6 +8,12 @@ import {
 } from "lucide-react";
 import { apiGet, apiPost } from "@/api/client";
 import { cn, formatDate } from "@/lib/utils";
+import { Button } from "@/components/ui/Button";
+import { Select, Textarea } from "@/components/ui/Field";
+import { Page, PageActions, PageDescription, PageHeader, PageHeaderContent, PageTitle } from "@/components/ui/Page";
+import { EmptyState, LoadingState } from "@/components/ui/States";
+import { Table, TableFooter, TableScroll, TableShell } from "@/components/ui/Table";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 function formatINR(amountPaise: number): string {
   const rupees = amountPaise / 100;
@@ -37,12 +43,55 @@ export function BuyoutListPage() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [approveId, setApproveId] = useState<string | null>(null);
   const [rejectId, setRejectId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const rejectDialogRef = useRef<HTMLDivElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+  const rejectBusyRef = useRef(false);
+  const rejectOpen = rejectId !== null;
+  rejectBusyRef.current = Boolean(rejectId && actionLoading === rejectId);
 
   useEffect(() => {
     loadBuyouts();
   }, [statusFilter]);
+
+  useEffect(() => {
+    if (!rejectOpen) return;
+    returnFocusRef.current = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.requestAnimationFrame(() => document.getElementById("buyout-reject-reason")?.focus());
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !rejectBusyRef.current) {
+        event.preventDefault();
+        setRejectId(null);
+        setRejectReason("");
+        return;
+      }
+      if (event.key !== "Tab" || !rejectDialogRef.current) return;
+      const focusable = Array.from(rejectDialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+      ));
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      returnFocusRef.current?.focus();
+    };
+  }, [rejectOpen]);
 
   async function loadBuyouts() {
     setLoading(true);
@@ -60,7 +109,6 @@ export function BuyoutListPage() {
   }
 
   async function handleApprove(id: string) {
-    if (!confirm("Are you sure you want to approve this buyout request? The employee's last working date will be updated.")) return;
     setActionLoading(id);
     try {
       await apiPost(`/buyout/${id}/approve`);
@@ -69,6 +117,7 @@ export function BuyoutListPage() {
       // handled
     } finally {
       setActionLoading(null);
+      setApproveId(null);
     }
   }
 
@@ -88,72 +137,68 @@ export function BuyoutListPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Notice Buyout Requests</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+    <Page>
+      <PageHeader>
+        <PageHeaderContent>
+          <PageTitle>Notice Buyout Requests</PageTitle>
+          <PageDescription>
             Review and manage employee notice period buyout requests.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <select
+          </PageDescription>
+        </PageHeaderContent>
+        <PageActions>
+          <Select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-muted-foreground focus:border-rose-500 focus:ring-2 focus:ring-rose-500 focus:outline-none"
+            aria-label="Filter by status"
+            className="min-w-44"
           >
             <option value="">All Statuses</option>
             <option value="pending">Pending</option>
             <option value="approved">Approved</option>
             <option value="rejected">Rejected</option>
-          </select>
-        </div>
-      </div>
+          </Select>
+        </PageActions>
+      </PageHeader>
 
       {loading ? (
-        <div className="flex h-64 items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-rose-600 dark:text-rose-400" />
-        </div>
+        <LoadingState label="Loading buyout requests" className="surface-card" />
       ) : buyouts.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-12 text-center">
-          <Calculator className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
-          <p className="text-muted-foreground">No buyout requests found.</p>
-        </div>
+        <EmptyState title="No buyout requests found." icon={Calculator} className="surface-card" />
       ) : (
-        <div className="rounded-xl border border-border bg-card overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-border">
-              <thead className="bg-muted/50">
+        <TableShell>
+          <TableScroll>
+            <Table>
+              <thead>
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  <th scope="col">
                     Employee
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  <th scope="col">
                     Original Date
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  <th scope="col">
                     Requested Date
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  <th scope="col">
                     Days Bought Out
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  <th scope="col">
                     Amount
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  <th scope="col">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  <th scope="col" className="text-end">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border bg-card">
+              <tbody>
                 {buyouts.map((b: any) => {
                   const StatusIcon = STATUS_ICONS[b.status] || Clock;
                   return (
-                    <tr key={b.id} className="hover:bg-muted/50">
-                      <td className="whitespace-nowrap px-6 py-4">
+                    <tr key={b.id}>
+                      <td className="whitespace-nowrap">
                         <p className="text-sm font-medium text-foreground">
                           {b.employee
                             ? `${b.employee.first_name} ${b.employee.last_name}`
@@ -161,22 +206,22 @@ export function BuyoutListPage() {
                         </p>
                         <p className="text-xs text-muted-foreground">Exit: {b.exit_request_id?.slice(0, 8)}...</p>
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-muted-foreground">
+                      <td className="whitespace-nowrap text-muted-foreground">
                         {formatDate(b.original_last_date)}
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-muted-foreground">
+                      <td className="whitespace-nowrap text-muted-foreground">
                         {formatDate(b.requested_last_date)}
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-foreground">
+                      <td className="whitespace-nowrap font-medium text-foreground">
                         {b.remaining_days} days
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm font-semibold text-foreground">
+                      <td className="whitespace-nowrap font-semibold text-foreground">
                         {formatINR(b.buyout_amount)}
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4">
+                      <td className="whitespace-nowrap">
                         <span
                           className={cn(
-                            "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium capitalize",
+                            "status-pill capitalize",
                             STATUS_COLORS[b.status],
                           )}
                         >
@@ -184,13 +229,14 @@ export function BuyoutListPage() {
                           {b.status}
                         </span>
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-right">
+                      <td className="whitespace-nowrap text-end">
                         {b.status === "pending" && (
                           <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => handleApprove(b.id)}
+                            <Button
+                              onClick={() => setApproveId(b.id)}
                               disabled={actionLoading === b.id}
-                              className="inline-flex items-center gap-1 rounded-md bg-green-50 dark:bg-green-950/40 px-2.5 py-1.5 text-xs font-medium text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-950/40 disabled:opacity-50"
+                              variant="ghost"
+                              className="min-h-9 px-2.5 text-xs text-emerald-700 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-950/40"
                             >
                               {actionLoading === b.id ? (
                                 <Loader2 className="h-3 w-3 animate-spin" />
@@ -198,15 +244,16 @@ export function BuyoutListPage() {
                                 <CheckCircle className="h-3 w-3" />
                               )}
                               Approve
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                               onClick={() => setRejectId(b.id)}
                               disabled={actionLoading === b.id}
-                              className="inline-flex items-center gap-1 rounded-md bg-red-50 dark:bg-red-950/40 px-2.5 py-1.5 text-xs font-medium text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-950/40 disabled:opacity-50"
+                              variant="ghost"
+                              className="min-h-9 px-2.5 text-xs text-red-700 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-950/40"
                             >
                               <XCircle className="h-3 w-3" />
                               Reject
-                            </button>
+                            </Button>
                           </div>
                         )}
                         {b.status === "rejected" && b.rejected_reason && (
@@ -219,54 +266,68 @@ export function BuyoutListPage() {
                   );
                 })}
               </tbody>
-            </table>
-          </div>
+            </Table>
+          </TableScroll>
 
           {total > buyouts.length && (
-            <div className="border-t border-border px-6 py-3 text-sm text-muted-foreground">
+            <TableFooter>
               Showing {buyouts.length} of {total} requests
-            </div>
+            </TableFooter>
           )}
-        </div>
+        </TableShell>
       )}
 
       {/* Rejection Dialog */}
       {rejectId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="mx-4 w-full max-w-md rounded-xl bg-card p-6 shadow-xl">
-            <h3 className="text-lg font-semibold text-foreground mb-4">Reject Buyout Request</h3>
-            <p className="text-sm text-muted-foreground mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overscroll-contain bg-slate-950/55 p-4 backdrop-blur-sm" onMouseDown={(event) => { if (event.target === event.currentTarget && !rejectBusyRef.current) { setRejectId(null); setRejectReason(""); } }}>
+          <div ref={rejectDialogRef} className="surface-card w-full max-w-md p-6 shadow-floating" role="dialog" aria-modal="true" aria-labelledby="reject-buyout-title" tabIndex={-1}>
+            <h2 id="reject-buyout-title" className="mb-2 text-lg font-semibold text-foreground">Reject Buyout Request</h2>
+            <p className="mb-4 text-sm leading-6 text-muted-foreground">
               Please provide a reason for rejecting this buyout request. The employee will be notified.
             </p>
-            <textarea
+            <Textarea
+              id="buyout-reject-reason"
+              aria-label="Rejection reason"
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               placeholder="Enter rejection reason..."
               rows={3}
-              className="block w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm text-foreground placeholder-muted-foreground focus:border-rose-500 focus:ring-2 focus:ring-rose-500 focus:outline-none"
+              autoFocus
             />
             <div className="mt-4 flex items-center justify-end gap-3">
-              <button
+              <Button
                 onClick={() => {
                   setRejectId(null);
                   setRejectReason("");
                 }}
-                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/50"
+                variant="secondary"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => handleReject(rejectId)}
                 disabled={!rejectReason.trim() || actionLoading === rejectId}
-                className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                variant="danger"
               >
                 {actionLoading === rejectId && <Loader2 className="h-4 w-4 animate-spin" />}
                 Reject
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       )}
-    </div>
+
+      <ConfirmDialog
+        open={Boolean(approveId)}
+        title="Approve buyout request?"
+        message="The employee's last working date will be updated when this request is approved."
+        confirmLabel="Approve request"
+        loading={Boolean(approveId && actionLoading === approveId)}
+        onCancel={() => setApproveId(null)}
+        onConfirm={() => {
+          if (approveId) void handleApprove(approveId);
+        }}
+      />
+    </Page>
   );
 }

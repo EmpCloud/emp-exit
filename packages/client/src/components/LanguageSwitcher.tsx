@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, type KeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { Globe } from "lucide-react";
+import { Check, ChevronDown, Globe } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const LANGUAGES = [
   { code: "en", label: "English", flag: "EN" },
@@ -83,7 +84,7 @@ export default function LanguageSwitcher() {
             setOpen(true);
           }
         }}
-        className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors text-sm"
+        className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-transparent px-3 text-sm font-medium text-muted-foreground transition-[background-color,border-color,color] hover:border-border hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
         title={t("common.changeLanguage")}
         aria-label={t("common.changeLanguage")}
         aria-haspopup="menu"
@@ -92,6 +93,7 @@ export default function LanguageSwitcher() {
       >
         <Globe className="h-4 w-4" aria-hidden="true" focusable="false" />
         <span className="hidden sm:inline text-xs font-medium">{currentLang.flag}</span>
+        <ChevronDown aria-hidden="true" className={cn("size-3.5 transition-transform", open && "rotate-180")} />
       </button>
 
       {open && (
@@ -100,7 +102,7 @@ export default function LanguageSwitcher() {
           role="menu"
           aria-label={t("common.changeLanguage")}
           onKeyDown={handleMenuKeyDown}
-          className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden py-1"
+          className="absolute end-0 top-full z-50 mt-2 w-48 overflow-hidden rounded-xl border border-border bg-popover py-1.5 text-popover-foreground shadow-floating"
         >
           {LANGUAGES.map((lang, index) => (
             <button
@@ -113,14 +115,16 @@ export default function LanguageSwitcher() {
               aria-checked={activeLanguage === lang.code}
               tabIndex={activeLanguage === lang.code ? 0 : -1}
               onClick={() => handleChange(lang.code)}
-              className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-gray-50 transition-colors ${
+              className={cn(
+                "flex min-h-10 w-full items-center gap-2 px-3 text-start text-sm transition-colors hover:bg-muted focus-visible:ring-inset",
                 activeLanguage === lang.code
-                  ? "bg-brand-50 text-brand-700 font-medium"
-                  : "text-gray-700"
-              }`}
+                  ? "bg-brand-50 font-semibold text-brand-700 dark:bg-brand-950/50 dark:text-brand-300"
+                  : "text-popover-foreground",
+              )}
             >
-              <span className="text-xs font-bold w-6 text-center text-gray-400">{lang.flag}</span>
-              {lang.label}
+              <span className="w-6 text-center text-xs font-bold text-muted-foreground">{lang.flag}</span>
+              <span className="flex-1">{lang.label}</span>
+              {activeLanguage === lang.code ? <Check aria-hidden="true" className="size-4" /> : null}
             </button>
           ))}
         </div>

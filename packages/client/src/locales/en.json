@@ -13,6 +13,7 @@
     "noData": "No data available",
     "success": "Success",
     "error": "Error",
+    "retry": "Try again",
     "confirm": "Confirm",
     "back": "Back",
     "next": "Next",
@@ -52,6 +53,7 @@
     "changeLanguage": "Change language",
     "openNavigationMenu": "Open navigation menu",
     "closeNavigationMenu": "Close navigation menu",
+    "skipToMainContent": "Skip to main content",
     "unknown": "Unknown",
     "user": "User"
   },
@@ -75,7 +77,14 @@
     "myExit": "My Exit",
     "myInterview": "My Interview",
     "myKt": "My KT",
-    "logout": "Logout"
+    "logout": "Logout",
+    "overview": "Overview",
+    "exitOperations": "Exit Operations",
+    "settlement": "Settlement",
+    "handoverAssets": "Handover & Assets",
+    "alumniInsights": "Alumni & Insights",
+    "administration": "Administration",
+    "selfService": "Self-service"
   },
   "roles": {
     "superAdmin": "Super Admin",

@@ -13,6 +13,7 @@
     "noData": "कोई डेटा उपलब्ध नहीं",
     "success": "सफल",
     "error": "त्रुटि",
+    "retry": "पुनः प्रयास करें",
     "confirm": "पुष्टि करें",
     "back": "वापस",
     "next": "आगे",
@@ -52,6 +53,7 @@
     "changeLanguage": "भाषा बदलें",
     "openNavigationMenu": "नेविगेशन मेनू खोलें",
     "closeNavigationMenu": "नेविगेशन मेनू बंद करें",
+    "skipToMainContent": "मुख्य सामग्री पर जाएँ",
     "unknown": "अज्ञात",
     "user": "उपयोगकर्ता"
   },
@@ -75,7 +77,14 @@
     "myExit": "मेरा निकास",
     "myInterview": "मेरा साक्षात्कार",
     "myKt": "मेरा KT",
-    "logout": "लॉग आउट"
+    "logout": "लॉग आउट",
+    "overview": "अवलोकन",
+    "exitOperations": "निकास संचालन",
+    "settlement": "निपटान",
+    "handoverAssets": "हस्तांतरण और संपत्तियाँ",
+    "alumniInsights": "पूर्व कर्मचारी और विश्लेषण",
+    "administration": "प्रशासन",
+    "selfService": "स्वयं सेवा"
   },
   "roles": {
     "superAdmin": "सुपर एडमिन",

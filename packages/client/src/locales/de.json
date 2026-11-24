@@ -13,6 +13,7 @@
     "noData": "Keine Daten verfügbar",
     "success": "Erfolg",
     "error": "Fehler",
+    "retry": "Erneut versuchen",
     "confirm": "Bestätigen",
     "back": "Zurück",
     "next": "Weiter",
@@ -52,6 +53,7 @@
     "changeLanguage": "Sprache ändern",
     "openNavigationMenu": "Navigationsmenü öffnen",
     "closeNavigationMenu": "Navigationsmenü schließen",
+    "skipToMainContent": "Zum Hauptinhalt springen",
     "unknown": "Unbekannt",
     "user": "Benutzer"
   },
@@ -75,7 +77,14 @@
     "myExit": "Mein Austritt",
     "myInterview": "Mein Interview",
     "myKt": "Mein KT",
-    "logout": "Abmelden"
+    "logout": "Abmelden",
+    "overview": "Überblick",
+    "exitOperations": "Austrittsvorgänge",
+    "settlement": "Abrechnung",
+    "handoverAssets": "Übergabe & Assets",
+    "alumniInsights": "Alumni & Einblicke",
+    "administration": "Administration",
+    "selfService": "Self-Service"
   },
   "roles": {
     "superAdmin": "Super-Admin",
