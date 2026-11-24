@@ -48,15 +48,12 @@
     "noNotifications": "Aún no hay notificaciones",
     "viewAll": "Ver todo",
     "review": "Revisar",
+    "cancelInvitationTooltip": "Cancelar esta invitación y eliminar al usuario no activado",
     "changeLanguage": "Cambiar idioma",
     "openNavigationMenu": "Abrir menú de navegación",
     "closeNavigationMenu": "Cerrar menú de navegación",
     "unknown": "Desconocido",
-    "user": "Usuario",
-    "cancelInvitationTooltip": "Cancelar esta invitación y eliminar al usuario no activado"
-  },
-  "app": {
-    "title": "EMP Exit — Gestión de salidas de empleados"
+    "user": "Usuario"
   },
   "nav": {
     "brand": "EMP Exit",
@@ -87,22 +84,26 @@
     "hrManager": "Gerente de RR. HH.",
     "employee": "Empleado"
   },
-  "theme": {
-    "label": "Tema",
-    "light": "Claro",
-    "dark": "Oscuro",
-    "system": "Sistema"
-  },
   "dashboard": {
     "title": "Panel",
     "subtitle": "Resumen y métricas de la gestión de salidas.",
+    "statActiveExits": "Salidas activas",
+    "statClearancePending": "Autorización pendiente",
+    "statFnfPending": "FnF pendiente",
+    "statCompletedMonth": "Completadas (mes)",
+    "recentExits": "Salidas recientes",
+    "emptyExits": "Aún no hay solicitudes de salida. Comienza iniciando una salida.",
+    "colEmployee": "Empleado",
+    "colType": "Tipo",
+    "colLastWorkingDate": "Último día laboral",
+    "colInitiated": "Iniciada",
+    "employeeFallback": "Empleado n.º {{id}}",
     "stats": {
       "activeExits": "Salidas activas",
       "clearancePending": "Autorizaciones pendientes",
       "fnfPending": "FnF pendiente",
       "completedThisMonth": "Completadas (este mes)"
     },
-    "recentExits": "Salidas recientes",
     "emptyState": "Aún no hay solicitudes de salida. Empieza iniciando una salida.",
     "table": {
       "employee": "Empleado",
@@ -110,32 +111,60 @@
       "status": "Estado",
       "lastWorkingDate": "Último día de trabajo",
       "initiated": "Iniciada"
-    },
-    "employeeFallback": "Empleado n.º {{id}}"
+    }
   },
-  "exitTypes": {
-    "resignation": "Renuncia",
-    "termination": "Terminación",
-    "retirement": "Jubilación",
-    "endOfContract": "Fin de contrato",
-    "mutualSeparation": "Separación de mutuo acuerdo",
-    "absconding": "Abandono del puesto"
-  },
-  "exitStatuses": {
+  "exitStatus": {
     "initiated": "Iniciada",
-    "noticePeriod": "Período de preaviso",
-    "clearancePending": "Autorización pendiente",
-    "fnfPending": "FnF pendiente",
-    "fnfProcessed": "FnF procesado",
+    "notice_period": "Período de preaviso",
+    "clearance_pending": "Autorización pendiente",
+    "fnf_pending": "FnF pendiente",
+    "fnf_processed": "FnF procesado",
     "completed": "Completada",
     "cancelled": "Cancelada"
+  },
+  "exitType": {
+    "resignation": "Renuncia",
+    "termination": "Despido",
+    "retirement": "Jubilación",
+    "end_of_contract": "Fin de contrato",
+    "mutual_separation": "Separación mutua",
+    "absconding": "Abandono"
   },
   "exitList": {
     "title": "Solicitudes de salida",
     "subtitle": "Consulta y gestiona todas las solicitudes de salida de empleados.",
+    "initiate": "Iniciar salida",
+    "allStatuses": "Todos los estados",
+    "activeInProgress": "Activas (en curso)",
+    "requestsFound_one": "{{count}} solicitud de salida encontrada",
+    "requestsFound_other": "{{count}} solicitudes de salida encontradas",
+    "colEmployee": "Empleado",
+    "colType": "Tipo",
+    "colResignationDate": "Fecha de renuncia",
+    "colLastWorkingDate": "Último día laboral",
+    "colInitiated": "Iniciada",
+    "noneFound": "No se encontraron solicitudes de salida.",
+    "deletedEmployee": "Empleado eliminado n.º {{id}}",
+    "pageInfo": "Página {{page}} de {{total}}",
+    "status": {
+      "initiated": "Iniciada",
+      "notice_period": "Período de preaviso",
+      "clearance_pending": "Autorización pendiente",
+      "fnf_pending": "FnF pendiente",
+      "fnf_processed": "FnF procesado",
+      "completed": "Completada",
+      "cancelled": "Cancelada"
+    },
+    "type": {
+      "resignation": "Renuncia",
+      "termination": "Despido",
+      "retirement": "Jubilación",
+      "end_of_contract": "Fin de contrato",
+      "mutual_separation": "Separación mutua",
+      "absconding": "Abandono"
+    },
     "initiateExit": "Iniciar salida",
     "statusFilterLabel": "Filtrar solicitudes de salida por estado",
-    "allStatuses": "Todos los estados",
     "activeStatus": "Activa (en curso)",
     "resultCount_zero": "Se encontraron {{count}} solicitudes de salida",
     "resultCount_one": "Se encontró {{count}} solicitud de salida",
@@ -153,10 +182,131 @@
       "lastWorkingDate": "Último día de trabajo",
       "initiated": "Iniciada"
     },
-    "deletedEmployee": "Empleado eliminado n.º {{id}}",
     "pagination": {
       "label": "Paginación de solicitudes de salida",
       "page": "Página {{page}} de {{totalPages}}"
     }
+  },
+  "checklists": {
+    "instanceTitle": "Lista de salida",
+    "instanceSubtitle": "Realiza el seguimiento y actualiza los elementos de la lista de esta salida.",
+    "backToExits": "Volver a salidas",
+    "generateFromTemplate": "Generar lista desde plantilla",
+    "templateOption": "{{name}} ({{count}} elementos)",
+    "generate": "Generar",
+    "replaceWarning": "Advertencia: al generar se reemplazarán los elementos actuales de la lista.",
+    "noItemsYet": "Aún no hay elementos. Genera desde una plantilla arriba.",
+    "progress": "{{completed}} / {{total}} completados ({{progress}}%)",
+    "templatesTitle": "Plantillas de lista",
+    "templatesSubtitle": "Gestiona las plantillas y los elementos de las listas de salida.",
+    "newTemplate": "Nueva plantilla",
+    "editTemplate": "Editar plantilla",
+    "createTemplate": "Crear plantilla",
+    "nameLabel": "Nombre *",
+    "namePlaceholder": "p. ej. Lista de salida estándar",
+    "exitTypeLabel": "Tipo de salida",
+    "descriptionLabel": "Descripción",
+    "descriptionPlaceholder": "Descripción opcional",
+    "setDefault": "Establecer como plantilla predeterminada",
+    "saving": "Guardando...",
+    "saveChanges": "Guardar cambios",
+    "confirmDeleteTemplate": "¿Eliminar esta plantilla y todos sus elementos?",
+    "noTemplates": "Aún no hay plantillas de lista.",
+    "itemsCount_one": "{{count}} elemento",
+    "itemsCount_other": "{{count}} elementos",
+    "default": "Predeterminada",
+    "editTemplateTitle": "Editar plantilla",
+    "deleteTemplateTitle": "Eliminar plantilla",
+    "noItemsInTemplate": "No hay elementos en esta plantilla.",
+    "required": "Obligatorio",
+    "assigned": "Asignado: {{role}}",
+    "editItemTitle": "Editar elemento",
+    "deleteItemTitle": "Eliminar elemento",
+    "editItem": "Editar elemento",
+    "addItem": "Agregar elemento",
+    "itemTitlePlaceholder": "Título del elemento",
+    "itemDescPlaceholder": "Descripción (opcional)",
+    "mandatory": "Obligatorio",
+    "addItemButton": "Agregar elemento",
+    "confirmDeleteItem": "¿Eliminar este elemento?",
+    "allTypes": "Todos los tipos",
+    "type": {
+      "resignation": "Renuncia",
+      "termination": "Despido",
+      "retirement": "Jubilación",
+      "end_of_contract": "Fin de contrato",
+      "mutual_separation": "Separación mutua",
+      "absconding": "Abandono"
+    },
+    "itemStatus": {
+      "pending": "Pendiente",
+      "in_progress": "En curso",
+      "completed": "Completado",
+      "waived": "Exento",
+      "na": "N/D"
+    }
+  },
+  "clearance": {
+    "recordsTitle": "Registros de autorización",
+    "recordsSubtitle": "Aprobaciones de autorización de departamentos pendientes en todas las salidas.",
+    "manageDepartments": "Gestionar departamentos",
+    "noPending": "No hay autorizaciones pendientes.",
+    "colDepartment": "Departamento",
+    "colEmployee": "Empleado",
+    "colPendingAmount": "Importe pendiente",
+    "unknown": "Desconocido",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "reasonRequired": "Introduce un motivo para el rechazo",
+    "rejected": "Autorización rechazada",
+    "rejectFailed": "Error al rechazar la autorización",
+    "rejectTitle": "Rechazar autorización",
+    "reasonLabel": "Motivo del rechazo",
+    "reasonPlaceholder": "Explica por qué se rechaza esta autorización…",
+    "deptTitle": "Departamentos de autorización",
+    "deptSubtitle": "Gestiona los departamentos que deben aprobar durante la autorización de salida del empleado.",
+    "addDepartment": "Agregar departamento",
+    "deptNameLabel": "Nombre del departamento *",
+    "deptNamePlaceholder": "p. ej. TI / Sistemas",
+    "approverRoleLabel": "Rol del aprobador",
+    "approverRolePlaceholder": "p. ej. it_admin",
+    "adding": "Agregando...",
+    "add": "Agregar",
+    "confirmDeleteDept": "¿Eliminar este departamento de autorización?",
+    "noDepartments": "Aún no hay departamentos de autorización configurados.",
+    "colOrder": "Orden",
+    "colApproverRole": "Rol del aprobador",
+    "status": {
+      "pending": "Pendiente",
+      "approved": "Aprobada",
+      "rejected": "Rechazada",
+      "waived": "Exenta"
+    }
+  },
+  "app": {
+    "title": "EMP Exit — Gestión de salidas de empleados"
+  },
+  "theme": {
+    "label": "Tema",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema"
+  },
+  "exitTypes": {
+    "resignation": "Renuncia",
+    "termination": "Terminación",
+    "retirement": "Jubilación",
+    "endOfContract": "Fin de contrato",
+    "mutualSeparation": "Separación de mutuo acuerdo",
+    "absconding": "Abandono del puesto"
+  },
+  "exitStatuses": {
+    "initiated": "Iniciada",
+    "noticePeriod": "Período de preaviso",
+    "clearancePending": "Autorización pendiente",
+    "fnfPending": "FnF pendiente",
+    "fnfProcessed": "FnF procesado",
+    "completed": "Completada",
+    "cancelled": "Cancelada"
   }
 }

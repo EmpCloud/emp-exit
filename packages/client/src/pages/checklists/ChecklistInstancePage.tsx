@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Loader2,
   ClipboardCheck,
@@ -26,6 +27,7 @@ interface Template {
 }
 
 export function ChecklistInstancePage() {
+  const { t } = useTranslation();
   const { id: exitId } = useParams<{ id: string }>();
   const [checklist, setChecklist] = useState<any>(null);
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -107,27 +109,27 @@ export function ChecklistInstancePage() {
           to="/exits"
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-muted-foreground mb-2"
         >
-          <ArrowLeft className="h-4 w-4" /> Back to exits
+          <ArrowLeft className="h-4 w-4" /> {t("checklists.backToExits")}
         </Link>
-        <h1 className="text-2xl font-bold text-foreground">Exit Checklist</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t("checklists.instanceTitle")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Track and update checklist items for this exit.
+          {t("checklists.instanceSubtitle")}
         </p>
       </div>
 
       {/* Generate from template */}
       {templates.length > 0 && (
         <div className="rounded-xl border border-border bg-card p-5">
-          <h3 className="text-sm font-medium text-muted-foreground mb-3">Generate Checklist from Template</h3>
+          <h3 className="text-sm font-medium text-muted-foreground mb-3">{t("checklists.generateFromTemplate")}</h3>
           <div className="flex items-center gap-3">
             <select
               value={selectedTemplate}
               onChange={(e) => setSelectedTemplate(e.target.value)}
               className="rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
             >
-              {templates.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name} ({t.item_count} items)
+              {templates.map((tmpl) => (
+                <option key={tmpl.id} value={tmpl.id}>
+                  {t("checklists.templateOption", { name: tmpl.name, count: tmpl.item_count })}
                 </option>
               ))}
             </select>
@@ -137,12 +139,12 @@ export function ChecklistInstancePage() {
               className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50"
             >
               {generating && <Loader2 className="h-4 w-4 animate-spin" />}
-              Generate
+              {t("checklists.generate")}
             </button>
           </div>
           {hasItems && (
             <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
-              Warning: generating will replace the current checklist items.
+              {t("checklists.replaceWarning")}
             </p>
           )}
         </div>
@@ -153,7 +155,7 @@ export function ChecklistInstancePage() {
         {!hasItems ? (
           <div className="px-6 py-12 text-center">
             <ClipboardCheck className="mx-auto h-10 w-10 text-muted-foreground/50 mb-3" />
-            <p className="text-sm text-muted-foreground">No checklist items yet. Generate from a template above.</p>
+            <p className="text-sm text-muted-foreground">{t("checklists.noItemsYet")}</p>
           </div>
         ) : (
           <>
@@ -161,7 +163,7 @@ export function ChecklistInstancePage() {
             <div className="px-6 py-4 border-b border-border">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-muted-foreground">
-                  {checklist.completed} / {checklist.total} completed ({checklist.progress}%)
+                  {t("checklists.progress", { completed: checklist.completed, total: checklist.total, progress: checklist.progress })}
                 </span>
               </div>
               <div className="w-full bg-muted rounded-full h-2">
@@ -209,7 +211,7 @@ export function ChecklistInstancePage() {
                     )}
                   >
                     {STATUS_OPTIONS.map((s) => (
-                      <option key={s} value={s}>{s.replace(/_/g, " ")}</option>
+                      <option key={s} value={s}>{t(`checklists.itemStatus.${s}`)}</option>
                     ))}
                   </select>
                 </div>

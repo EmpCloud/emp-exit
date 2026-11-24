@@ -48,15 +48,12 @@
     "noNotifications": "暂无通知",
     "viewAll": "查看全部",
     "review": "查看",
+    "cancelInvitationTooltip": "取消此邀请并移除未激活的用户",
     "changeLanguage": "切换语言",
     "openNavigationMenu": "打开导航菜单",
     "closeNavigationMenu": "关闭导航菜单",
     "unknown": "未知",
-    "user": "用户",
-    "cancelInvitationTooltip": "取消此邀请并移除未激活的用户"
-  },
-  "app": {
-    "title": "EMP Exit — 员工离职管理"
+    "user": "用户"
   },
   "nav": {
     "brand": "EMP Exit",
@@ -87,22 +84,26 @@
     "hrManager": "人力资源经理",
     "employee": "员工"
   },
-  "theme": {
-    "label": "主题",
-    "light": "浅色",
-    "dark": "深色",
-    "system": "跟随系统"
-  },
   "dashboard": {
     "title": "仪表板",
     "subtitle": "离职管理概览和指标。",
+    "statActiveExits": "进行中的离职",
+    "statClearancePending": "待结算",
+    "statFnfPending": "FnF 待处理",
+    "statCompletedMonth": "已完成（本月）",
+    "recentExits": "最近离职",
+    "emptyExits": "暂无离职申请。请先发起一项离职。",
+    "colEmployee": "员工",
+    "colType": "类型",
+    "colLastWorkingDate": "最后工作日",
+    "colInitiated": "已发起",
+    "employeeFallback": "员工 #{{id}}",
     "stats": {
       "activeExits": "进行中的离职",
       "clearancePending": "待结清",
       "fnfPending": "待完成最终结算",
       "completedThisMonth": "本月已完成"
     },
-    "recentExits": "最近离职",
     "emptyState": "暂无离职申请。请先发起离职流程。",
     "table": {
       "employee": "员工",
@@ -110,32 +111,60 @@
       "status": "状态",
       "lastWorkingDate": "最后工作日",
       "initiated": "发起日期"
-    },
-    "employeeFallback": "员工 #{{id}}"
+    }
   },
-  "exitTypes": {
+  "exitStatus": {
+    "initiated": "已发起",
+    "notice_period": "通知期",
+    "clearance_pending": "待结算",
+    "fnf_pending": "FnF 待处理",
+    "fnf_processed": "FnF 已处理",
+    "completed": "已完成",
+    "cancelled": "已取消"
+  },
+  "exitType": {
     "resignation": "辞职",
     "termination": "解雇",
     "retirement": "退休",
-    "endOfContract": "合同到期",
-    "mutualSeparation": "协议离职",
+    "end_of_contract": "合同到期",
+    "mutual_separation": "协商离职",
     "absconding": "旷工离职"
-  },
-  "exitStatuses": {
-    "initiated": "已发起",
-    "noticePeriod": "通知期",
-    "clearancePending": "待结清",
-    "fnfPending": "待最终结算",
-    "fnfProcessed": "最终结算已处理",
-    "completed": "已完成",
-    "cancelled": "已取消"
   },
   "exitList": {
     "title": "离职申请",
     "subtitle": "查看并管理所有员工离职申请。",
+    "initiate": "发起离职",
+    "allStatuses": "所有状态",
+    "activeInProgress": "进行中",
+    "requestsFound_one": "找到 {{count}} 条离职申请",
+    "requestsFound_other": "找到 {{count}} 条离职申请",
+    "colEmployee": "员工",
+    "colType": "类型",
+    "colResignationDate": "辞职日期",
+    "colLastWorkingDate": "最后工作日",
+    "colInitiated": "已发起",
+    "noneFound": "未找到离职申请。",
+    "deletedEmployee": "已删除员工 #{{id}}",
+    "pageInfo": "第 {{page}} 页，共 {{total}} 页",
+    "status": {
+      "initiated": "已发起",
+      "notice_period": "通知期",
+      "clearance_pending": "待结算",
+      "fnf_pending": "FnF 待处理",
+      "fnf_processed": "FnF 已处理",
+      "completed": "已完成",
+      "cancelled": "已取消"
+    },
+    "type": {
+      "resignation": "辞职",
+      "termination": "解雇",
+      "retirement": "退休",
+      "end_of_contract": "合同到期",
+      "mutual_separation": "协商离职",
+      "absconding": "旷工离职"
+    },
     "initiateExit": "发起离职",
     "statusFilterLabel": "按状态筛选离职申请",
-    "allStatuses": "所有状态",
     "activeStatus": "进行中",
     "resultCount_zero": "找到 {{count}} 个离职申请",
     "resultCount_one": "找到 {{count}} 个离职申请",
@@ -153,10 +182,131 @@
       "lastWorkingDate": "最后工作日",
       "initiated": "发起日期"
     },
-    "deletedEmployee": "已删除员工 #{{id}}",
     "pagination": {
       "label": "离职申请分页",
       "page": "第 {{page}} 页，共 {{totalPages}} 页"
     }
+  },
+  "checklists": {
+    "instanceTitle": "离职清单",
+    "instanceSubtitle": "跟踪并更新此离职的清单项。",
+    "backToExits": "返回离职",
+    "generateFromTemplate": "从模板生成清单",
+    "templateOption": "{{name}}（{{count}} 项）",
+    "generate": "生成",
+    "replaceWarning": "警告：生成将替换当前的清单项。",
+    "noItemsYet": "暂无清单项。请从上方模板生成。",
+    "progress": "{{completed}} / {{total}} 已完成（{{progress}}%）",
+    "templatesTitle": "清单模板",
+    "templatesSubtitle": "管理离职清单模板和项目。",
+    "newTemplate": "新建模板",
+    "editTemplate": "编辑模板",
+    "createTemplate": "创建模板",
+    "nameLabel": "名称 *",
+    "namePlaceholder": "例如：标准离职清单",
+    "exitTypeLabel": "离职类型",
+    "descriptionLabel": "描述",
+    "descriptionPlaceholder": "可选描述",
+    "setDefault": "设为默认模板",
+    "saving": "保存中...",
+    "saveChanges": "保存更改",
+    "confirmDeleteTemplate": "删除此模板及其所有项目？",
+    "noTemplates": "暂无清单模板。",
+    "itemsCount_one": "{{count}} 项",
+    "itemsCount_other": "{{count}} 项",
+    "default": "默认",
+    "editTemplateTitle": "编辑模板",
+    "deleteTemplateTitle": "删除模板",
+    "noItemsInTemplate": "此模板中没有项目。",
+    "required": "必填",
+    "assigned": "已分配：{{role}}",
+    "editItemTitle": "编辑项目",
+    "deleteItemTitle": "删除项目",
+    "editItem": "编辑项目",
+    "addItem": "添加项目",
+    "itemTitlePlaceholder": "项目标题",
+    "itemDescPlaceholder": "描述（可选）",
+    "mandatory": "必填",
+    "addItemButton": "添加项目",
+    "confirmDeleteItem": "移除此项目？",
+    "allTypes": "所有类型",
+    "type": {
+      "resignation": "辞职",
+      "termination": "解雇",
+      "retirement": "退休",
+      "end_of_contract": "合同到期",
+      "mutual_separation": "协商离职",
+      "absconding": "旷工离职"
+    },
+    "itemStatus": {
+      "pending": "待处理",
+      "in_progress": "进行中",
+      "completed": "已完成",
+      "waived": "已豁免",
+      "na": "不适用"
+    }
+  },
+  "clearance": {
+    "recordsTitle": "结算记录",
+    "recordsSubtitle": "所有离职中待处理的部门结算审批。",
+    "manageDepartments": "管理部门",
+    "noPending": "没有待处理的结算。",
+    "colDepartment": "部门",
+    "colEmployee": "员工",
+    "colPendingAmount": "待付金额",
+    "unknown": "未知",
+    "approve": "批准",
+    "reject": "拒绝",
+    "reasonRequired": "请输入拒绝理由",
+    "rejected": "结算已拒绝",
+    "rejectFailed": "拒绝结算失败",
+    "rejectTitle": "拒绝结算",
+    "reasonLabel": "拒绝理由",
+    "reasonPlaceholder": "请说明为何拒绝此结算…",
+    "deptTitle": "结算部门",
+    "deptSubtitle": "管理在员工离职结算期间必须签核的部门。",
+    "addDepartment": "添加部门",
+    "deptNameLabel": "部门名称 *",
+    "deptNamePlaceholder": "例如：IT / 系统",
+    "approverRoleLabel": "审批人角色",
+    "approverRolePlaceholder": "例如：it_admin",
+    "adding": "添加中...",
+    "add": "添加",
+    "confirmDeleteDept": "删除此结算部门？",
+    "noDepartments": "尚未配置结算部门。",
+    "colOrder": "顺序",
+    "colApproverRole": "审批人角色",
+    "status": {
+      "pending": "待处理",
+      "approved": "已批准",
+      "rejected": "已拒绝",
+      "waived": "已豁免"
+    }
+  },
+  "app": {
+    "title": "EMP Exit — 员工离职管理"
+  },
+  "theme": {
+    "label": "主题",
+    "light": "浅色",
+    "dark": "深色",
+    "system": "跟随系统"
+  },
+  "exitTypes": {
+    "resignation": "辞职",
+    "termination": "解雇",
+    "retirement": "退休",
+    "endOfContract": "合同到期",
+    "mutualSeparation": "协议离职",
+    "absconding": "旷工离职"
+  },
+  "exitStatuses": {
+    "initiated": "已发起",
+    "noticePeriod": "通知期",
+    "clearancePending": "待结清",
+    "fnfPending": "待最终结算",
+    "fnfProcessed": "最终结算已处理",
+    "completed": "已完成",
+    "cancelled": "已取消"
   }
 }

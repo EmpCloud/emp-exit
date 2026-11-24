@@ -48,15 +48,12 @@
     "noNotifications": "Nenhuma notificação ainda",
     "viewAll": "Ver tudo",
     "review": "Revisar",
+    "cancelInvitationTooltip": "Cancelar este convite e remover o usuário não ativado",
     "changeLanguage": "Alterar idioma",
     "openNavigationMenu": "Abrir menu de navegação",
     "closeNavigationMenu": "Fechar menu de navegação",
     "unknown": "Desconhecido",
-    "user": "Usuário",
-    "cancelInvitationTooltip": "Cancelar este convite e remover o usuário não ativado"
-  },
-  "app": {
-    "title": "EMP Exit — Gestão de desligamentos de funcionários"
+    "user": "Usuário"
   },
   "nav": {
     "brand": "EMP Exit",
@@ -87,22 +84,26 @@
     "hrManager": "Gerente de RH",
     "employee": "Funcionário"
   },
-  "theme": {
-    "label": "Tema",
-    "light": "Claro",
-    "dark": "Escuro",
-    "system": "Sistema"
-  },
   "dashboard": {
     "title": "Painel",
     "subtitle": "Visão geral e métricas da gestão de desligamentos.",
+    "statActiveExits": "Saídas ativas",
+    "statClearancePending": "Liberação pendente",
+    "statFnfPending": "FnF pendente",
+    "statCompletedMonth": "Concluídas (mês)",
+    "recentExits": "Desligamentos recentes",
+    "emptyExits": "Ainda não há solicitações de saída. Comece iniciando uma saída.",
+    "colEmployee": "Funcionário",
+    "colType": "Tipo",
+    "colLastWorkingDate": "Último dia de trabalho",
+    "colInitiated": "Iniciada",
+    "employeeFallback": "Funcionário nº {{id}}",
     "stats": {
       "activeExits": "Desligamentos ativos",
       "clearancePending": "Liberação pendente",
       "fnfPending": "FnF pendente",
       "completedThisMonth": "Concluídos (este mês)"
     },
-    "recentExits": "Desligamentos recentes",
     "emptyState": "Ainda não há solicitações de desligamento. Comece iniciando um desligamento.",
     "table": {
       "employee": "Funcionário",
@@ -110,32 +111,60 @@
       "status": "Status",
       "lastWorkingDate": "Último dia de trabalho",
       "initiated": "Iniciado"
-    },
-    "employeeFallback": "Funcionário nº {{id}}"
+    }
   },
-  "exitTypes": {
-    "resignation": "Pedido de demissão",
-    "termination": "Demissão",
+  "exitStatus": {
+    "initiated": "Iniciada",
+    "notice_period": "Período de aviso",
+    "clearance_pending": "Liberação pendente",
+    "fnf_pending": "FnF pendente",
+    "fnf_processed": "FnF processado",
+    "completed": "Concluída",
+    "cancelled": "Cancelada"
+  },
+  "exitType": {
+    "resignation": "Demissão",
+    "termination": "Rescisão",
     "retirement": "Aposentadoria",
-    "endOfContract": "Fim do contrato",
-    "mutualSeparation": "Desligamento por mútuo acordo",
-    "absconding": "Abandono de emprego"
-  },
-  "exitStatuses": {
-    "initiated": "Iniciado",
-    "noticePeriod": "Aviso prévio",
-    "clearancePending": "Liberação pendente",
-    "fnfPending": "FnF pendente",
-    "fnfProcessed": "FnF processado",
-    "completed": "Concluído",
-    "cancelled": "Cancelado"
+    "end_of_contract": "Fim de contrato",
+    "mutual_separation": "Separação mútua",
+    "absconding": "Abandono"
   },
   "exitList": {
     "title": "Solicitações de desligamento",
     "subtitle": "Visualize e gerencie todas as solicitações de desligamento dos funcionários.",
+    "initiate": "Iniciar saída",
+    "allStatuses": "Todos os status",
+    "activeInProgress": "Ativas (em andamento)",
+    "requestsFound_one": "{{count}} solicitação de saída encontrada",
+    "requestsFound_other": "{{count}} solicitações de saída encontradas",
+    "colEmployee": "Funcionário",
+    "colType": "Tipo",
+    "colResignationDate": "Data de demissão",
+    "colLastWorkingDate": "Último dia de trabalho",
+    "colInitiated": "Iniciada",
+    "noneFound": "Nenhuma solicitação de saída encontrada.",
+    "deletedEmployee": "Funcionário excluído n.º {{id}}",
+    "pageInfo": "Página {{page}} de {{total}}",
+    "status": {
+      "initiated": "Iniciada",
+      "notice_period": "Período de aviso",
+      "clearance_pending": "Liberação pendente",
+      "fnf_pending": "FnF pendente",
+      "fnf_processed": "FnF processado",
+      "completed": "Concluída",
+      "cancelled": "Cancelada"
+    },
+    "type": {
+      "resignation": "Demissão",
+      "termination": "Rescisão",
+      "retirement": "Aposentadoria",
+      "end_of_contract": "Fim de contrato",
+      "mutual_separation": "Separação mútua",
+      "absconding": "Abandono"
+    },
     "initiateExit": "Iniciar desligamento",
     "statusFilterLabel": "Filtrar solicitações de desligamento por status",
-    "allStatuses": "Todos os status",
     "activeStatus": "Ativas (em andamento)",
     "resultCount_zero": "Foram encontradas {{count}} solicitações de desligamento",
     "resultCount_one": "Foi encontrada {{count}} solicitação de desligamento",
@@ -153,10 +182,131 @@
       "lastWorkingDate": "Último dia de trabalho",
       "initiated": "Iniciado"
     },
-    "deletedEmployee": "Funcionário excluído n.º {{id}}",
     "pagination": {
       "label": "Paginação das solicitações de desligamento",
       "page": "Página {{page}} de {{totalPages}}"
     }
+  },
+  "checklists": {
+    "instanceTitle": "Lista de saída",
+    "instanceSubtitle": "Acompanhe e atualize os itens da lista desta saída.",
+    "backToExits": "Voltar às saídas",
+    "generateFromTemplate": "Gerar lista a partir de modelo",
+    "templateOption": "{{name}} ({{count}} itens)",
+    "generate": "Gerar",
+    "replaceWarning": "Aviso: gerar substituirá os itens atuais da lista.",
+    "noItemsYet": "Ainda não há itens. Gere a partir de um modelo acima.",
+    "progress": "{{completed}} / {{total}} concluídos ({{progress}}%)",
+    "templatesTitle": "Modelos de lista",
+    "templatesSubtitle": "Gerencie modelos e itens das listas de saída.",
+    "newTemplate": "Novo modelo",
+    "editTemplate": "Editar modelo",
+    "createTemplate": "Criar modelo",
+    "nameLabel": "Nome *",
+    "namePlaceholder": "ex.: Lista de saída padrão",
+    "exitTypeLabel": "Tipo de saída",
+    "descriptionLabel": "Descrição",
+    "descriptionPlaceholder": "Descrição opcional",
+    "setDefault": "Definir como modelo padrão",
+    "saving": "Salvando...",
+    "saveChanges": "Salvar alterações",
+    "confirmDeleteTemplate": "Excluir este modelo e todos os seus itens?",
+    "noTemplates": "Ainda não há modelos de lista.",
+    "itemsCount_one": "{{count}} item",
+    "itemsCount_other": "{{count}} itens",
+    "default": "Padrão",
+    "editTemplateTitle": "Editar modelo",
+    "deleteTemplateTitle": "Excluir modelo",
+    "noItemsInTemplate": "Nenhum item neste modelo.",
+    "required": "Obrigatório",
+    "assigned": "Atribuído: {{role}}",
+    "editItemTitle": "Editar item",
+    "deleteItemTitle": "Excluir item",
+    "editItem": "Editar item",
+    "addItem": "Adicionar item",
+    "itemTitlePlaceholder": "Título do item",
+    "itemDescPlaceholder": "Descrição (opcional)",
+    "mandatory": "Obrigatório",
+    "addItemButton": "Adicionar item",
+    "confirmDeleteItem": "Remover este item?",
+    "allTypes": "Todos os tipos",
+    "type": {
+      "resignation": "Demissão",
+      "termination": "Rescisão",
+      "retirement": "Aposentadoria",
+      "end_of_contract": "Fim de contrato",
+      "mutual_separation": "Separação mútua",
+      "absconding": "Abandono"
+    },
+    "itemStatus": {
+      "pending": "Pendente",
+      "in_progress": "Em andamento",
+      "completed": "Concluído",
+      "waived": "Dispensado",
+      "na": "N/D"
+    }
+  },
+  "clearance": {
+    "recordsTitle": "Registros de liberação",
+    "recordsSubtitle": "Aprovações de liberação de departamentos pendentes em todas as saídas.",
+    "manageDepartments": "Gerenciar departamentos",
+    "noPending": "Nenhuma liberação pendente.",
+    "colDepartment": "Departamento",
+    "colEmployee": "Funcionário",
+    "colPendingAmount": "Valor pendente",
+    "unknown": "Desconhecido",
+    "approve": "Aprovar",
+    "reject": "Rejeitar",
+    "reasonRequired": "Insira um motivo para a rejeição",
+    "rejected": "Liberação rejeitada",
+    "rejectFailed": "Falha ao rejeitar a liberação",
+    "rejectTitle": "Rejeitar liberação",
+    "reasonLabel": "Motivo da rejeição",
+    "reasonPlaceholder": "Explique por que esta liberação está sendo rejeitada…",
+    "deptTitle": "Departamentos de liberação",
+    "deptSubtitle": "Gerencie os departamentos que devem aprovar durante a liberação de saída do funcionário.",
+    "addDepartment": "Adicionar departamento",
+    "deptNameLabel": "Nome do departamento *",
+    "deptNamePlaceholder": "ex.: TI / Sistemas",
+    "approverRoleLabel": "Função do aprovador",
+    "approverRolePlaceholder": "ex.: it_admin",
+    "adding": "Adicionando...",
+    "add": "Adicionar",
+    "confirmDeleteDept": "Excluir este departamento de liberação?",
+    "noDepartments": "Nenhum departamento de liberação configurado ainda.",
+    "colOrder": "Ordem",
+    "colApproverRole": "Função do aprovador",
+    "status": {
+      "pending": "Pendente",
+      "approved": "Aprovada",
+      "rejected": "Rejeitada",
+      "waived": "Dispensada"
+    }
+  },
+  "app": {
+    "title": "EMP Exit — Gestão de desligamentos de funcionários"
+  },
+  "theme": {
+    "label": "Tema",
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema"
+  },
+  "exitTypes": {
+    "resignation": "Pedido de demissão",
+    "termination": "Demissão",
+    "retirement": "Aposentadoria",
+    "endOfContract": "Fim do contrato",
+    "mutualSeparation": "Desligamento por mútuo acordo",
+    "absconding": "Abandono de emprego"
+  },
+  "exitStatuses": {
+    "initiated": "Iniciado",
+    "noticePeriod": "Aviso prévio",
+    "clearancePending": "Liberação pendente",
+    "fnfPending": "FnF pendente",
+    "fnfProcessed": "FnF processado",
+    "completed": "Concluído",
+    "cancelled": "Cancelado"
   }
 }

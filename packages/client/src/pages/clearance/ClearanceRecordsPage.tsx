@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Shield, Loader2, Settings, X } from "lucide-react";
 import { apiGet, apiPut } from "@/api/client";
 import { cn, formatDate } from "@/lib/utils";
@@ -35,6 +36,7 @@ function formatINR(paise: number): string {
 }
 
 export function ClearanceRecordsPage() {
+  const { t } = useTranslation();
   const [clearances, setClearances] = useState<MyClearance[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -74,19 +76,19 @@ export function ClearanceRecordsPage() {
   async function handleConfirmReject() {
     if (!rejectTarget) return;
     if (!rejectReason.trim()) {
-      toast.error("Please enter a reason for rejection");
+      toast.error(t("clearance.reasonRequired"));
       return;
     }
     const id = rejectTarget.id;
     setActionLoading(id);
     try {
       await apiPut(`/clearance/${id}`, { status: "rejected", remarks: rejectReason.trim() });
-      toast.success("Clearance rejected");
+      toast.success(t("clearance.rejected"));
       setRejectTarget(null);
       setRejectReason("");
       await loadClearances();
     } catch {
-      toast.error("Failed to reject clearance");
+      toast.error(t("clearance.rejectFailed"));
     } finally {
       setActionLoading(null);
     }
@@ -104,9 +106,9 @@ export function ClearanceRecordsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Clearance Records</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t("clearance.recordsTitle")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Pending department clearance approvals across all exits.
+            {t("clearance.recordsSubtitle")}
           </p>
         </div>
         <Link
@@ -114,32 +116,32 @@ export function ClearanceRecordsPage() {
           className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
         >
           <Settings className="h-4 w-4" />
-          Manage Departments
+          {t("clearance.manageDepartments")}
         </Link>
       </div>
 
       {clearances.length === 0 ? (
         <div className="rounded-xl border border-border bg-card p-12 text-center">
           <Shield className="mx-auto h-12 w-12 text-muted-foreground/50 mb-3" />
-          <p className="text-sm text-muted-foreground">No pending clearances.</p>
+          <p className="text-sm text-muted-foreground">{t("clearance.noPending")}</p>
         </div>
       ) : (
         <div className="rounded-xl border border-border bg-card overflow-x-auto -mx-4 lg:mx-0">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                <th className="px-6 py-3">Department</th>
-                <th className="px-6 py-3">Employee</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3">Pending Amount</th>
-                <th className="px-6 py-3 text-right">Actions</th>
+                <th className="px-6 py-3">{t("clearance.colDepartment")}</th>
+                <th className="px-6 py-3">{t("clearance.colEmployee")}</th>
+                <th className="px-6 py-3">{t("common.status")}</th>
+                <th className="px-6 py-3">{t("clearance.colPendingAmount")}</th>
+                <th className="px-6 py-3 text-right">{t("common.actions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {clearances.map((c) => (
                 <tr key={c.id} className="hover:bg-muted/50">
                   <td className="px-6 py-4 font-medium text-foreground">
-                    {c.department?.name || "Unknown"}
+                    {c.department?.name || t("clearance.unknown")}
                   </td>
                   <td className="px-6 py-4">
                     <Link
@@ -157,11 +159,11 @@ export function ClearanceRecordsPage() {
                   <td className="px-6 py-4">
                     <span
                       className={cn(
-                        "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium capitalize",
+                        "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
                         CLEARANCE_STATUS_COLORS[c.status] || "bg-muted text-muted-foreground",
                       )}
                     >
-                      {c.status}
+                      {t(`clearance.status.${c.status}`, { defaultValue: c.status })}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-muted-foreground">
@@ -175,14 +177,14 @@ export function ClearanceRecordsPage() {
                           disabled={actionLoading === c.id}
                           className="rounded-lg bg-green-50 dark:bg-green-950/40 px-3 py-1.5 text-xs font-medium text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-950/40 disabled:opacity-50"
                         >
-                          Approve
+                          {t("clearance.approve")}
                         </button>
                         <button
                           onClick={() => { setRejectTarget(c); setRejectReason(""); }}
                           disabled={actionLoading === c.id}
                           className="rounded-lg bg-red-50 dark:bg-red-950/40 px-3 py-1.5 text-xs font-medium text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-950/40 disabled:opacity-50"
                         >
-                          Reject
+                          {t("clearance.reject")}
                         </button>
                       </div>
                     )}
@@ -205,7 +207,7 @@ export function ClearanceRecordsPage() {
           <div className="w-full max-w-md rounded-xl bg-card p-6 shadow-xl">
             <div className="mb-4 flex items-start justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-foreground">Reject Clearance</h3>
+                <h3 className="text-lg font-semibold text-foreground">{t("clearance.rejectTitle")}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {rejectTarget.department?.name || "Department"}
                   {rejectTarget.employee ? ` · ${rejectTarget.employee.first_name} ${rejectTarget.employee.last_name}` : ""}
@@ -218,13 +220,13 @@ export function ClearanceRecordsPage() {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <label className="mb-1 block text-sm font-medium text-muted-foreground">Reason for rejection</label>
+            <label className="mb-1 block text-sm font-medium text-muted-foreground">{t("clearance.reasonLabel")}</label>
             <textarea
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               rows={3}
               autoFocus
-              placeholder="Explain why this clearance is being rejected…"
+              placeholder={t("clearance.reasonPlaceholder")}
               className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
             />
             <div className="mt-5 flex justify-end gap-3">
@@ -233,7 +235,7 @@ export function ClearanceRecordsPage() {
                 disabled={actionLoading === rejectTarget.id}
                 className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/50"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
               <button
                 onClick={handleConfirmReject}
@@ -241,7 +243,7 @@ export function ClearanceRecordsPage() {
                 className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
               >
                 {actionLoading === rejectTarget.id && <Loader2 className="h-4 w-4 animate-spin" />}
-                Reject
+                {t("clearance.reject")}
               </button>
             </div>
           </div>

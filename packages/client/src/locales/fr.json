@@ -48,15 +48,12 @@
     "noNotifications": "Aucune notification pour le moment",
     "viewAll": "Voir tout",
     "review": "Examiner",
+    "cancelInvitationTooltip": "Annuler cette invitation et supprimer l'utilisateur non activé",
     "changeLanguage": "Changer de langue",
     "openNavigationMenu": "Ouvrir le menu de navigation",
     "closeNavigationMenu": "Fermer le menu de navigation",
     "unknown": "Inconnu",
-    "user": "Utilisateur",
-    "cancelInvitationTooltip": "Annuler cette invitation et supprimer l'utilisateur non activé"
-  },
-  "app": {
-    "title": "EMP Exit — Gestion des départs des employés"
+    "user": "Utilisateur"
   },
   "nav": {
     "brand": "EMP Exit",
@@ -87,22 +84,26 @@
     "hrManager": "Responsable RH",
     "employee": "Employé"
   },
-  "theme": {
-    "label": "Thème",
-    "light": "Clair",
-    "dark": "Sombre",
-    "system": "Système"
-  },
   "dashboard": {
     "title": "Tableau de bord",
     "subtitle": "Aperçu et indicateurs de la gestion des départs.",
+    "statActiveExits": "Départs actifs",
+    "statClearancePending": "Décharge en attente",
+    "statFnfPending": "FnF en attente",
+    "statCompletedMonth": "Terminés (mois)",
+    "recentExits": "Départs récents",
+    "emptyExits": "Aucune demande de départ pour le moment. Commencez par initier un départ.",
+    "colEmployee": "Employé",
+    "colType": "Type",
+    "colLastWorkingDate": "Dernier jour travaillé",
+    "colInitiated": "Initié",
+    "employeeFallback": "Employé n° {{id}}",
     "stats": {
       "activeExits": "Départs actifs",
       "clearancePending": "Décharges en attente",
       "fnfPending": "FnF en attente",
       "completedThisMonth": "Terminés (ce mois-ci)"
     },
-    "recentExits": "Départs récents",
     "emptyState": "Aucune demande de départ pour le moment. Commencez par initier un départ.",
     "table": {
       "employee": "Employé",
@@ -110,32 +111,60 @@
       "status": "Statut",
       "lastWorkingDate": "Dernier jour de travail",
       "initiated": "Date d’initiation"
-    },
-    "employeeFallback": "Employé n° {{id}}"
+    }
   },
-  "exitTypes": {
-    "resignation": "Démission",
-    "termination": "Licenciement",
-    "retirement": "Retraite",
-    "endOfContract": "Fin de contrat",
-    "mutualSeparation": "Séparation à l’amiable",
-    "absconding": "Abandon de poste"
-  },
-  "exitStatuses": {
+  "exitStatus": {
     "initiated": "Initié",
-    "noticePeriod": "Préavis",
-    "clearancePending": "Décharge en attente",
-    "fnfPending": "FnF en attente",
-    "fnfProcessed": "FnF traité",
+    "notice_period": "Préavis",
+    "clearance_pending": "Décharge en attente",
+    "fnf_pending": "FnF en attente",
+    "fnf_processed": "FnF traité",
     "completed": "Terminé",
     "cancelled": "Annulé"
+  },
+  "exitType": {
+    "resignation": "Démission",
+    "termination": "Licenciement",
+    "retirement": "Départ à la retraite",
+    "end_of_contract": "Fin de contrat",
+    "mutual_separation": "Séparation à l'amiable",
+    "absconding": "Abandon de poste"
   },
   "exitList": {
     "title": "Demandes de départ",
     "subtitle": "Consultez et gérez toutes les demandes de départ des employés.",
+    "initiate": "Initier un départ",
+    "allStatuses": "Tous les statuts",
+    "activeInProgress": "Actives (en cours)",
+    "requestsFound_one": "{{count}} demande de départ trouvée",
+    "requestsFound_other": "{{count}} demandes de départ trouvées",
+    "colEmployee": "Employé",
+    "colType": "Type",
+    "colResignationDate": "Date de démission",
+    "colLastWorkingDate": "Dernier jour travaillé",
+    "colInitiated": "Initiée",
+    "noneFound": "Aucune demande de départ trouvée.",
+    "deletedEmployee": "Employé supprimé n° {{id}}",
+    "pageInfo": "Page {{page}} sur {{total}}",
+    "status": {
+      "initiated": "Initié",
+      "notice_period": "Préavis",
+      "clearance_pending": "Décharge en attente",
+      "fnf_pending": "FnF en attente",
+      "fnf_processed": "FnF traité",
+      "completed": "Terminé",
+      "cancelled": "Annulé"
+    },
+    "type": {
+      "resignation": "Démission",
+      "termination": "Licenciement",
+      "retirement": "Départ à la retraite",
+      "end_of_contract": "Fin de contrat",
+      "mutual_separation": "Séparation à l'amiable",
+      "absconding": "Abandon de poste"
+    },
     "initiateExit": "Initier un départ",
     "statusFilterLabel": "Filtrer les demandes de départ par statut",
-    "allStatuses": "Tous les statuts",
     "activeStatus": "Actives (en cours)",
     "resultCount_zero": "{{count}} demande de départ trouvée",
     "resultCount_one": "{{count}} demande de départ trouvée",
@@ -153,10 +182,131 @@
       "lastWorkingDate": "Dernier jour de travail",
       "initiated": "Date d’initiation"
     },
-    "deletedEmployee": "Employé supprimé n° {{id}}",
     "pagination": {
       "label": "Pagination des demandes de départ",
       "page": "Page {{page}} sur {{totalPages}}"
     }
+  },
+  "checklists": {
+    "instanceTitle": "Liste de départ",
+    "instanceSubtitle": "Suivez et mettez à jour les éléments de la liste pour ce départ.",
+    "backToExits": "Retour aux départs",
+    "generateFromTemplate": "Générer la liste depuis un modèle",
+    "templateOption": "{{name}} ({{count}} éléments)",
+    "generate": "Générer",
+    "replaceWarning": "Attention : la génération remplacera les éléments actuels de la liste.",
+    "noItemsYet": "Aucun élément pour le moment. Générez depuis un modèle ci-dessus.",
+    "progress": "{{completed}} / {{total}} terminés ({{progress}} %)",
+    "templatesTitle": "Modèles de liste",
+    "templatesSubtitle": "Gérez les modèles et les éléments des listes de départ.",
+    "newTemplate": "Nouveau modèle",
+    "editTemplate": "Modifier le modèle",
+    "createTemplate": "Créer un modèle",
+    "nameLabel": "Nom *",
+    "namePlaceholder": "ex. Liste de départ standard",
+    "exitTypeLabel": "Type de départ",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Description facultative",
+    "setDefault": "Définir comme modèle par défaut",
+    "saving": "Enregistrement...",
+    "saveChanges": "Enregistrer",
+    "confirmDeleteTemplate": "Supprimer ce modèle et tous ses éléments ?",
+    "noTemplates": "Aucun modèle de liste pour le moment.",
+    "itemsCount_one": "{{count}} élément",
+    "itemsCount_other": "{{count}} éléments",
+    "default": "Par défaut",
+    "editTemplateTitle": "Modifier le modèle",
+    "deleteTemplateTitle": "Supprimer le modèle",
+    "noItemsInTemplate": "Aucun élément dans ce modèle.",
+    "required": "Obligatoire",
+    "assigned": "Assigné : {{role}}",
+    "editItemTitle": "Modifier l'élément",
+    "deleteItemTitle": "Supprimer l'élément",
+    "editItem": "Modifier l'élément",
+    "addItem": "Ajouter un élément",
+    "itemTitlePlaceholder": "Titre de l'élément",
+    "itemDescPlaceholder": "Description (facultative)",
+    "mandatory": "Obligatoire",
+    "addItemButton": "Ajouter",
+    "confirmDeleteItem": "Supprimer cet élément ?",
+    "allTypes": "Tous les types",
+    "type": {
+      "resignation": "Démission",
+      "termination": "Licenciement",
+      "retirement": "Départ à la retraite",
+      "end_of_contract": "Fin de contrat",
+      "mutual_separation": "Séparation à l'amiable",
+      "absconding": "Abandon de poste"
+    },
+    "itemStatus": {
+      "pending": "En attente",
+      "in_progress": "En cours",
+      "completed": "Terminé",
+      "waived": "Dispensé",
+      "na": "S/O"
+    }
+  },
+  "clearance": {
+    "recordsTitle": "Enregistrements de décharge",
+    "recordsSubtitle": "Approbations de décharge de département en attente pour tous les départs.",
+    "manageDepartments": "Gérer les départements",
+    "noPending": "Aucune décharge en attente.",
+    "colDepartment": "Département",
+    "colEmployee": "Employé",
+    "colPendingAmount": "Montant en attente",
+    "unknown": "Inconnu",
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "reasonRequired": "Veuillez saisir un motif de rejet",
+    "rejected": "Décharge rejetée",
+    "rejectFailed": "Échec du rejet de la décharge",
+    "rejectTitle": "Rejeter la décharge",
+    "reasonLabel": "Motif du rejet",
+    "reasonPlaceholder": "Expliquez pourquoi cette décharge est rejetée…",
+    "deptTitle": "Départements de décharge",
+    "deptSubtitle": "Gérez les départements qui doivent valider lors de la décharge de départ d'un employé.",
+    "addDepartment": "Ajouter un département",
+    "deptNameLabel": "Nom du département *",
+    "deptNamePlaceholder": "ex. Informatique / Systèmes",
+    "approverRoleLabel": "Rôle d'approbateur",
+    "approverRolePlaceholder": "ex. it_admin",
+    "adding": "Ajout...",
+    "add": "Ajouter",
+    "confirmDeleteDept": "Supprimer ce département de décharge ?",
+    "noDepartments": "Aucun département de décharge configuré pour le moment.",
+    "colOrder": "Ordre",
+    "colApproverRole": "Rôle d'approbateur",
+    "status": {
+      "pending": "En attente",
+      "approved": "Approuvée",
+      "rejected": "Rejetée",
+      "waived": "Dispensée"
+    }
+  },
+  "app": {
+    "title": "EMP Exit — Gestion des départs des employés"
+  },
+  "theme": {
+    "label": "Thème",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  },
+  "exitTypes": {
+    "resignation": "Démission",
+    "termination": "Licenciement",
+    "retirement": "Retraite",
+    "endOfContract": "Fin de contrat",
+    "mutualSeparation": "Séparation à l’amiable",
+    "absconding": "Abandon de poste"
+  },
+  "exitStatuses": {
+    "initiated": "Initié",
+    "noticePeriod": "Préavis",
+    "clearancePending": "Décharge en attente",
+    "fnfPending": "FnF en attente",
+    "fnfProcessed": "FnF traité",
+    "completed": "Terminé",
+    "cancelled": "Annulé"
   }
 }

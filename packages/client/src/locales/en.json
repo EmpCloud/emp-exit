@@ -48,15 +48,12 @@
     "noNotifications": "No notifications yet",
     "viewAll": "View all",
     "review": "Review",
+    "cancelInvitationTooltip": "Cancel this invitation and remove the unactivated user",
     "changeLanguage": "Change language",
     "openNavigationMenu": "Open navigation menu",
     "closeNavigationMenu": "Close navigation menu",
     "unknown": "Unknown",
-    "user": "User",
-    "cancelInvitationTooltip": "Cancel this invitation and remove the unactivated user"
-  },
-  "app": {
-    "title": "EMP Exit — Employee Exit Management"
+    "user": "User"
   },
   "nav": {
     "brand": "EMP Exit",
@@ -87,22 +84,26 @@
     "hrManager": "HR Manager",
     "employee": "Employee"
   },
-  "theme": {
-    "label": "Theme",
-    "light": "Light",
-    "dark": "Dark",
-    "system": "System"
-  },
   "dashboard": {
     "title": "Dashboard",
     "subtitle": "Exit management overview and metrics.",
+    "statActiveExits": "Active Exits",
+    "statClearancePending": "Clearance Pending",
+    "statFnfPending": "FnF Pending",
+    "statCompletedMonth": "Completed (Month)",
+    "recentExits": "Recent Exits",
+    "emptyExits": "No exit requests yet. Start by initiating an exit.",
+    "colEmployee": "Employee",
+    "colType": "Type",
+    "colLastWorkingDate": "Last Working Date",
+    "colInitiated": "Initiated",
+    "employeeFallback": "Employee #{{id}}",
     "stats": {
       "activeExits": "Active Exits",
       "clearancePending": "Clearance Pending",
       "fnfPending": "FnF Pending",
       "completedThisMonth": "Completed (This Month)"
     },
-    "recentExits": "Recent Exits",
     "emptyState": "No exit requests yet. Start by initiating an exit.",
     "table": {
       "employee": "Employee",
@@ -110,32 +111,60 @@
       "status": "Status",
       "lastWorkingDate": "Last Working Date",
       "initiated": "Initiated"
-    },
-    "employeeFallback": "Employee #{{id}}"
+    }
   },
-  "exitTypes": {
+  "exitStatus": {
+    "initiated": "Initiated",
+    "notice_period": "Notice Period",
+    "clearance_pending": "Clearance Pending",
+    "fnf_pending": "FnF Pending",
+    "fnf_processed": "FnF Processed",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "exitType": {
     "resignation": "Resignation",
     "termination": "Termination",
     "retirement": "Retirement",
-    "endOfContract": "End of Contract",
-    "mutualSeparation": "Mutual Separation",
+    "end_of_contract": "End of Contract",
+    "mutual_separation": "Mutual Separation",
     "absconding": "Absconding"
-  },
-  "exitStatuses": {
-    "initiated": "Initiated",
-    "noticePeriod": "Notice Period",
-    "clearancePending": "Clearance Pending",
-    "fnfPending": "FnF Pending",
-    "fnfProcessed": "FnF Processed",
-    "completed": "Completed",
-    "cancelled": "Cancelled"
   },
   "exitList": {
     "title": "Exit Requests",
     "subtitle": "View and manage all employee exit requests.",
+    "initiate": "Initiate Exit",
+    "allStatuses": "All Statuses",
+    "activeInProgress": "Active (in progress)",
+    "requestsFound_one": "{{count}} exit request found",
+    "requestsFound_other": "{{count}} exit requests found",
+    "colEmployee": "Employee",
+    "colType": "Type",
+    "colResignationDate": "Resignation Date",
+    "colLastWorkingDate": "Last Working Date",
+    "colInitiated": "Initiated",
+    "noneFound": "No exit requests found.",
+    "deletedEmployee": "Deleted employee #{{id}}",
+    "pageInfo": "Page {{page}} of {{total}}",
+    "status": {
+      "initiated": "Initiated",
+      "notice_period": "Notice Period",
+      "clearance_pending": "Clearance Pending",
+      "fnf_pending": "FnF Pending",
+      "fnf_processed": "FnF Processed",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "type": {
+      "resignation": "Resignation",
+      "termination": "Termination",
+      "retirement": "Retirement",
+      "end_of_contract": "End of Contract",
+      "mutual_separation": "Mutual Separation",
+      "absconding": "Absconding"
+    },
     "initiateExit": "Initiate Exit",
     "statusFilterLabel": "Filter exit requests by status",
-    "allStatuses": "All Statuses",
     "activeStatus": "Active (in progress)",
     "resultCount_zero": "{{count}} exit requests found",
     "resultCount_one": "{{count}} exit request found",
@@ -153,10 +182,131 @@
       "lastWorkingDate": "Last Working Date",
       "initiated": "Initiated"
     },
-    "deletedEmployee": "Deleted employee #{{id}}",
     "pagination": {
       "label": "Exit requests pagination",
       "page": "Page {{page}} of {{totalPages}}"
     }
+  },
+  "checklists": {
+    "instanceTitle": "Exit Checklist",
+    "instanceSubtitle": "Track and update checklist items for this exit.",
+    "backToExits": "Back to exits",
+    "generateFromTemplate": "Generate Checklist from Template",
+    "templateOption": "{{name}} ({{count}} items)",
+    "generate": "Generate",
+    "replaceWarning": "Warning: generating will replace the current checklist items.",
+    "noItemsYet": "No checklist items yet. Generate from a template above.",
+    "progress": "{{completed}} / {{total}} completed ({{progress}}%)",
+    "templatesTitle": "Checklist Templates",
+    "templatesSubtitle": "Manage exit checklist templates and items.",
+    "newTemplate": "New Template",
+    "editTemplate": "Edit Template",
+    "createTemplate": "Create Template",
+    "nameLabel": "Name *",
+    "namePlaceholder": "e.g. Standard Exit Checklist",
+    "exitTypeLabel": "Exit Type",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Optional description",
+    "setDefault": "Set as default template",
+    "saving": "Saving...",
+    "saveChanges": "Save changes",
+    "confirmDeleteTemplate": "Delete this template and all its items?",
+    "noTemplates": "No checklist templates yet.",
+    "itemsCount_one": "{{count}} item",
+    "itemsCount_other": "{{count}} items",
+    "default": "Default",
+    "editTemplateTitle": "Edit template",
+    "deleteTemplateTitle": "Delete template",
+    "noItemsInTemplate": "No items in this template.",
+    "required": "Required",
+    "assigned": "Assigned: {{role}}",
+    "editItemTitle": "Edit item",
+    "deleteItemTitle": "Delete item",
+    "editItem": "Edit item",
+    "addItem": "Add item",
+    "itemTitlePlaceholder": "Item title",
+    "itemDescPlaceholder": "Description (optional)",
+    "mandatory": "Mandatory",
+    "addItemButton": "Add Item",
+    "confirmDeleteItem": "Remove this item?",
+    "allTypes": "All Types",
+    "type": {
+      "resignation": "Resignation",
+      "termination": "Termination",
+      "retirement": "Retirement",
+      "end_of_contract": "End of Contract",
+      "mutual_separation": "Mutual Separation",
+      "absconding": "Absconding"
+    },
+    "itemStatus": {
+      "pending": "Pending",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "waived": "Waived",
+      "na": "N/A"
+    }
+  },
+  "clearance": {
+    "recordsTitle": "Clearance Records",
+    "recordsSubtitle": "Pending department clearance approvals across all exits.",
+    "manageDepartments": "Manage Departments",
+    "noPending": "No pending clearances.",
+    "colDepartment": "Department",
+    "colEmployee": "Employee",
+    "colPendingAmount": "Pending Amount",
+    "unknown": "Unknown",
+    "approve": "Approve",
+    "reject": "Reject",
+    "reasonRequired": "Please enter a reason for rejection",
+    "rejected": "Clearance rejected",
+    "rejectFailed": "Failed to reject clearance",
+    "rejectTitle": "Reject Clearance",
+    "reasonLabel": "Reason for rejection",
+    "reasonPlaceholder": "Explain why this clearance is being rejected…",
+    "deptTitle": "Clearance Departments",
+    "deptSubtitle": "Manage departments that must sign off during employee exit clearance.",
+    "addDepartment": "Add Department",
+    "deptNameLabel": "Department Name *",
+    "deptNamePlaceholder": "e.g. IT / Systems",
+    "approverRoleLabel": "Approver Role",
+    "approverRolePlaceholder": "e.g. it_admin",
+    "adding": "Adding...",
+    "add": "Add",
+    "confirmDeleteDept": "Delete this clearance department?",
+    "noDepartments": "No clearance departments configured yet.",
+    "colOrder": "Order",
+    "colApproverRole": "Approver Role",
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "waived": "Waived"
+    }
+  },
+  "app": {
+    "title": "EMP Exit — Employee Exit Management"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "exitTypes": {
+    "resignation": "Resignation",
+    "termination": "Termination",
+    "retirement": "Retirement",
+    "endOfContract": "End of Contract",
+    "mutualSeparation": "Mutual Separation",
+    "absconding": "Absconding"
+  },
+  "exitStatuses": {
+    "initiated": "Initiated",
+    "noticePeriod": "Notice Period",
+    "clearancePending": "Clearance Pending",
+    "fnfPending": "FnF Pending",
+    "fnfProcessed": "FnF Processed",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
   }
 }

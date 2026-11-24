@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Shield, Plus, Trash2, Edit2, Loader2, X, Check } from "lucide-react";
 import { apiGet, apiPost, apiPut, apiDelete } from "@/api/client";
 import { cn } from "@/lib/utils";
@@ -12,6 +13,7 @@ interface Department {
 }
 
 export function ClearanceDeptPage() {
+  const { t } = useTranslation();
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -62,7 +64,7 @@ export function ClearanceDeptPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this clearance department?")) return;
+    if (!confirm(t("clearance.confirmDeleteDept"))) return;
     try {
       await apiDelete(`/clearance/departments/${id}`);
       await loadDepartments();
@@ -114,9 +116,9 @@ export function ClearanceDeptPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Clearance Departments</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t("clearance.deptTitle")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Manage departments that must sign off during employee exit clearance.
+            {t("clearance.deptSubtitle")}
           </p>
         </div>
         <button
@@ -124,7 +126,7 @@ export function ClearanceDeptPage() {
           className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-rose-700 transition-colors"
         >
           <Plus className="h-4 w-4" />
-          Add Department
+          {t("clearance.addDepartment")}
         </button>
       </div>
 
@@ -132,7 +134,7 @@ export function ClearanceDeptPage() {
       {showCreate && (
         <div className="rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50/50 dark:bg-rose-950/30 p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-foreground">Add Department</h3>
+            <h3 className="text-sm font-semibold text-foreground">{t("clearance.addDepartment")}</h3>
             <button onClick={() => setShowCreate(false)} className="text-muted-foreground hover:text-muted-foreground">
               <X className="h-4 w-4" />
             </button>
@@ -141,26 +143,26 @@ export function ClearanceDeptPage() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-1">
-                  Department Name *
+                  {t("clearance.deptNameLabel")}
                 </label>
                 <input
                   type="text"
                   required
                   value={createName}
                   onChange={(e) => setCreateName(e.target.value)}
-                  placeholder="e.g. IT / Systems"
+                  placeholder={t("clearance.deptNamePlaceholder")}
                   className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-1">
-                  Approver Role
+                  {t("clearance.approverRoleLabel")}
                 </label>
                 <input
                   type="text"
                   value={createApproverRole}
                   onChange={(e) => setCreateApproverRole(e.target.value)}
-                  placeholder="e.g. it_admin"
+                  placeholder={t("clearance.approverRolePlaceholder")}
                   className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
                 />
               </div>
@@ -171,14 +173,14 @@ export function ClearanceDeptPage() {
                 disabled={saving || !createName}
                 className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50"
               >
-                {saving ? "Adding..." : "Add"}
+                {saving ? t("clearance.adding") : t("clearance.add")}
               </button>
               <button
                 type="button"
                 onClick={() => setShowCreate(false)}
                 className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/50"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
             </div>
           </form>
@@ -189,18 +191,18 @@ export function ClearanceDeptPage() {
       {departments.length === 0 ? (
         <div className="rounded-xl border border-border bg-card p-12 text-center">
           <Shield className="mx-auto h-12 w-12 text-muted-foreground/50 mb-3" />
-          <p className="text-sm text-muted-foreground">No clearance departments configured yet.</p>
+          <p className="text-sm text-muted-foreground">{t("clearance.noDepartments")}</p>
         </div>
       ) : (
         <div className="rounded-xl border border-border bg-card overflow-x-auto -mx-4 lg:mx-0">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                <th className="px-6 py-3">Order</th>
-                <th className="px-6 py-3">Department</th>
-                <th className="px-6 py-3">Approver Role</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3 text-right">Actions</th>
+                <th className="px-6 py-3">{t("clearance.colOrder")}</th>
+                <th className="px-6 py-3">{t("clearance.colDepartment")}</th>
+                <th className="px-6 py-3">{t("clearance.colApproverRole")}</th>
+                <th className="px-6 py-3">{t("common.status")}</th>
+                <th className="px-6 py-3 text-right">{t("common.actions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -241,7 +243,7 @@ export function ClearanceDeptPage() {
                           : "bg-muted text-muted-foreground",
                       )}
                     >
-                      {dept.is_active ? "Active" : "Inactive"}
+                      {dept.is_active ? t("common.active") : t("common.inactive")}
                     </button>
                   </td>
                   <td className="px-6 py-3">

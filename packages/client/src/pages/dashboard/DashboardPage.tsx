@@ -37,23 +37,25 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: "bg-muted text-muted-foreground",
 };
 
-const STATUS_TRANSLATION_KEYS: Record<ExitStatus, string> = {
-  initiated: "exitStatuses.initiated",
-  notice_period: "exitStatuses.noticePeriod",
-  clearance_pending: "exitStatuses.clearancePending",
-  fnf_pending: "exitStatuses.fnfPending",
-  fnf_processed: "exitStatuses.fnfProcessed",
-  completed: "exitStatuses.completed",
-  cancelled: "exitStatuses.cancelled",
+// i18n keys under the shared `exitStatus` / `exitType` namespaces, resolved
+// via t() at render time (see the exit status/type cells below).
+const STATUS_LABEL_KEYS: Record<ExitStatus, string> = {
+  initiated: "exitStatus.initiated",
+  notice_period: "exitStatus.notice_period",
+  clearance_pending: "exitStatus.clearance_pending",
+  fnf_pending: "exitStatus.fnf_pending",
+  fnf_processed: "exitStatus.fnf_processed",
+  completed: "exitStatus.completed",
+  cancelled: "exitStatus.cancelled",
 };
 
-const TYPE_TRANSLATION_KEYS: Record<ExitType, string> = {
-  resignation: "exitTypes.resignation",
-  termination: "exitTypes.termination",
-  retirement: "exitTypes.retirement",
-  end_of_contract: "exitTypes.endOfContract",
-  mutual_separation: "exitTypes.mutualSeparation",
-  absconding: "exitTypes.absconding",
+const TYPE_LABEL_KEYS: Record<ExitType, string> = {
+  resignation: "exitType.resignation",
+  termination: "exitType.termination",
+  retirement: "exitType.retirement",
+  end_of_contract: "exitType.end_of_contract",
+  mutual_separation: "exitType.mutual_separation",
+  absconding: "exitType.absconding",
 };
 
 export function DashboardPage() {
@@ -130,7 +132,7 @@ export function DashboardPage() {
   const statCards = [
     {
       id: "active-exits",
-      label: t("dashboard.stats.activeExits"),
+      label: t("dashboard.statActiveExits"),
       value: stats?.activeExits ?? 0,
       icon: UserMinus,
       color: "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400",
@@ -139,7 +141,7 @@ export function DashboardPage() {
     },
     {
       id: "clearance-pending",
-      label: t("dashboard.stats.clearancePending"),
+      label: t("dashboard.statClearancePending"),
       value: stats?.clearancePending ?? 0,
       icon: Shield,
       color: "bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400",
@@ -148,7 +150,7 @@ export function DashboardPage() {
     },
     {
       id: "fnf-pending",
-      label: t("dashboard.stats.fnfPending"),
+      label: t("dashboard.statFnfPending"),
       value: stats?.fnfPending ?? 0,
       icon: DollarSign,
       color: "bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400",
@@ -157,7 +159,7 @@ export function DashboardPage() {
     },
     {
       id: "completed-this-month",
-      label: t("dashboard.stats.completedThisMonth"),
+      label: t("dashboard.statCompletedMonth"),
       value: stats?.completedThisMonth ?? 0,
       icon: ClipboardCheck,
       color: "bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400",
@@ -213,18 +215,18 @@ export function DashboardPage() {
 
         {recentExits.length === 0 ? (
           <div className="px-6 py-12 text-center text-sm text-muted-foreground">
-            {t("dashboard.emptyState")}
+            {t("dashboard.emptyExits")}
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm" aria-labelledby="recent-exits-heading">
               <thead>
                 <tr className="border-b border-border text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  <th className="px-6 py-3">{t("dashboard.table.employee")}</th>
-                  <th className="px-6 py-3">{t("dashboard.table.type")}</th>
-                  <th className="px-6 py-3">{t("dashboard.table.status")}</th>
-                  <th className="px-6 py-3">{t("dashboard.table.lastWorkingDate")}</th>
-                  <th className="px-6 py-3">{t("dashboard.table.initiated")}</th>
+                  <th className="px-6 py-3">{t("dashboard.colEmployee")}</th>
+                  <th className="px-6 py-3">{t("dashboard.colType")}</th>
+                  <th className="px-6 py-3">{t("common.status")}</th>
+                  <th className="px-6 py-3">{t("dashboard.colLastWorkingDate")}</th>
+                  <th className="px-6 py-3">{t("dashboard.colInitiated")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -241,7 +243,7 @@ export function DashboardPage() {
                       )}
                     </td>
                     <td className="px-6 py-3 text-muted-foreground">
-                      {t(TYPE_TRANSLATION_KEYS[exit.exit_type] ?? "common.unknown")}
+                      {t(TYPE_LABEL_KEYS[exit.exit_type] ?? "common.unknown")}
                     </td>
                     <td className="px-6 py-3">
                       <span
@@ -250,7 +252,7 @@ export function DashboardPage() {
                           STATUS_COLORS[exit.status] || "bg-muted text-muted-foreground",
                         )}
                       >
-                        {t(STATUS_TRANSLATION_KEYS[exit.status] ?? "common.unknown")}
+                        {t(STATUS_LABEL_KEYS[exit.status] ?? "common.unknown")}
                       </span>
                     </td>
                     <td className="px-6 py-3 text-muted-foreground">
