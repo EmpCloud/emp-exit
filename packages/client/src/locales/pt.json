@@ -79,6 +79,72 @@
     "hrManager": "Gerente de RH",
     "employee": "Funcionário"
   },
+  "dashboard": {
+    "title": "Painel",
+    "subtitle": "Visão geral e métricas da gestão de saídas.",
+    "statActiveExits": "Saídas ativas",
+    "statClearancePending": "Liberação pendente",
+    "statFnfPending": "FnF pendente",
+    "statCompletedMonth": "Concluídas (mês)",
+    "recentExits": "Saídas recentes",
+    "emptyExits": "Ainda não há solicitações de saída. Comece iniciando uma saída.",
+    "colEmployee": "Funcionário",
+    "colType": "Tipo",
+    "colLastWorkingDate": "Último dia de trabalho",
+    "colInitiated": "Iniciada",
+    "employeeFallback": "Funcionário #{{id}}"
+  },
+  "exitStatus": {
+    "initiated": "Iniciada",
+    "notice_period": "Período de aviso",
+    "clearance_pending": "Liberação pendente",
+    "fnf_pending": "FnF pendente",
+    "fnf_processed": "FnF processado",
+    "completed": "Concluída",
+    "cancelled": "Cancelada"
+  },
+  "exitType": {
+    "resignation": "Demissão",
+    "termination": "Rescisão",
+    "retirement": "Aposentadoria",
+    "end_of_contract": "Fim de contrato",
+    "mutual_separation": "Separação mútua",
+    "absconding": "Abandono"
+  },
+  "exitList": {
+    "title": "Solicitações de saída",
+    "subtitle": "Veja e gerencie todas as solicitações de saída de funcionários.",
+    "initiate": "Iniciar saída",
+    "allStatuses": "Todos os status",
+    "activeInProgress": "Ativas (em andamento)",
+    "requestsFound_one": "{{count}} solicitação de saída encontrada",
+    "requestsFound_other": "{{count}} solicitações de saída encontradas",
+    "colEmployee": "Funcionário",
+    "colType": "Tipo",
+    "colResignationDate": "Data de demissão",
+    "colLastWorkingDate": "Último dia de trabalho",
+    "colInitiated": "Iniciada",
+    "noneFound": "Nenhuma solicitação de saída encontrada.",
+    "deletedEmployee": "Funcionário excluído #{{id}}",
+    "pageInfo": "Página {{page}} de {{total}}",
+    "status": {
+      "initiated": "Iniciada",
+      "notice_period": "Período de aviso",
+      "clearance_pending": "Liberação pendente",
+      "fnf_pending": "FnF pendente",
+      "fnf_processed": "FnF processado",
+      "completed": "Concluída",
+      "cancelled": "Cancelada"
+    },
+    "type": {
+      "resignation": "Demissão",
+      "termination": "Rescisão",
+      "retirement": "Aposentadoria",
+      "end_of_contract": "Fim de contrato",
+      "mutual_separation": "Separação mútua",
+      "absconding": "Abandono"
+    }
+  },
   "checklists": {
     "instanceTitle": "Lista de saída",
     "instanceSubtitle": "Acompanhe e atualize os itens da lista desta saída.",

@@ -79,6 +79,72 @@
     "hrManager": "Gerente de RR. HH.",
     "employee": "Empleado"
   },
+  "dashboard": {
+    "title": "Panel",
+    "subtitle": "Resumen y métricas de gestión de salidas.",
+    "statActiveExits": "Salidas activas",
+    "statClearancePending": "Autorización pendiente",
+    "statFnfPending": "FnF pendiente",
+    "statCompletedMonth": "Completadas (mes)",
+    "recentExits": "Salidas recientes",
+    "emptyExits": "Aún no hay solicitudes de salida. Comienza iniciando una salida.",
+    "colEmployee": "Empleado",
+    "colType": "Tipo",
+    "colLastWorkingDate": "Último día laboral",
+    "colInitiated": "Iniciada",
+    "employeeFallback": "Empleado #{{id}}"
+  },
+  "exitStatus": {
+    "initiated": "Iniciada",
+    "notice_period": "Período de preaviso",
+    "clearance_pending": "Autorización pendiente",
+    "fnf_pending": "FnF pendiente",
+    "fnf_processed": "FnF procesado",
+    "completed": "Completada",
+    "cancelled": "Cancelada"
+  },
+  "exitType": {
+    "resignation": "Renuncia",
+    "termination": "Despido",
+    "retirement": "Jubilación",
+    "end_of_contract": "Fin de contrato",
+    "mutual_separation": "Separación mutua",
+    "absconding": "Abandono"
+  },
+  "exitList": {
+    "title": "Solicitudes de salida",
+    "subtitle": "Ver y gestionar todas las solicitudes de salida de empleados.",
+    "initiate": "Iniciar salida",
+    "allStatuses": "Todos los estados",
+    "activeInProgress": "Activas (en curso)",
+    "requestsFound_one": "{{count}} solicitud de salida encontrada",
+    "requestsFound_other": "{{count}} solicitudes de salida encontradas",
+    "colEmployee": "Empleado",
+    "colType": "Tipo",
+    "colResignationDate": "Fecha de renuncia",
+    "colLastWorkingDate": "Último día laboral",
+    "colInitiated": "Iniciada",
+    "noneFound": "No se encontraron solicitudes de salida.",
+    "deletedEmployee": "Empleado eliminado #{{id}}",
+    "pageInfo": "Página {{page}} de {{total}}",
+    "status": {
+      "initiated": "Iniciada",
+      "notice_period": "Período de preaviso",
+      "clearance_pending": "Autorización pendiente",
+      "fnf_pending": "FnF pendiente",
+      "fnf_processed": "FnF procesado",
+      "completed": "Completada",
+      "cancelled": "Cancelada"
+    },
+    "type": {
+      "resignation": "Renuncia",
+      "termination": "Despido",
+      "retirement": "Jubilación",
+      "end_of_contract": "Fin de contrato",
+      "mutual_separation": "Separación mutua",
+      "absconding": "Abandono"
+    }
+  },
   "checklists": {
     "instanceTitle": "Lista de salida",
     "instanceSubtitle": "Realiza el seguimiento y actualiza los elementos de la lista de esta salida.",

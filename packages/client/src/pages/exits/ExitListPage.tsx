@@ -1,19 +1,21 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Plus, Search, Loader2, UserMinus } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Plus, Loader2, UserMinus } from "lucide-react";
 import { apiGet } from "@/api/client";
 import { cn, formatDate } from "@/lib/utils";
 
-const STATUS_OPTIONS = [
-  { value: "", label: "All Statuses" },
-  { value: "active", label: "Active (in progress)" },
-  { value: "initiated", label: "Initiated" },
-  { value: "notice_period", label: "Notice Period" },
-  { value: "clearance_pending", label: "Clearance Pending" },
-  { value: "fnf_pending", label: "FnF Pending" },
-  { value: "fnf_processed", label: "FnF Processed" },
-  { value: "completed", label: "Completed" },
-  { value: "cancelled", label: "Cancelled" },
+// value -> i18n key, resolved via t() at render.
+const STATUS_OPTION_KEYS: { value: string; key: string }[] = [
+  { value: "", key: "exitList.allStatuses" },
+  { value: "active", key: "exitList.activeInProgress" },
+  { value: "initiated", key: "exitList.status.initiated" },
+  { value: "notice_period", key: "exitList.status.notice_period" },
+  { value: "clearance_pending", key: "exitList.status.clearance_pending" },
+  { value: "fnf_pending", key: "exitList.status.fnf_pending" },
+  { value: "fnf_processed", key: "exitList.status.fnf_processed" },
+  { value: "completed", key: "exitList.status.completed" },
+  { value: "cancelled", key: "exitList.status.cancelled" },
 ];
 
 const STATUS_COLORS: Record<string, string> = {
@@ -26,23 +28,24 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: "bg-muted text-muted-foreground",
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  initiated: "Initiated",
-  notice_period: "Notice Period",
-  clearance_pending: "Clearance Pending",
-  fnf_pending: "FnF Pending",
-  fnf_processed: "FnF Processed",
-  completed: "Completed",
-  cancelled: "Cancelled",
+// value -> i18n key under the page's exitList namespace, resolved at render.
+const STATUS_LABEL_KEYS: Record<string, string> = {
+  initiated: "exitList.status.initiated",
+  notice_period: "exitList.status.notice_period",
+  clearance_pending: "exitList.status.clearance_pending",
+  fnf_pending: "exitList.status.fnf_pending",
+  fnf_processed: "exitList.status.fnf_processed",
+  completed: "exitList.status.completed",
+  cancelled: "exitList.status.cancelled",
 };
 
-const TYPE_LABELS: Record<string, string> = {
-  resignation: "Resignation",
-  termination: "Termination",
-  retirement: "Retirement",
-  end_of_contract: "End of Contract",
-  mutual_separation: "Mutual Separation",
-  absconding: "Absconding",
+const TYPE_LABEL_KEYS: Record<string, string> = {
+  resignation: "exitList.type.resignation",
+  termination: "exitList.type.termination",
+  retirement: "exitList.type.retirement",
+  end_of_contract: "exitList.type.end_of_contract",
+  mutual_separation: "exitList.type.mutual_separation",
+  absconding: "exitList.type.absconding",
 };
 
 interface ExitListItem {
@@ -67,6 +70,7 @@ interface ExitListItem {
 }
 
 export function ExitListPage() {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [exits, setExits] = useState<ExitListItem[]>([]);
   const [total, setTotal] = useState(0);
@@ -118,9 +122,9 @@ export function ExitListPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Exit Requests</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t("exitList.title")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            View and manage all employee exit requests.
+            {t("exitList.subtitle")}
           </p>
         </div>
         <Link
@@ -128,7 +132,7 @@ export function ExitListPage() {
           className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-rose-700 transition-colors"
         >
           <Plus className="h-4 w-4" />
-          Initiate Exit
+          {t("exitList.initiate")}
         </Link>
       </div>
 
@@ -139,12 +143,12 @@ export function ExitListPage() {
           onChange={(e) => handleStatusChange(e.target.value)}
           className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-muted-foreground focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
         >
-          {STATUS_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          {STATUS_OPTION_KEYS.map((opt) => (
+            <option key={opt.value} value={opt.value}>{t(opt.key)}</option>
           ))}
         </select>
         <div className="text-sm text-muted-foreground">
-          {total} exit request{total !== 1 ? "s" : ""} found
+          {t("exitList.requestsFound", { count: total })}
         </div>
       </div>
 
@@ -157,7 +161,7 @@ export function ExitListPage() {
         ) : exits.length === 0 ? (
           <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
             <UserMinus className="h-12 w-12 text-muted-foreground/50 mb-3" />
-            <p className="text-sm text-muted-foreground">No exit requests found.</p>
+            <p className="text-sm text-muted-foreground">{t("exitList.noneFound")}</p>
           </div>
         ) : (
           <>
@@ -165,12 +169,12 @@ export function ExitListPage() {
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b border-border text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    <th className="px-6 py-3">Employee</th>
-                    <th className="px-6 py-3">Type</th>
-                    <th className="px-6 py-3">Status</th>
-                    <th className="px-6 py-3">Resignation Date</th>
-                    <th className="px-6 py-3">Last Working Date</th>
-                    <th className="px-6 py-3">Initiated</th>
+                    <th className="px-6 py-3">{t("exitList.colEmployee")}</th>
+                    <th className="px-6 py-3">{t("exitList.colType")}</th>
+                    <th className="px-6 py-3">{t("common.status")}</th>
+                    <th className="px-6 py-3">{t("exitList.colResignationDate")}</th>
+                    <th className="px-6 py-3">{t("exitList.colLastWorkingDate")}</th>
+                    <th className="px-6 py-3">{t("exitList.colInitiated")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -183,7 +187,7 @@ export function ExitListPage() {
                         >
                           {exit.employee
                             ? `${exit.employee.first_name} ${exit.employee.last_name}`
-                            : `Deleted employee #${exit.employee_id}`}
+                            : t("exitList.deletedEmployee", { id: exit.employee_id })}
                         </Link>
                         {exit.employee?.designation && (
                           <p className="text-xs text-muted-foreground">{exit.employee.designation}</p>
@@ -193,7 +197,7 @@ export function ExitListPage() {
                         )}
                       </td>
                       <td className="px-6 py-4 text-muted-foreground">
-                        {TYPE_LABELS[exit.exit_type] || exit.exit_type}
+                        {TYPE_LABEL_KEYS[exit.exit_type] ? t(TYPE_LABEL_KEYS[exit.exit_type]) : exit.exit_type}
                       </td>
                       <td className="px-6 py-4">
                         <span
@@ -202,7 +206,7 @@ export function ExitListPage() {
                             STATUS_COLORS[exit.status] || "bg-muted text-muted-foreground",
                           )}
                         >
-                          {STATUS_LABELS[exit.status] || exit.status}
+                          {STATUS_LABEL_KEYS[exit.status] ? t(STATUS_LABEL_KEYS[exit.status]) : exit.status}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-muted-foreground">
@@ -224,7 +228,7 @@ export function ExitListPage() {
             {totalPages > 1 && (
               <div className="flex items-center justify-between border-t border-border px-6 py-3">
                 <p className="text-sm text-muted-foreground">
-                  Page {page} of {totalPages}
+                  {t("exitList.pageInfo", { page, total: totalPages })}
                 </p>
                 <div className="flex gap-2">
                   <button
@@ -232,14 +236,14 @@ export function ExitListPage() {
                     disabled={page === 1}
                     className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted/50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Previous
+                    {t("common.previous")}
                   </button>
                   <button
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
                     className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted/50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Next
+                    {t("common.next")}
                   </button>
                 </div>
               </div>
