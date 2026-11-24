@@ -203,5 +203,42 @@
       "waived": "माफ़",
       "na": "लागू नहीं"
     }
+  },
+  "clearance": {
+    "recordsTitle": "क्लीयरेंस रिकॉर्ड",
+    "recordsSubtitle": "सभी निकासों में लंबित विभागीय क्लीयरेंस अनुमोदन।",
+    "manageDepartments": "विभाग प्रबंधित करें",
+    "noPending": "कोई लंबित क्लीयरेंस नहीं।",
+    "colDepartment": "विभाग",
+    "colEmployee": "कर्मचारी",
+    "colPendingAmount": "लंबित राशि",
+    "unknown": "अज्ञात",
+    "approve": "स्वीकृत करें",
+    "reject": "अस्वीकृत करें",
+    "reasonRequired": "कृपया अस्वीकृति का कारण दर्ज करें",
+    "rejected": "क्लीयरेंस अस्वीकृत",
+    "rejectFailed": "क्लीयरेंस अस्वीकृत करने में विफल",
+    "rejectTitle": "क्लीयरेंस अस्वीकृत करें",
+    "reasonLabel": "अस्वीकृति का कारण",
+    "reasonPlaceholder": "बताएं कि यह क्लीयरेंस क्यों अस्वीकृत की जा रही है…",
+    "deptTitle": "क्लीयरेंस विभाग",
+    "deptSubtitle": "उन विभागों को प्रबंधित करें जिन्हें कर्मचारी निकास क्लीयरेंस के दौरान स्वीकृति देनी होती है।",
+    "addDepartment": "विभाग जोड़ें",
+    "deptNameLabel": "विभाग नाम *",
+    "deptNamePlaceholder": "जैसे IT / सिस्टम",
+    "approverRoleLabel": "अनुमोदक भूमिका",
+    "approverRolePlaceholder": "जैसे it_admin",
+    "adding": "जोड़ा जा रहा है...",
+    "add": "जोड़ें",
+    "confirmDeleteDept": "इस क्लीयरेंस विभाग को हटाएँ?",
+    "noDepartments": "अभी तक कोई क्लीयरेंस विभाग कॉन्फ़िगर नहीं किया गया।",
+    "colOrder": "क्रम",
+    "colApproverRole": "अनुमोदक भूमिका",
+    "status": {
+      "pending": "लंबित",
+      "approved": "स्वीकृत",
+      "rejected": "अस्वीकृत",
+      "waived": "माफ़"
+    }
   }
 }

@@ -203,5 +203,42 @@
       "waived": "Dispensado",
       "na": "N/D"
     }
+  },
+  "clearance": {
+    "recordsTitle": "Registros de liberação",
+    "recordsSubtitle": "Aprovações de liberação de departamentos pendentes em todas as saídas.",
+    "manageDepartments": "Gerenciar departamentos",
+    "noPending": "Nenhuma liberação pendente.",
+    "colDepartment": "Departamento",
+    "colEmployee": "Funcionário",
+    "colPendingAmount": "Valor pendente",
+    "unknown": "Desconhecido",
+    "approve": "Aprovar",
+    "reject": "Rejeitar",
+    "reasonRequired": "Insira um motivo para a rejeição",
+    "rejected": "Liberação rejeitada",
+    "rejectFailed": "Falha ao rejeitar a liberação",
+    "rejectTitle": "Rejeitar liberação",
+    "reasonLabel": "Motivo da rejeição",
+    "reasonPlaceholder": "Explique por que esta liberação está sendo rejeitada…",
+    "deptTitle": "Departamentos de liberação",
+    "deptSubtitle": "Gerencie os departamentos que devem aprovar durante a liberação de saída do funcionário.",
+    "addDepartment": "Adicionar departamento",
+    "deptNameLabel": "Nome do departamento *",
+    "deptNamePlaceholder": "ex.: TI / Sistemas",
+    "approverRoleLabel": "Função do aprovador",
+    "approverRolePlaceholder": "ex.: it_admin",
+    "adding": "Adicionando...",
+    "add": "Adicionar",
+    "confirmDeleteDept": "Excluir este departamento de liberação?",
+    "noDepartments": "Nenhum departamento de liberação configurado ainda.",
+    "colOrder": "Ordem",
+    "colApproverRole": "Função do aprovador",
+    "status": {
+      "pending": "Pendente",
+      "approved": "Aprovada",
+      "rejected": "Rejeitada",
+      "waived": "Dispensada"
+    }
   }
 }

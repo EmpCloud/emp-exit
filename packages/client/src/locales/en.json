@@ -203,5 +203,42 @@
       "waived": "Waived",
       "na": "N/A"
     }
+  },
+  "clearance": {
+    "recordsTitle": "Clearance Records",
+    "recordsSubtitle": "Pending department clearance approvals across all exits.",
+    "manageDepartments": "Manage Departments",
+    "noPending": "No pending clearances.",
+    "colDepartment": "Department",
+    "colEmployee": "Employee",
+    "colPendingAmount": "Pending Amount",
+    "unknown": "Unknown",
+    "approve": "Approve",
+    "reject": "Reject",
+    "reasonRequired": "Please enter a reason for rejection",
+    "rejected": "Clearance rejected",
+    "rejectFailed": "Failed to reject clearance",
+    "rejectTitle": "Reject Clearance",
+    "reasonLabel": "Reason for rejection",
+    "reasonPlaceholder": "Explain why this clearance is being rejected…",
+    "deptTitle": "Clearance Departments",
+    "deptSubtitle": "Manage departments that must sign off during employee exit clearance.",
+    "addDepartment": "Add Department",
+    "deptNameLabel": "Department Name *",
+    "deptNamePlaceholder": "e.g. IT / Systems",
+    "approverRoleLabel": "Approver Role",
+    "approverRolePlaceholder": "e.g. it_admin",
+    "adding": "Adding...",
+    "add": "Add",
+    "confirmDeleteDept": "Delete this clearance department?",
+    "noDepartments": "No clearance departments configured yet.",
+    "colOrder": "Order",
+    "colApproverRole": "Approver Role",
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "waived": "Waived"
+    }
   }
 }

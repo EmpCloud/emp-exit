@@ -203,5 +203,42 @@
       "waived": "مُعفى",
       "na": "غير متاح"
     }
+  },
+  "clearance": {
+    "recordsTitle": "سجلات إخلاء الطرف",
+    "recordsSubtitle": "موافقات إخلاء الطرف المعلقة للأقسام عبر جميع المغادرات.",
+    "manageDepartments": "إدارة الأقسام",
+    "noPending": "لا توجد حالات إخلاء طرف معلقة.",
+    "colDepartment": "القسم",
+    "colEmployee": "الموظف",
+    "colPendingAmount": "المبلغ المستحق",
+    "unknown": "غير معروف",
+    "approve": "موافقة",
+    "reject": "رفض",
+    "reasonRequired": "يرجى إدخال سبب الرفض",
+    "rejected": "تم رفض إخلاء الطرف",
+    "rejectFailed": "فشل رفض إخلاء الطرف",
+    "rejectTitle": "رفض إخلاء الطرف",
+    "reasonLabel": "سبب الرفض",
+    "reasonPlaceholder": "اشرح سبب رفض إخلاء الطرف هذا…",
+    "deptTitle": "أقسام إخلاء الطرف",
+    "deptSubtitle": "إدارة الأقسام التي يجب أن توافق أثناء إخلاء طرف مغادرة الموظف.",
+    "addDepartment": "إضافة قسم",
+    "deptNameLabel": "اسم القسم *",
+    "deptNamePlaceholder": "مثال: تقنية المعلومات / الأنظمة",
+    "approverRoleLabel": "دور الموافِق",
+    "approverRolePlaceholder": "مثال: it_admin",
+    "adding": "جارٍ الإضافة...",
+    "add": "إضافة",
+    "confirmDeleteDept": "حذف قسم إخلاء الطرف هذا؟",
+    "noDepartments": "لم يتم تكوين أي أقسام إخلاء طرف بعد.",
+    "colOrder": "الترتيب",
+    "colApproverRole": "دور الموافِق",
+    "status": {
+      "pending": "معلق",
+      "approved": "موافق عليه",
+      "rejected": "مرفوض",
+      "waived": "مُعفى"
+    }
   }
 }

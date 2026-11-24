@@ -203,5 +203,42 @@
       "waived": "Erlassen",
       "na": "N/V"
     }
+  },
+  "clearance": {
+    "recordsTitle": "Freigabe-Datensätze",
+    "recordsSubtitle": "Ausstehende Abteilungsfreigaben über alle Austritte.",
+    "manageDepartments": "Abteilungen verwalten",
+    "noPending": "Keine ausstehenden Freigaben.",
+    "colDepartment": "Abteilung",
+    "colEmployee": "Mitarbeiter",
+    "colPendingAmount": "Ausstehender Betrag",
+    "unknown": "Unbekannt",
+    "approve": "Genehmigen",
+    "reject": "Ablehnen",
+    "reasonRequired": "Bitte einen Ablehnungsgrund angeben",
+    "rejected": "Freigabe abgelehnt",
+    "rejectFailed": "Freigabe konnte nicht abgelehnt werden",
+    "rejectTitle": "Freigabe ablehnen",
+    "reasonLabel": "Ablehnungsgrund",
+    "reasonPlaceholder": "Erklären Sie, warum diese Freigabe abgelehnt wird…",
+    "deptTitle": "Freigabe-Abteilungen",
+    "deptSubtitle": "Verwalten Sie die Abteilungen, die bei der Austrittsfreigabe eines Mitarbeiters zustimmen müssen.",
+    "addDepartment": "Abteilung hinzufügen",
+    "deptNameLabel": "Abteilungsname *",
+    "deptNamePlaceholder": "z. B. IT / Systeme",
+    "approverRoleLabel": "Genehmigerrolle",
+    "approverRolePlaceholder": "z. B. it_admin",
+    "adding": "Wird hinzugefügt...",
+    "add": "Hinzufügen",
+    "confirmDeleteDept": "Diese Freigabe-Abteilung löschen?",
+    "noDepartments": "Noch keine Freigabe-Abteilungen konfiguriert.",
+    "colOrder": "Reihenfolge",
+    "colApproverRole": "Genehmigerrolle",
+    "status": {
+      "pending": "Ausstehend",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt",
+      "waived": "Erlassen"
+    }
   }
 }

@@ -203,5 +203,42 @@
       "waived": "Exento",
       "na": "N/D"
     }
+  },
+  "clearance": {
+    "recordsTitle": "Registros de autorización",
+    "recordsSubtitle": "Aprobaciones de autorización de departamentos pendientes en todas las salidas.",
+    "manageDepartments": "Gestionar departamentos",
+    "noPending": "No hay autorizaciones pendientes.",
+    "colDepartment": "Departamento",
+    "colEmployee": "Empleado",
+    "colPendingAmount": "Importe pendiente",
+    "unknown": "Desconocido",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "reasonRequired": "Introduce un motivo para el rechazo",
+    "rejected": "Autorización rechazada",
+    "rejectFailed": "Error al rechazar la autorización",
+    "rejectTitle": "Rechazar autorización",
+    "reasonLabel": "Motivo del rechazo",
+    "reasonPlaceholder": "Explica por qué se rechaza esta autorización…",
+    "deptTitle": "Departamentos de autorización",
+    "deptSubtitle": "Gestiona los departamentos que deben aprobar durante la autorización de salida del empleado.",
+    "addDepartment": "Agregar departamento",
+    "deptNameLabel": "Nombre del departamento *",
+    "deptNamePlaceholder": "p. ej. TI / Sistemas",
+    "approverRoleLabel": "Rol del aprobador",
+    "approverRolePlaceholder": "p. ej. it_admin",
+    "adding": "Agregando...",
+    "add": "Agregar",
+    "confirmDeleteDept": "¿Eliminar este departamento de autorización?",
+    "noDepartments": "Aún no hay departamentos de autorización configurados.",
+    "colOrder": "Orden",
+    "colApproverRole": "Rol del aprobador",
+    "status": {
+      "pending": "Pendiente",
+      "approved": "Aprobada",
+      "rejected": "Rechazada",
+      "waived": "Exenta"
+    }
   }
 }

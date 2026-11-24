@@ -203,5 +203,42 @@
       "waived": "Dispensé",
       "na": "S/O"
     }
+  },
+  "clearance": {
+    "recordsTitle": "Enregistrements de décharge",
+    "recordsSubtitle": "Approbations de décharge de département en attente pour tous les départs.",
+    "manageDepartments": "Gérer les départements",
+    "noPending": "Aucune décharge en attente.",
+    "colDepartment": "Département",
+    "colEmployee": "Employé",
+    "colPendingAmount": "Montant en attente",
+    "unknown": "Inconnu",
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "reasonRequired": "Veuillez saisir un motif de rejet",
+    "rejected": "Décharge rejetée",
+    "rejectFailed": "Échec du rejet de la décharge",
+    "rejectTitle": "Rejeter la décharge",
+    "reasonLabel": "Motif du rejet",
+    "reasonPlaceholder": "Expliquez pourquoi cette décharge est rejetée…",
+    "deptTitle": "Départements de décharge",
+    "deptSubtitle": "Gérez les départements qui doivent valider lors de la décharge de départ d'un employé.",
+    "addDepartment": "Ajouter un département",
+    "deptNameLabel": "Nom du département *",
+    "deptNamePlaceholder": "ex. Informatique / Systèmes",
+    "approverRoleLabel": "Rôle d'approbateur",
+    "approverRolePlaceholder": "ex. it_admin",
+    "adding": "Ajout...",
+    "add": "Ajouter",
+    "confirmDeleteDept": "Supprimer ce département de décharge ?",
+    "noDepartments": "Aucun département de décharge configuré pour le moment.",
+    "colOrder": "Ordre",
+    "colApproverRole": "Rôle d'approbateur",
+    "status": {
+      "pending": "En attente",
+      "approved": "Approuvée",
+      "rejected": "Rejetée",
+      "waived": "Dispensée"
+    }
   }
 }

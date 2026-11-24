@@ -203,5 +203,42 @@
       "waived": "免除",
       "na": "該当なし"
     }
+  },
+  "clearance": {
+    "recordsTitle": "クリアランス記録",
+    "recordsSubtitle": "すべての退職における部門クリアランス承認の保留状況。",
+    "manageDepartments": "部門を管理",
+    "noPending": "保留中のクリアランスはありません。",
+    "colDepartment": "部門",
+    "colEmployee": "従業員",
+    "colPendingAmount": "未処理金額",
+    "unknown": "不明",
+    "approve": "承認",
+    "reject": "却下",
+    "reasonRequired": "却下の理由を入力してください",
+    "rejected": "クリアランスを却下しました",
+    "rejectFailed": "クリアランスの却下に失敗しました",
+    "rejectTitle": "クリアランスを却下",
+    "reasonLabel": "却下の理由",
+    "reasonPlaceholder": "このクリアランスを却下する理由を説明してください…",
+    "deptTitle": "クリアランス部門",
+    "deptSubtitle": "従業員の退職クリアランス時に承認が必要な部門を管理します。",
+    "addDepartment": "部門を追加",
+    "deptNameLabel": "部門名 *",
+    "deptNamePlaceholder": "例: IT / システム",
+    "approverRoleLabel": "承認者ロール",
+    "approverRolePlaceholder": "例: it_admin",
+    "adding": "追加中...",
+    "add": "追加",
+    "confirmDeleteDept": "このクリアランス部門を削除しますか？",
+    "noDepartments": "クリアランス部門がまだ設定されていません。",
+    "colOrder": "順序",
+    "colApproverRole": "承認者ロール",
+    "status": {
+      "pending": "保留中",
+      "approved": "承認済み",
+      "rejected": "却下",
+      "waived": "免除"
+    }
   }
 }

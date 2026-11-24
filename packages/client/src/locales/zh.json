@@ -203,5 +203,42 @@
       "waived": "已豁免",
       "na": "不适用"
     }
+  },
+  "clearance": {
+    "recordsTitle": "结算记录",
+    "recordsSubtitle": "所有离职中待处理的部门结算审批。",
+    "manageDepartments": "管理部门",
+    "noPending": "没有待处理的结算。",
+    "colDepartment": "部门",
+    "colEmployee": "员工",
+    "colPendingAmount": "待付金额",
+    "unknown": "未知",
+    "approve": "批准",
+    "reject": "拒绝",
+    "reasonRequired": "请输入拒绝理由",
+    "rejected": "结算已拒绝",
+    "rejectFailed": "拒绝结算失败",
+    "rejectTitle": "拒绝结算",
+    "reasonLabel": "拒绝理由",
+    "reasonPlaceholder": "请说明为何拒绝此结算…",
+    "deptTitle": "结算部门",
+    "deptSubtitle": "管理在员工离职结算期间必须签核的部门。",
+    "addDepartment": "添加部门",
+    "deptNameLabel": "部门名称 *",
+    "deptNamePlaceholder": "例如：IT / 系统",
+    "approverRoleLabel": "审批人角色",
+    "approverRolePlaceholder": "例如：it_admin",
+    "adding": "添加中...",
+    "add": "添加",
+    "confirmDeleteDept": "删除此结算部门？",
+    "noDepartments": "尚未配置结算部门。",
+    "colOrder": "顺序",
+    "colApproverRole": "审批人角色",
+    "status": {
+      "pending": "待处理",
+      "approved": "已批准",
+      "rejected": "已拒绝",
+      "waived": "已豁免"
+    }
   }
 }
