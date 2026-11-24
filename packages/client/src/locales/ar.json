@@ -110,5 +110,39 @@
     "end_of_contract": "انتهاء العقد",
     "mutual_separation": "انفصال متبادل",
     "absconding": "تغيّب"
+  },
+  "exitList": {
+    "title": "طلبات المغادرة",
+    "subtitle": "عرض وإدارة جميع طلبات مغادرة الموظفين.",
+    "initiate": "بدء المغادرة",
+    "allStatuses": "جميع الحالات",
+    "activeInProgress": "نشطة (قيد التنفيذ)",
+    "requestsFound_one": "تم العثور على {{count}} طلب مغادرة",
+    "requestsFound_other": "تم العثور على {{count}} طلبات مغادرة",
+    "colEmployee": "الموظف",
+    "colType": "النوع",
+    "colResignationDate": "تاريخ الاستقالة",
+    "colLastWorkingDate": "آخر يوم عمل",
+    "colInitiated": "تم البدء",
+    "noneFound": "لم يتم العثور على طلبات مغادرة.",
+    "deletedEmployee": "موظف محذوف #{{id}}",
+    "pageInfo": "صفحة {{page}} من {{total}}",
+    "status": {
+      "initiated": "تم البدء",
+      "notice_period": "فترة الإشعار",
+      "clearance_pending": "إخلاء الطرف المعلق",
+      "fnf_pending": "FnF معلقة",
+      "fnf_processed": "FnF تمت معالجتها",
+      "completed": "مكتمل",
+      "cancelled": "ملغى"
+    },
+    "type": {
+      "resignation": "استقالة",
+      "termination": "إنهاء الخدمة",
+      "retirement": "تقاعد",
+      "end_of_contract": "انتهاء العقد",
+      "mutual_separation": "انفصال متبادل",
+      "absconding": "تغيّب"
+    }
   }
 }

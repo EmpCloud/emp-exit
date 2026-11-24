@@ -110,5 +110,39 @@
     "end_of_contract": "Vertragsende",
     "mutual_separation": "Einvernehmliche Trennung",
     "absconding": "Unentschuldigtes Fernbleiben"
+  },
+  "exitList": {
+    "title": "Austrittsanträge",
+    "subtitle": "Alle Austrittsanträge von Mitarbeitern anzeigen und verwalten.",
+    "initiate": "Austritt einleiten",
+    "allStatuses": "Alle Status",
+    "activeInProgress": "Aktiv (in Bearbeitung)",
+    "requestsFound_one": "{{count}} Austrittsantrag gefunden",
+    "requestsFound_other": "{{count}} Austrittsanträge gefunden",
+    "colEmployee": "Mitarbeiter",
+    "colType": "Typ",
+    "colResignationDate": "Kündigungsdatum",
+    "colLastWorkingDate": "Letzter Arbeitstag",
+    "colInitiated": "Eingeleitet",
+    "noneFound": "Keine Austrittsanträge gefunden.",
+    "deletedEmployee": "Gelöschter Mitarbeiter #{{id}}",
+    "pageInfo": "Seite {{page}} von {{total}}",
+    "status": {
+      "initiated": "Eingeleitet",
+      "notice_period": "Kündigungsfrist",
+      "clearance_pending": "Freigabe ausstehend",
+      "fnf_pending": "FnF ausstehend",
+      "fnf_processed": "FnF verarbeitet",
+      "completed": "Abgeschlossen",
+      "cancelled": "Storniert"
+    },
+    "type": {
+      "resignation": "Kündigung",
+      "termination": "Entlassung",
+      "retirement": "Ruhestand",
+      "end_of_contract": "Vertragsende",
+      "mutual_separation": "Einvernehmliche Trennung",
+      "absconding": "Unentschuldigtes Fernbleiben"
+    }
   }
 }

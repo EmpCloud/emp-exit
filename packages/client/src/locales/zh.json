@@ -110,5 +110,39 @@
     "end_of_contract": "合同到期",
     "mutual_separation": "协商离职",
     "absconding": "旷工离职"
+  },
+  "exitList": {
+    "title": "离职申请",
+    "subtitle": "查看和管理所有员工离职申请。",
+    "initiate": "发起离职",
+    "allStatuses": "所有状态",
+    "activeInProgress": "进行中",
+    "requestsFound_one": "找到 {{count}} 条离职申请",
+    "requestsFound_other": "找到 {{count}} 条离职申请",
+    "colEmployee": "员工",
+    "colType": "类型",
+    "colResignationDate": "辞职日期",
+    "colLastWorkingDate": "最后工作日",
+    "colInitiated": "已发起",
+    "noneFound": "未找到离职申请。",
+    "deletedEmployee": "已删除员工 #{{id}}",
+    "pageInfo": "第 {{page}} 页，共 {{total}} 页",
+    "status": {
+      "initiated": "已发起",
+      "notice_period": "通知期",
+      "clearance_pending": "待结算",
+      "fnf_pending": "FnF 待处理",
+      "fnf_processed": "FnF 已处理",
+      "completed": "已完成",
+      "cancelled": "已取消"
+    },
+    "type": {
+      "resignation": "辞职",
+      "termination": "解雇",
+      "retirement": "退休",
+      "end_of_contract": "合同到期",
+      "mutual_separation": "协商离职",
+      "absconding": "旷工离职"
+    }
   }
 }

@@ -110,5 +110,39 @@
     "end_of_contract": "अनुबंध समाप्ति",
     "mutual_separation": "पारस्परिक पृथक्करण",
     "absconding": "अनुपस्थिति"
+  },
+  "exitList": {
+    "title": "निकास अनुरोध",
+    "subtitle": "सभी कर्मचारी निकास अनुरोध देखें और प्रबंधित करें।",
+    "initiate": "निकास आरंभ करें",
+    "allStatuses": "सभी स्थितियाँ",
+    "activeInProgress": "सक्रिय (प्रगति में)",
+    "requestsFound_one": "{{count}} निकास अनुरोध मिला",
+    "requestsFound_other": "{{count}} निकास अनुरोध मिले",
+    "colEmployee": "कर्मचारी",
+    "colType": "प्रकार",
+    "colResignationDate": "इस्तीफ़ा तिथि",
+    "colLastWorkingDate": "अंतिम कार्य दिवस",
+    "colInitiated": "आरंभ किया गया",
+    "noneFound": "कोई निकास अनुरोध नहीं मिला।",
+    "deletedEmployee": "हटाया गया कर्मचारी #{{id}}",
+    "pageInfo": "पृष्ठ {{page}} / {{total}}",
+    "status": {
+      "initiated": "आरंभ किया गया",
+      "notice_period": "नोटिस अवधि",
+      "clearance_pending": "क्लीयरेंस लंबित",
+      "fnf_pending": "FnF लंबित",
+      "fnf_processed": "FnF संसाधित",
+      "completed": "पूर्ण",
+      "cancelled": "रद्द"
+    },
+    "type": {
+      "resignation": "इस्तीफा",
+      "termination": "समाप्ति",
+      "retirement": "सेवानिवृत्ति",
+      "end_of_contract": "अनुबंध समाप्ति",
+      "mutual_separation": "पारस्परिक पृथक्करण",
+      "absconding": "अनुपस्थिति"
+    }
   }
 }
