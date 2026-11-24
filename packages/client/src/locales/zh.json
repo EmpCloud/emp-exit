@@ -48,7 +48,15 @@
     "noNotifications": "暂无通知",
     "viewAll": "查看全部",
     "review": "查看",
+    "changeLanguage": "切换语言",
+    "openNavigationMenu": "打开导航菜单",
+    "closeNavigationMenu": "关闭导航菜单",
+    "unknown": "未知",
+    "user": "用户",
     "cancelInvitationTooltip": "取消此邀请并移除未激活的用户"
+  },
+  "app": {
+    "title": "EMP Exit — 员工离职管理"
   },
   "nav": {
     "brand": "EMP Exit",
@@ -78,5 +86,77 @@
     "hrAdmin": "人力资源管理员",
     "hrManager": "人力资源经理",
     "employee": "员工"
+  },
+  "theme": {
+    "label": "主题",
+    "light": "浅色",
+    "dark": "深色",
+    "system": "跟随系统"
+  },
+  "dashboard": {
+    "title": "仪表板",
+    "subtitle": "离职管理概览和指标。",
+    "stats": {
+      "activeExits": "进行中的离职",
+      "clearancePending": "待结清",
+      "fnfPending": "待完成最终结算",
+      "completedThisMonth": "本月已完成"
+    },
+    "recentExits": "最近离职",
+    "emptyState": "暂无离职申请。请先发起离职流程。",
+    "table": {
+      "employee": "员工",
+      "type": "类型",
+      "status": "状态",
+      "lastWorkingDate": "最后工作日",
+      "initiated": "发起日期"
+    },
+    "employeeFallback": "员工 #{{id}}"
+  },
+  "exitTypes": {
+    "resignation": "辞职",
+    "termination": "解雇",
+    "retirement": "退休",
+    "endOfContract": "合同到期",
+    "mutualSeparation": "协议离职",
+    "absconding": "旷工离职"
+  },
+  "exitStatuses": {
+    "initiated": "已发起",
+    "noticePeriod": "通知期",
+    "clearancePending": "待结清",
+    "fnfPending": "待最终结算",
+    "fnfProcessed": "最终结算已处理",
+    "completed": "已完成",
+    "cancelled": "已取消"
+  },
+  "exitList": {
+    "title": "离职申请",
+    "subtitle": "查看并管理所有员工离职申请。",
+    "initiateExit": "发起离职",
+    "statusFilterLabel": "按状态筛选离职申请",
+    "allStatuses": "所有状态",
+    "activeStatus": "进行中",
+    "resultCount_zero": "找到 {{count}} 个离职申请",
+    "resultCount_one": "找到 {{count}} 个离职申请",
+    "resultCount_two": "找到 {{count}} 个离职申请",
+    "resultCount_few": "找到 {{count}} 个离职申请",
+    "resultCount_many": "找到 {{count}} 个离职申请",
+    "resultCount_other": "找到 {{count}} 个离职申请",
+    "emptyState": "未找到离职申请。",
+    "tableLabel": "离职申请列表",
+    "table": {
+      "employee": "员工",
+      "type": "类型",
+      "status": "状态",
+      "resignationDate": "辞职日期",
+      "lastWorkingDate": "最后工作日",
+      "initiated": "发起日期"
+    },
+    "deletedEmployee": "已删除员工 #{{id}}",
+    "pagination": {
+      "label": "离职申请分页",
+      "page": "第 {{page}} 页，共 {{totalPages}} 页"
+    }
   }
 }

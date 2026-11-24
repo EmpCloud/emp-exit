@@ -48,7 +48,15 @@
     "noNotifications": "No notifications yet",
     "viewAll": "View all",
     "review": "Review",
+    "changeLanguage": "Change language",
+    "openNavigationMenu": "Open navigation menu",
+    "closeNavigationMenu": "Close navigation menu",
+    "unknown": "Unknown",
+    "user": "User",
     "cancelInvitationTooltip": "Cancel this invitation and remove the unactivated user"
+  },
+  "app": {
+    "title": "EMP Exit — Employee Exit Management"
   },
   "nav": {
     "brand": "EMP Exit",
@@ -78,5 +86,77 @@
     "hrAdmin": "HR Admin",
     "hrManager": "HR Manager",
     "employee": "Employee"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Exit management overview and metrics.",
+    "stats": {
+      "activeExits": "Active Exits",
+      "clearancePending": "Clearance Pending",
+      "fnfPending": "FnF Pending",
+      "completedThisMonth": "Completed (This Month)"
+    },
+    "recentExits": "Recent Exits",
+    "emptyState": "No exit requests yet. Start by initiating an exit.",
+    "table": {
+      "employee": "Employee",
+      "type": "Type",
+      "status": "Status",
+      "lastWorkingDate": "Last Working Date",
+      "initiated": "Initiated"
+    },
+    "employeeFallback": "Employee #{{id}}"
+  },
+  "exitTypes": {
+    "resignation": "Resignation",
+    "termination": "Termination",
+    "retirement": "Retirement",
+    "endOfContract": "End of Contract",
+    "mutualSeparation": "Mutual Separation",
+    "absconding": "Absconding"
+  },
+  "exitStatuses": {
+    "initiated": "Initiated",
+    "noticePeriod": "Notice Period",
+    "clearancePending": "Clearance Pending",
+    "fnfPending": "FnF Pending",
+    "fnfProcessed": "FnF Processed",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "exitList": {
+    "title": "Exit Requests",
+    "subtitle": "View and manage all employee exit requests.",
+    "initiateExit": "Initiate Exit",
+    "statusFilterLabel": "Filter exit requests by status",
+    "allStatuses": "All Statuses",
+    "activeStatus": "Active (in progress)",
+    "resultCount_zero": "{{count}} exit requests found",
+    "resultCount_one": "{{count}} exit request found",
+    "resultCount_two": "{{count}} exit requests found",
+    "resultCount_few": "{{count}} exit requests found",
+    "resultCount_many": "{{count}} exit requests found",
+    "resultCount_other": "{{count}} exit requests found",
+    "emptyState": "No exit requests found.",
+    "tableLabel": "Exit requests",
+    "table": {
+      "employee": "Employee",
+      "type": "Type",
+      "status": "Status",
+      "resignationDate": "Resignation Date",
+      "lastWorkingDate": "Last Working Date",
+      "initiated": "Initiated"
+    },
+    "deletedEmployee": "Deleted employee #{{id}}",
+    "pagination": {
+      "label": "Exit requests pagination",
+      "page": "Page {{page}} of {{totalPages}}"
+    }
   }
 }

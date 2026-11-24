@@ -6,18 +6,24 @@
 
 import { useTheme, type Theme } from "@/lib/theme";
 import { Sun, Moon, Monitor } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export function ThemeToggle() {
+  const { t } = useTranslation();
   const { theme, setTheme } = useTheme();
 
   const options: { value: Theme; icon: typeof Sun; label: string }[] = [
-    { value: "light", icon: Sun, label: "Light" },
-    { value: "dark", icon: Moon, label: "Dark" },
-    { value: "system", icon: Monitor, label: "System" },
+    { value: "light", icon: Sun, label: t("theme.light") },
+    { value: "dark", icon: Moon, label: t("theme.dark") },
+    { value: "system", icon: Monitor, label: t("theme.system") },
   ];
 
   return (
-    <div className="inline-flex items-center rounded-md border border-border bg-muted p-0.5">
+    <div
+      role="group"
+      aria-label={t("theme.label")}
+      className="inline-flex items-center rounded-md border border-border bg-muted p-0.5"
+    >
       {options.map(({ value, icon: Icon, label }) => {
         const active = theme === value;
         return (
@@ -34,7 +40,7 @@ export function ThemeToggle() {
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            <Icon className="h-4 w-4" />
+            <Icon className="h-4 w-4" aria-hidden="true" focusable="false" />
           </button>
         );
       })}

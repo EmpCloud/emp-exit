@@ -48,7 +48,15 @@
     "noNotifications": "अभी कोई सूचना नहीं",
     "viewAll": "सभी देखें",
     "review": "समीक्षा करें",
+    "changeLanguage": "भाषा बदलें",
+    "openNavigationMenu": "नेविगेशन मेनू खोलें",
+    "closeNavigationMenu": "नेविगेशन मेनू बंद करें",
+    "unknown": "अज्ञात",
+    "user": "उपयोगकर्ता",
     "cancelInvitationTooltip": "इस निमंत्रण को रद्द करें और निष्क्रिय उपयोगकर्ता को हटाएं"
+  },
+  "app": {
+    "title": "EMP Exit — कर्मचारी निकास प्रबंधन"
   },
   "nav": {
     "brand": "EMP Exit",
@@ -78,5 +86,77 @@
     "hrAdmin": "एचआर एडमिन",
     "hrManager": "एचआर मैनेजर",
     "employee": "कर्मचारी"
+  },
+  "theme": {
+    "label": "थीम",
+    "light": "हल्का",
+    "dark": "गहरा",
+    "system": "सिस्टम"
+  },
+  "dashboard": {
+    "title": "डैशबोर्ड",
+    "subtitle": "निकास प्रबंधन का अवलोकन और प्रमुख आँकड़े।",
+    "stats": {
+      "activeExits": "सक्रिय निकास",
+      "clearancePending": "क्लीयरेंस लंबित",
+      "fnfPending": "FnF लंबित",
+      "completedThisMonth": "पूर्ण (इस माह)"
+    },
+    "recentExits": "हाल के निकास",
+    "emptyState": "अभी कोई निकास अनुरोध नहीं है। निकास शुरू करके शुरुआत करें।",
+    "table": {
+      "employee": "कर्मचारी",
+      "type": "प्रकार",
+      "status": "स्थिति",
+      "lastWorkingDate": "अंतिम कार्य दिवस",
+      "initiated": "आरंभ किया गया"
+    },
+    "employeeFallback": "कर्मचारी #{{id}}"
+  },
+  "exitTypes": {
+    "resignation": "इस्तीफ़ा",
+    "termination": "सेवा समाप्ति",
+    "retirement": "सेवानिवृत्ति",
+    "endOfContract": "अनुबंध की समाप्ति",
+    "mutualSeparation": "आपसी सहमति से अलगाव",
+    "absconding": "बिना सूचना नौकरी छोड़ना"
+  },
+  "exitStatuses": {
+    "initiated": "आरंभ किया गया",
+    "noticePeriod": "नोटिस अवधि",
+    "clearancePending": "क्लीयरेंस लंबित",
+    "fnfPending": "FnF लंबित",
+    "fnfProcessed": "FnF संसाधित",
+    "completed": "पूर्ण",
+    "cancelled": "रद्द"
+  },
+  "exitList": {
+    "title": "निकास अनुरोध",
+    "subtitle": "सभी कर्मचारियों के निकास अनुरोध देखें और प्रबंधित करें।",
+    "initiateExit": "निकास शुरू करें",
+    "statusFilterLabel": "स्थिति के अनुसार निकास अनुरोध फ़िल्टर करें",
+    "allStatuses": "सभी स्थितियाँ",
+    "activeStatus": "सक्रिय (प्रगति में)",
+    "resultCount_zero": "{{count}} निकास अनुरोध मिले",
+    "resultCount_one": "{{count}} निकास अनुरोध मिला",
+    "resultCount_two": "{{count}} निकास अनुरोध मिले",
+    "resultCount_few": "{{count}} निकास अनुरोध मिले",
+    "resultCount_many": "{{count}} निकास अनुरोध मिले",
+    "resultCount_other": "{{count}} निकास अनुरोध मिले",
+    "emptyState": "कोई निकास अनुरोध नहीं मिला।",
+    "tableLabel": "निकास अनुरोध",
+    "table": {
+      "employee": "कर्मचारी",
+      "type": "प्रकार",
+      "status": "स्थिति",
+      "resignationDate": "इस्तीफे की तारीख",
+      "lastWorkingDate": "अंतिम कार्य दिवस",
+      "initiated": "आरंभ किया गया"
+    },
+    "deletedEmployee": "हटाया गया कर्मचारी #{{id}}",
+    "pagination": {
+      "label": "निकास अनुरोध पृष्ठांकन",
+      "page": "पृष्ठ {{page}}, कुल {{totalPages}} में से"
+    }
   }
 }

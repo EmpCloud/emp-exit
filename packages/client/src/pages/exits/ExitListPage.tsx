@@ -1,20 +1,22 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Plus, Search, Loader2, UserMinus } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Plus, Loader2, UserMinus } from "lucide-react";
 import { apiGet } from "@/api/client";
 import { cn, formatDate } from "@/lib/utils";
+import type { ExitStatus, ExitType } from "@emp-exit/shared";
 
-const STATUS_OPTIONS = [
-  { value: "", label: "All Statuses" },
-  { value: "active", label: "Active (in progress)" },
-  { value: "initiated", label: "Initiated" },
-  { value: "notice_period", label: "Notice Period" },
-  { value: "clearance_pending", label: "Clearance Pending" },
-  { value: "fnf_pending", label: "FnF Pending" },
-  { value: "fnf_processed", label: "FnF Processed" },
-  { value: "completed", label: "Completed" },
-  { value: "cancelled", label: "Cancelled" },
-];
+const STATUS_FILTER_OPTIONS = [
+  { value: "", labelKey: "exitList.allStatuses" },
+  { value: "active", labelKey: "exitList.activeStatus" },
+  { value: "initiated", labelKey: "exitStatuses.initiated" },
+  { value: "notice_period", labelKey: "exitStatuses.noticePeriod" },
+  { value: "clearance_pending", labelKey: "exitStatuses.clearancePending" },
+  { value: "fnf_pending", labelKey: "exitStatuses.fnfPending" },
+  { value: "fnf_processed", labelKey: "exitStatuses.fnfProcessed" },
+  { value: "completed", labelKey: "exitStatuses.completed" },
+  { value: "cancelled", labelKey: "exitStatuses.cancelled" },
+] as const;
 
 const STATUS_COLORS: Record<string, string> = {
   initiated: "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300",
@@ -26,29 +28,29 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: "bg-muted text-muted-foreground",
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  initiated: "Initiated",
-  notice_period: "Notice Period",
-  clearance_pending: "Clearance Pending",
-  fnf_pending: "FnF Pending",
-  fnf_processed: "FnF Processed",
-  completed: "Completed",
-  cancelled: "Cancelled",
+const STATUS_TRANSLATION_KEYS: Record<ExitStatus, string> = {
+  initiated: "exitStatuses.initiated",
+  notice_period: "exitStatuses.noticePeriod",
+  clearance_pending: "exitStatuses.clearancePending",
+  fnf_pending: "exitStatuses.fnfPending",
+  fnf_processed: "exitStatuses.fnfProcessed",
+  completed: "exitStatuses.completed",
+  cancelled: "exitStatuses.cancelled",
 };
 
-const TYPE_LABELS: Record<string, string> = {
-  resignation: "Resignation",
-  termination: "Termination",
-  retirement: "Retirement",
-  end_of_contract: "End of Contract",
-  mutual_separation: "Mutual Separation",
-  absconding: "Absconding",
+const TYPE_TRANSLATION_KEYS: Record<ExitType, string> = {
+  resignation: "exitTypes.resignation",
+  termination: "exitTypes.termination",
+  retirement: "exitTypes.retirement",
+  end_of_contract: "exitTypes.endOfContract",
+  mutual_separation: "exitTypes.mutualSeparation",
+  absconding: "exitTypes.absconding",
 };
 
 interface ExitListItem {
   id: string;
-  status: string;
-  exit_type: string;
+  status: ExitStatus;
+  exit_type: ExitType;
   created_at: string;
   last_working_date: string | null;
   resignation_date: string | null;
@@ -67,6 +69,7 @@ interface ExitListItem {
 }
 
 export function ExitListPage() {
+  const { t, i18n } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [exits, setExits] = useState<ExitListItem[]>([]);
   const [total, setTotal] = useState(0);
@@ -113,22 +116,23 @@ export function ExitListPage() {
   }
 
   const totalPages = Math.ceil(total / 20);
+  const locale = i18n.resolvedLanguage || i18n.language;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Exit Requests</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t("exitList.title")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            View and manage all employee exit requests.
+            {t("exitList.subtitle")}
           </p>
         </div>
         <Link
           to="/exits/new"
           className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-rose-700 transition-colors"
         >
-          <Plus className="h-4 w-4" />
-          Initiate Exit
+          <Plus aria-hidden="true" className="h-4 w-4" />
+          {t("exitList.initiateExit")}
         </Link>
       </div>
 
@@ -137,40 +141,42 @@ export function ExitListPage() {
         <select
           value={statusFilter}
           onChange={(e) => handleStatusChange(e.target.value)}
+          aria-label={t("exitList.statusFilterLabel")}
           className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-muted-foreground focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
         >
-          {STATUS_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
+          {STATUS_FILTER_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>{t(opt.labelKey)}</option>
           ))}
         </select>
-        <div className="text-sm text-muted-foreground">
-          {total} exit request{total !== 1 ? "s" : ""} found
+        <div className="text-sm text-muted-foreground" role="status" aria-live="polite">
+          {t("exitList.resultCount", { count: total })}
         </div>
       </div>
 
       {/* Table */}
       <div className="rounded-xl border border-border bg-card">
         {loading ? (
-          <div className="flex h-48 items-center justify-center">
-            <Loader2 className="h-6 w-6 animate-spin text-rose-600 dark:text-rose-400" />
+          <div className="flex h-48 items-center justify-center" role="status" aria-live="polite">
+            <Loader2 aria-hidden="true" className="h-6 w-6 animate-spin text-rose-600 dark:text-rose-400" />
+            <span className="sr-only">{t("common.loading")}</span>
           </div>
         ) : exits.length === 0 ? (
           <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
-            <UserMinus className="h-12 w-12 text-muted-foreground/50 mb-3" />
-            <p className="text-sm text-muted-foreground">No exit requests found.</p>
+            <UserMinus aria-hidden="true" className="h-12 w-12 text-muted-foreground/50 mb-3" />
+            <p className="text-sm text-muted-foreground">{t("exitList.emptyState")}</p>
           </div>
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
+              <table className="w-full text-left text-sm" aria-label={t("exitList.tableLabel")}>
                 <thead>
                   <tr className="border-b border-border text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    <th className="px-6 py-3">Employee</th>
-                    <th className="px-6 py-3">Type</th>
-                    <th className="px-6 py-3">Status</th>
-                    <th className="px-6 py-3">Resignation Date</th>
-                    <th className="px-6 py-3">Last Working Date</th>
-                    <th className="px-6 py-3">Initiated</th>
+                    <th scope="col" className="px-6 py-3">{t("exitList.table.employee")}</th>
+                    <th scope="col" className="px-6 py-3">{t("exitList.table.type")}</th>
+                    <th scope="col" className="px-6 py-3">{t("exitList.table.status")}</th>
+                    <th scope="col" className="px-6 py-3">{t("exitList.table.resignationDate")}</th>
+                    <th scope="col" className="px-6 py-3">{t("exitList.table.lastWorkingDate")}</th>
+                    <th scope="col" className="px-6 py-3">{t("exitList.table.initiated")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -183,7 +189,7 @@ export function ExitListPage() {
                         >
                           {exit.employee
                             ? `${exit.employee.first_name} ${exit.employee.last_name}`
-                            : `Deleted employee #${exit.employee_id}`}
+                            : t("exitList.deletedEmployee", { id: exit.employee_id })}
                         </Link>
                         {exit.employee?.designation && (
                           <p className="text-xs text-muted-foreground">{exit.employee.designation}</p>
@@ -193,7 +199,7 @@ export function ExitListPage() {
                         )}
                       </td>
                       <td className="px-6 py-4 text-muted-foreground">
-                        {TYPE_LABELS[exit.exit_type] || exit.exit_type}
+                        {t(TYPE_TRANSLATION_KEYS[exit.exit_type] ?? "common.unknown")}
                       </td>
                       <td className="px-6 py-4">
                         <span
@@ -202,17 +208,17 @@ export function ExitListPage() {
                             STATUS_COLORS[exit.status] || "bg-muted text-muted-foreground",
                           )}
                         >
-                          {STATUS_LABELS[exit.status] || exit.status}
+                          {t(STATUS_TRANSLATION_KEYS[exit.status] ?? "common.unknown")}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-muted-foreground">
-                        {exit.resignation_date ? formatDate(exit.resignation_date) : "--"}
+                        {exit.resignation_date ? formatDate(exit.resignation_date, locale) : "--"}
                       </td>
                       <td className="px-6 py-4 text-muted-foreground">
-                        {exit.last_working_date ? formatDate(exit.last_working_date) : "--"}
+                        {exit.last_working_date ? formatDate(exit.last_working_date, locale) : "--"}
                       </td>
                       <td className="px-6 py-4 text-muted-foreground">
-                        {formatDate(exit.created_at)}
+                        {formatDate(exit.created_at, locale)}
                       </td>
                     </tr>
                   ))}
@@ -222,27 +228,32 @@ export function ExitListPage() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between border-t border-border px-6 py-3">
+              <nav
+                className="flex items-center justify-between border-t border-border px-6 py-3"
+                aria-label={t("exitList.pagination.label")}
+              >
                 <p className="text-sm text-muted-foreground">
-                  Page {page} of {totalPages}
+                  {t("exitList.pagination.page", { page, totalPages })}
                 </p>
                 <div className="flex gap-2">
                   <button
+                    type="button"
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
                     className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted/50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Previous
+                    {t("common.previous")}
                   </button>
                   <button
+                    type="button"
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
                     className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted/50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Next
+                    {t("common.next")}
                   </button>
                 </div>
-              </div>
+              </nav>
             )}
           </>
         )}

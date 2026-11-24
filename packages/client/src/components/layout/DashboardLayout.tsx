@@ -17,7 +17,6 @@ import {
   AlertTriangle,
   Settings,
   Menu,
-  X,
   UserPlus,
   UserMinus,
 } from "lucide-react";
@@ -74,8 +73,17 @@ export function DashboardLayout() {
     setMobileOpen(false);
   }, [location.pathname]);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileOpen(false);
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [mobileOpen]);
+
   if (!isLoggedIn()) return <Navigate to="/login" replace />;
-  const displayName = user ? `${user.firstName} ${user.lastName}` : "User";
+  const displayName = user ? `${user.firstName} ${user.lastName}` : t("common.user");
   const ROLE_KEYS: Record<string, string> = {
     super_admin: "roles.superAdmin",
     org_admin: "roles.orgAdmin",
@@ -92,7 +100,7 @@ export function DashboardLayout() {
         {/* Logo */}
         <div className="flex h-16 items-center gap-3 px-6 border-b border-border">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600">
-            <DoorOpen className="h-5 w-5 text-white" />
+            <DoorOpen className="h-5 w-5 text-white" aria-hidden="true" focusable="false" />
           </div>
           <span className="text-lg font-bold text-foreground">{t("nav.brand")}</span>
         </div>
@@ -117,7 +125,7 @@ export function DashboardLayout() {
                 )
               }
             >
-              <item.icon className="h-5 w-5" />
+              <item.icon className="h-5 w-5" aria-hidden="true" focusable="false" />
               {t(item.label)}
             </NavLink>
           ))}
@@ -134,11 +142,13 @@ export function DashboardLayout() {
               <p className="text-xs text-muted-foreground">{roleLabel}</p>
             </div>
             <button
+              type="button"
               onClick={logout}
               className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-muted-foreground"
               title={t("nav.logout")}
+              aria-label={t("nav.logout")}
             >
-              <LogOutIcon className="h-4 w-4" />
+              <LogOutIcon className="h-4 w-4" aria-hidden="true" focusable="false" />
             </button>
           </div>
         </div>
@@ -156,8 +166,13 @@ export function DashboardLayout() {
       {/* Mobile sidebar overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="fixed inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-          <div className="fixed left-0 top-0 z-50 h-full">
+          <button
+            type="button"
+            className="fixed inset-0 bg-black/50"
+            onClick={() => setMobileOpen(false)}
+            aria-label={t("common.closeNavigationMenu")}
+          />
+          <div id="mobile-navigation" className="fixed left-0 top-0 z-50 h-full">
             <SidebarContent />
           </div>
         </div>
@@ -167,10 +182,14 @@ export function DashboardLayout() {
         {/* Top bar */}
         <header className="flex h-16 items-center justify-between border-b border-border bg-card px-4 lg:px-8">
           <button
+            type="button"
             onClick={() => setMobileOpen(true)}
             className="rounded-lg p-2 text-muted-foreground hover:bg-muted lg:hidden"
+            aria-label={t("common.openNavigationMenu")}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-navigation"
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="h-5 w-5" aria-hidden="true" focusable="false" />
           </button>
           <BackToDashboard />
           <div className="flex-1" />

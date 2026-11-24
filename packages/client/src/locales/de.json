@@ -48,7 +48,15 @@
     "noNotifications": "Noch keine Benachrichtigungen",
     "viewAll": "Alle anzeigen",
     "review": "Prüfen",
+    "changeLanguage": "Sprache ändern",
+    "openNavigationMenu": "Navigationsmenü öffnen",
+    "closeNavigationMenu": "Navigationsmenü schließen",
+    "unknown": "Unbekannt",
+    "user": "Benutzer",
     "cancelInvitationTooltip": "Diese Einladung stornieren und den nicht aktivierten Benutzer entfernen"
+  },
+  "app": {
+    "title": "EMP Exit — Mitarbeiteraustrittsmanagement"
   },
   "nav": {
     "brand": "EMP Exit",
@@ -78,5 +86,77 @@
     "hrAdmin": "HR-Admin",
     "hrManager": "HR-Manager",
     "employee": "Mitarbeiter"
+  },
+  "theme": {
+    "label": "Design",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Überblick und Kennzahlen zum Austrittsmanagement.",
+    "stats": {
+      "activeExits": "Aktive Austritte",
+      "clearancePending": "Freigabe ausstehend",
+      "fnfPending": "FnF ausstehend",
+      "completedThisMonth": "Abgeschlossen (dieser Monat)"
+    },
+    "recentExits": "Kürzliche Austritte",
+    "emptyState": "Es liegen noch keine Austrittsanträge vor. Leiten Sie zunächst einen Austritt ein.",
+    "table": {
+      "employee": "Mitarbeiter",
+      "type": "Art",
+      "status": "Status",
+      "lastWorkingDate": "Letzter Arbeitstag",
+      "initiated": "Eingeleitet"
+    },
+    "employeeFallback": "Mitarbeiter #{{id}}"
+  },
+  "exitTypes": {
+    "resignation": "Eigenkündigung",
+    "termination": "Beendigung",
+    "retirement": "Ruhestand",
+    "endOfContract": "Vertragsende",
+    "mutualSeparation": "Einvernehmliche Trennung",
+    "absconding": "Unerlaubtes Fernbleiben"
+  },
+  "exitStatuses": {
+    "initiated": "Eingeleitet",
+    "noticePeriod": "Kündigungsfrist",
+    "clearancePending": "Freigabe ausstehend",
+    "fnfPending": "FnF ausstehend",
+    "fnfProcessed": "FnF bearbeitet",
+    "completed": "Abgeschlossen",
+    "cancelled": "Storniert"
+  },
+  "exitList": {
+    "title": "Austrittsanträge",
+    "subtitle": "Alle Austrittsanträge von Mitarbeitenden anzeigen und verwalten.",
+    "initiateExit": "Austritt einleiten",
+    "statusFilterLabel": "Austrittsanträge nach Status filtern",
+    "allStatuses": "Alle Status",
+    "activeStatus": "Aktiv (in Bearbeitung)",
+    "resultCount_zero": "{{count}} Austrittsanträge gefunden",
+    "resultCount_one": "{{count}} Austrittsantrag gefunden",
+    "resultCount_two": "{{count}} Austrittsanträge gefunden",
+    "resultCount_few": "{{count}} Austrittsanträge gefunden",
+    "resultCount_many": "{{count}} Austrittsanträge gefunden",
+    "resultCount_other": "{{count}} Austrittsanträge gefunden",
+    "emptyState": "Keine Austrittsanträge gefunden.",
+    "tableLabel": "Austrittsanträge",
+    "table": {
+      "employee": "Mitarbeiter",
+      "type": "Art",
+      "status": "Status",
+      "resignationDate": "Kündigungsdatum",
+      "lastWorkingDate": "Letzter Arbeitstag",
+      "initiated": "Eingeleitet"
+    },
+    "deletedEmployee": "Gelöschter Mitarbeiter Nr. {{id}}",
+    "pagination": {
+      "label": "Seitennavigation der Austrittsanträge",
+      "page": "Seite {{page}} von {{totalPages}}"
+    }
   }
 }

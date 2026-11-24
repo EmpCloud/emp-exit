@@ -48,7 +48,15 @@
     "noNotifications": "Nenhuma notificação ainda",
     "viewAll": "Ver tudo",
     "review": "Revisar",
+    "changeLanguage": "Alterar idioma",
+    "openNavigationMenu": "Abrir menu de navegação",
+    "closeNavigationMenu": "Fechar menu de navegação",
+    "unknown": "Desconhecido",
+    "user": "Usuário",
     "cancelInvitationTooltip": "Cancelar este convite e remover o usuário não ativado"
+  },
+  "app": {
+    "title": "EMP Exit — Gestão de desligamentos de funcionários"
   },
   "nav": {
     "brand": "EMP Exit",
@@ -78,5 +86,77 @@
     "hrAdmin": "Administrador de RH",
     "hrManager": "Gerente de RH",
     "employee": "Funcionário"
+  },
+  "theme": {
+    "label": "Tema",
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema"
+  },
+  "dashboard": {
+    "title": "Painel",
+    "subtitle": "Visão geral e métricas da gestão de desligamentos.",
+    "stats": {
+      "activeExits": "Desligamentos ativos",
+      "clearancePending": "Liberação pendente",
+      "fnfPending": "FnF pendente",
+      "completedThisMonth": "Concluídos (este mês)"
+    },
+    "recentExits": "Desligamentos recentes",
+    "emptyState": "Ainda não há solicitações de desligamento. Comece iniciando um desligamento.",
+    "table": {
+      "employee": "Funcionário",
+      "type": "Tipo",
+      "status": "Status",
+      "lastWorkingDate": "Último dia de trabalho",
+      "initiated": "Iniciado"
+    },
+    "employeeFallback": "Funcionário nº {{id}}"
+  },
+  "exitTypes": {
+    "resignation": "Pedido de demissão",
+    "termination": "Demissão",
+    "retirement": "Aposentadoria",
+    "endOfContract": "Fim do contrato",
+    "mutualSeparation": "Desligamento por mútuo acordo",
+    "absconding": "Abandono de emprego"
+  },
+  "exitStatuses": {
+    "initiated": "Iniciado",
+    "noticePeriod": "Aviso prévio",
+    "clearancePending": "Liberação pendente",
+    "fnfPending": "FnF pendente",
+    "fnfProcessed": "FnF processado",
+    "completed": "Concluído",
+    "cancelled": "Cancelado"
+  },
+  "exitList": {
+    "title": "Solicitações de desligamento",
+    "subtitle": "Visualize e gerencie todas as solicitações de desligamento dos funcionários.",
+    "initiateExit": "Iniciar desligamento",
+    "statusFilterLabel": "Filtrar solicitações de desligamento por status",
+    "allStatuses": "Todos os status",
+    "activeStatus": "Ativas (em andamento)",
+    "resultCount_zero": "Foram encontradas {{count}} solicitações de desligamento",
+    "resultCount_one": "Foi encontrada {{count}} solicitação de desligamento",
+    "resultCount_two": "Foram encontradas {{count}} solicitações de desligamento",
+    "resultCount_few": "Foram encontradas {{count}} solicitações de desligamento",
+    "resultCount_many": "Foram encontradas {{count}} solicitações de desligamento",
+    "resultCount_other": "Foram encontradas {{count}} solicitações de desligamento",
+    "emptyState": "Nenhuma solicitação de desligamento encontrada.",
+    "tableLabel": "Solicitações de desligamento",
+    "table": {
+      "employee": "Funcionário",
+      "type": "Tipo",
+      "status": "Status",
+      "resignationDate": "Data de demissão",
+      "lastWorkingDate": "Último dia de trabalho",
+      "initiated": "Iniciado"
+    },
+    "deletedEmployee": "Funcionário excluído n.º {{id}}",
+    "pagination": {
+      "label": "Paginação das solicitações de desligamento",
+      "page": "Página {{page}} de {{totalPages}}"
+    }
   }
 }

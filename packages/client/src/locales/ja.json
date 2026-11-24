@@ -48,7 +48,15 @@
     "noNotifications": "通知はまだありません",
     "viewAll": "すべて表示",
     "review": "確認",
+    "changeLanguage": "言語を変更",
+    "openNavigationMenu": "ナビゲーションメニューを開く",
+    "closeNavigationMenu": "ナビゲーションメニューを閉じる",
+    "unknown": "不明",
+    "user": "ユーザー",
     "cancelInvitationTooltip": "この招待をキャンセルし、未有効化のユーザーを削除します"
+  },
+  "app": {
+    "title": "EMP Exit — 従業員退職管理"
   },
   "nav": {
     "brand": "EMP Exit",
@@ -78,5 +86,77 @@
     "hrAdmin": "人事管理者",
     "hrManager": "人事マネージャー",
     "employee": "従業員"
+  },
+  "theme": {
+    "label": "テーマ",
+    "light": "ライト",
+    "dark": "ダーク",
+    "system": "システム"
+  },
+  "dashboard": {
+    "title": "ダッシュボード",
+    "subtitle": "退職管理の概要と指標。",
+    "stats": {
+      "activeExits": "進行中の退職",
+      "clearancePending": "クリアランス待ち",
+      "fnfPending": "FnF待ち",
+      "completedThisMonth": "今月完了"
+    },
+    "recentExits": "最近の退職",
+    "emptyState": "退職申請はまだありません。退職手続きを開始してください。",
+    "table": {
+      "employee": "従業員",
+      "type": "種類",
+      "status": "ステータス",
+      "lastWorkingDate": "最終出勤日",
+      "initiated": "開始日"
+    },
+    "employeeFallback": "従業員 #{{id}}"
+  },
+  "exitTypes": {
+    "resignation": "自己都合退職",
+    "termination": "解雇",
+    "retirement": "定年退職",
+    "endOfContract": "契約満了",
+    "mutualSeparation": "合意退職",
+    "absconding": "無断退職"
+  },
+  "exitStatuses": {
+    "initiated": "開始済み",
+    "noticePeriod": "予告期間",
+    "clearancePending": "クリアランス待ち",
+    "fnfPending": "FnF待ち",
+    "fnfProcessed": "FnF処理済み",
+    "completed": "完了",
+    "cancelled": "キャンセル済み"
+  },
+  "exitList": {
+    "title": "退職申請",
+    "subtitle": "従業員のすべての退職申請を表示・管理します。",
+    "initiateExit": "退職手続きを開始",
+    "statusFilterLabel": "ステータスで退職申請を絞り込む",
+    "allStatuses": "すべてのステータス",
+    "activeStatus": "進行中",
+    "resultCount_zero": "{{count}}件の退職申請が見つかりました",
+    "resultCount_one": "{{count}}件の退職申請が見つかりました",
+    "resultCount_two": "{{count}}件の退職申請が見つかりました",
+    "resultCount_few": "{{count}}件の退職申請が見つかりました",
+    "resultCount_many": "{{count}}件の退職申請が見つかりました",
+    "resultCount_other": "{{count}}件の退職申請が見つかりました",
+    "emptyState": "退職申請が見つかりません。",
+    "tableLabel": "退職申請一覧",
+    "table": {
+      "employee": "従業員",
+      "type": "種類",
+      "status": "ステータス",
+      "resignationDate": "退職届提出日",
+      "lastWorkingDate": "最終出勤日",
+      "initiated": "開始日"
+    },
+    "deletedEmployee": "削除された従業員 #{{id}}",
+    "pagination": {
+      "label": "退職申請のページネーション",
+      "page": "{{totalPages}}ページ中{{page}}ページ"
+    }
   }
 }

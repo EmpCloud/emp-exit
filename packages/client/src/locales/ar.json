@@ -48,7 +48,15 @@
     "noNotifications": "لا توجد إشعارات بعد",
     "viewAll": "عرض الكل",
     "review": "مراجعة",
+    "changeLanguage": "تغيير اللغة",
+    "openNavigationMenu": "فتح قائمة التنقل",
+    "closeNavigationMenu": "إغلاق قائمة التنقل",
+    "unknown": "غير معروف",
+    "user": "مستخدم",
     "cancelInvitationTooltip": "إلغاء هذه الدعوة وإزالة المستخدم غير المُفعّل"
+  },
+  "app": {
+    "title": "EMP Exit — إدارة مغادرة الموظفين"
   },
   "nav": {
     "brand": "EMP Exit",
@@ -78,5 +86,77 @@
     "hrAdmin": "مدير الموارد البشرية",
     "hrManager": "مسؤول الموارد البشرية",
     "employee": "موظف"
+  },
+  "theme": {
+    "label": "السمة",
+    "light": "فاتح",
+    "dark": "داكن",
+    "system": "النظام"
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "subtitle": "نظرة عامة ومؤشرات إدارة المغادرة.",
+    "stats": {
+      "activeExits": "حالات المغادرة النشطة",
+      "clearancePending": "إخلاء الطرف المعلق",
+      "fnfPending": "التسوية النهائية المعلقة",
+      "completedThisMonth": "مكتملة (هذا الشهر)"
+    },
+    "recentExits": "أحدث حالات المغادرة",
+    "emptyState": "لا توجد طلبات مغادرة بعد. ابدأ بإنشاء طلب مغادرة.",
+    "table": {
+      "employee": "الموظف",
+      "type": "النوع",
+      "status": "الحالة",
+      "lastWorkingDate": "آخر يوم عمل",
+      "initiated": "تاريخ البدء"
+    },
+    "employeeFallback": "الموظف رقم {{id}}"
+  },
+  "exitTypes": {
+    "resignation": "استقالة",
+    "termination": "إنهاء خدمة",
+    "retirement": "تقاعد",
+    "endOfContract": "انتهاء العقد",
+    "mutualSeparation": "إنهاء بالتراضي",
+    "absconding": "انقطاع عن العمل"
+  },
+  "exitStatuses": {
+    "initiated": "تم البدء",
+    "noticePeriod": "فترة الإشعار",
+    "clearancePending": "إخلاء الطرف معلق",
+    "fnfPending": "التسوية النهائية معلقة",
+    "fnfProcessed": "تمت معالجة التسوية النهائية",
+    "completed": "مكتمل",
+    "cancelled": "ملغي"
+  },
+  "exitList": {
+    "title": "طلبات المغادرة",
+    "subtitle": "عرض وإدارة جميع طلبات مغادرة الموظفين.",
+    "initiateExit": "بدء طلب مغادرة",
+    "statusFilterLabel": "تصفية طلبات المغادرة حسب الحالة",
+    "allStatuses": "جميع الحالات",
+    "activeStatus": "نشط (قيد التنفيذ)",
+    "resultCount_zero": "لم يتم العثور على أي طلب مغادرة ({{count}})",
+    "resultCount_one": "تم العثور على طلب مغادرة واحد ({{count}})",
+    "resultCount_two": "تم العثور على طلبي مغادرة ({{count}})",
+    "resultCount_few": "تم العثور على {{count}} طلبات مغادرة",
+    "resultCount_many": "تم العثور على {{count}} طلب مغادرة",
+    "resultCount_other": "تم العثور على {{count}} طلب مغادرة",
+    "emptyState": "لم يتم العثور على طلبات مغادرة.",
+    "tableLabel": "طلبات المغادرة",
+    "table": {
+      "employee": "الموظف",
+      "type": "النوع",
+      "status": "الحالة",
+      "resignationDate": "تاريخ الاستقالة",
+      "lastWorkingDate": "آخر يوم عمل",
+      "initiated": "تاريخ البدء"
+    },
+    "deletedEmployee": "الموظف المحذوف رقم {{id}}",
+    "pagination": {
+      "label": "ترقيم صفحات طلبات المغادرة",
+      "page": "الصفحة {{page}} من {{totalPages}}"
+    }
   }
 }

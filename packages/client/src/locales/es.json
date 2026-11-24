@@ -48,7 +48,15 @@
     "noNotifications": "Aún no hay notificaciones",
     "viewAll": "Ver todo",
     "review": "Revisar",
+    "changeLanguage": "Cambiar idioma",
+    "openNavigationMenu": "Abrir menú de navegación",
+    "closeNavigationMenu": "Cerrar menú de navegación",
+    "unknown": "Desconocido",
+    "user": "Usuario",
     "cancelInvitationTooltip": "Cancelar esta invitación y eliminar al usuario no activado"
+  },
+  "app": {
+    "title": "EMP Exit — Gestión de salidas de empleados"
   },
   "nav": {
     "brand": "EMP Exit",
@@ -78,5 +86,77 @@
     "hrAdmin": "Administrador de RR. HH.",
     "hrManager": "Gerente de RR. HH.",
     "employee": "Empleado"
+  },
+  "theme": {
+    "label": "Tema",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema"
+  },
+  "dashboard": {
+    "title": "Panel",
+    "subtitle": "Resumen y métricas de la gestión de salidas.",
+    "stats": {
+      "activeExits": "Salidas activas",
+      "clearancePending": "Autorizaciones pendientes",
+      "fnfPending": "FnF pendiente",
+      "completedThisMonth": "Completadas (este mes)"
+    },
+    "recentExits": "Salidas recientes",
+    "emptyState": "Aún no hay solicitudes de salida. Empieza iniciando una salida.",
+    "table": {
+      "employee": "Empleado",
+      "type": "Tipo",
+      "status": "Estado",
+      "lastWorkingDate": "Último día de trabajo",
+      "initiated": "Iniciada"
+    },
+    "employeeFallback": "Empleado n.º {{id}}"
+  },
+  "exitTypes": {
+    "resignation": "Renuncia",
+    "termination": "Terminación",
+    "retirement": "Jubilación",
+    "endOfContract": "Fin de contrato",
+    "mutualSeparation": "Separación de mutuo acuerdo",
+    "absconding": "Abandono del puesto"
+  },
+  "exitStatuses": {
+    "initiated": "Iniciada",
+    "noticePeriod": "Período de preaviso",
+    "clearancePending": "Autorización pendiente",
+    "fnfPending": "FnF pendiente",
+    "fnfProcessed": "FnF procesado",
+    "completed": "Completada",
+    "cancelled": "Cancelada"
+  },
+  "exitList": {
+    "title": "Solicitudes de salida",
+    "subtitle": "Consulta y gestiona todas las solicitudes de salida de empleados.",
+    "initiateExit": "Iniciar salida",
+    "statusFilterLabel": "Filtrar solicitudes de salida por estado",
+    "allStatuses": "Todos los estados",
+    "activeStatus": "Activa (en curso)",
+    "resultCount_zero": "Se encontraron {{count}} solicitudes de salida",
+    "resultCount_one": "Se encontró {{count}} solicitud de salida",
+    "resultCount_two": "Se encontraron {{count}} solicitudes de salida",
+    "resultCount_few": "Se encontraron {{count}} solicitudes de salida",
+    "resultCount_many": "Se encontraron {{count}} solicitudes de salida",
+    "resultCount_other": "Se encontraron {{count}} solicitudes de salida",
+    "emptyState": "No se encontraron solicitudes de salida.",
+    "tableLabel": "Solicitudes de salida",
+    "table": {
+      "employee": "Empleado",
+      "type": "Tipo",
+      "status": "Estado",
+      "resignationDate": "Fecha de renuncia",
+      "lastWorkingDate": "Último día de trabajo",
+      "initiated": "Iniciada"
+    },
+    "deletedEmployee": "Empleado eliminado n.º {{id}}",
+    "pagination": {
+      "label": "Paginación de solicitudes de salida",
+      "page": "Página {{page}} de {{totalPages}}"
+    }
   }
 }

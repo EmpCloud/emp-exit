@@ -48,7 +48,15 @@
     "noNotifications": "Aucune notification pour le moment",
     "viewAll": "Voir tout",
     "review": "Examiner",
+    "changeLanguage": "Changer de langue",
+    "openNavigationMenu": "Ouvrir le menu de navigation",
+    "closeNavigationMenu": "Fermer le menu de navigation",
+    "unknown": "Inconnu",
+    "user": "Utilisateur",
     "cancelInvitationTooltip": "Annuler cette invitation et supprimer l'utilisateur non activé"
+  },
+  "app": {
+    "title": "EMP Exit — Gestion des départs des employés"
   },
   "nav": {
     "brand": "EMP Exit",
@@ -78,5 +86,77 @@
     "hrAdmin": "Administrateur RH",
     "hrManager": "Responsable RH",
     "employee": "Employé"
+  },
+  "theme": {
+    "label": "Thème",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "subtitle": "Aperçu et indicateurs de la gestion des départs.",
+    "stats": {
+      "activeExits": "Départs actifs",
+      "clearancePending": "Décharges en attente",
+      "fnfPending": "FnF en attente",
+      "completedThisMonth": "Terminés (ce mois-ci)"
+    },
+    "recentExits": "Départs récents",
+    "emptyState": "Aucune demande de départ pour le moment. Commencez par initier un départ.",
+    "table": {
+      "employee": "Employé",
+      "type": "Type",
+      "status": "Statut",
+      "lastWorkingDate": "Dernier jour de travail",
+      "initiated": "Date d’initiation"
+    },
+    "employeeFallback": "Employé n° {{id}}"
+  },
+  "exitTypes": {
+    "resignation": "Démission",
+    "termination": "Licenciement",
+    "retirement": "Retraite",
+    "endOfContract": "Fin de contrat",
+    "mutualSeparation": "Séparation à l’amiable",
+    "absconding": "Abandon de poste"
+  },
+  "exitStatuses": {
+    "initiated": "Initié",
+    "noticePeriod": "Préavis",
+    "clearancePending": "Décharge en attente",
+    "fnfPending": "FnF en attente",
+    "fnfProcessed": "FnF traité",
+    "completed": "Terminé",
+    "cancelled": "Annulé"
+  },
+  "exitList": {
+    "title": "Demandes de départ",
+    "subtitle": "Consultez et gérez toutes les demandes de départ des employés.",
+    "initiateExit": "Initier un départ",
+    "statusFilterLabel": "Filtrer les demandes de départ par statut",
+    "allStatuses": "Tous les statuts",
+    "activeStatus": "Actives (en cours)",
+    "resultCount_zero": "{{count}} demande de départ trouvée",
+    "resultCount_one": "{{count}} demande de départ trouvée",
+    "resultCount_two": "{{count}} demandes de départ trouvées",
+    "resultCount_few": "{{count}} demandes de départ trouvées",
+    "resultCount_many": "{{count}} demandes de départ trouvées",
+    "resultCount_other": "{{count}} demandes de départ trouvées",
+    "emptyState": "Aucune demande de départ trouvée.",
+    "tableLabel": "Demandes de départ",
+    "table": {
+      "employee": "Employé",
+      "type": "Type",
+      "status": "Statut",
+      "resignationDate": "Date de démission",
+      "lastWorkingDate": "Dernier jour de travail",
+      "initiated": "Date d’initiation"
+    },
+    "deletedEmployee": "Employé supprimé n° {{id}}",
+    "pagination": {
+      "label": "Pagination des demandes de départ",
+      "page": "Page {{page}} sur {{totalPages}}"
+    }
   }
 }
