@@ -78,5 +78,37 @@
     "hrAdmin": "Administrador de RR. HH.",
     "hrManager": "Gerente de RR. HH.",
     "employee": "Empleado"
+  },
+  "dashboard": {
+    "title": "Panel",
+    "subtitle": "Resumen y métricas de gestión de salidas.",
+    "statActiveExits": "Salidas activas",
+    "statClearancePending": "Autorización pendiente",
+    "statFnfPending": "FnF pendiente",
+    "statCompletedMonth": "Completadas (mes)",
+    "recentExits": "Salidas recientes",
+    "emptyExits": "Aún no hay solicitudes de salida. Comienza iniciando una salida.",
+    "colEmployee": "Empleado",
+    "colType": "Tipo",
+    "colLastWorkingDate": "Último día laboral",
+    "colInitiated": "Iniciada",
+    "employeeFallback": "Empleado #{{id}}"
+  },
+  "exitStatus": {
+    "initiated": "Iniciada",
+    "notice_period": "Período de preaviso",
+    "clearance_pending": "Autorización pendiente",
+    "fnf_pending": "FnF pendiente",
+    "fnf_processed": "FnF procesado",
+    "completed": "Completada",
+    "cancelled": "Cancelada"
+  },
+  "exitType": {
+    "resignation": "Renuncia",
+    "termination": "Despido",
+    "retirement": "Jubilación",
+    "end_of_contract": "Fin de contrato",
+    "mutual_separation": "Separación mutua",
+    "absconding": "Abandono"
   }
 }

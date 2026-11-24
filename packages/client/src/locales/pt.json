@@ -78,5 +78,37 @@
     "hrAdmin": "Administrador de RH",
     "hrManager": "Gerente de RH",
     "employee": "Funcionário"
+  },
+  "dashboard": {
+    "title": "Painel",
+    "subtitle": "Visão geral e métricas da gestão de saídas.",
+    "statActiveExits": "Saídas ativas",
+    "statClearancePending": "Liberação pendente",
+    "statFnfPending": "FnF pendente",
+    "statCompletedMonth": "Concluídas (mês)",
+    "recentExits": "Saídas recentes",
+    "emptyExits": "Ainda não há solicitações de saída. Comece iniciando uma saída.",
+    "colEmployee": "Funcionário",
+    "colType": "Tipo",
+    "colLastWorkingDate": "Último dia de trabalho",
+    "colInitiated": "Iniciada",
+    "employeeFallback": "Funcionário #{{id}}"
+  },
+  "exitStatus": {
+    "initiated": "Iniciada",
+    "notice_period": "Período de aviso",
+    "clearance_pending": "Liberação pendente",
+    "fnf_pending": "FnF pendente",
+    "fnf_processed": "FnF processado",
+    "completed": "Concluída",
+    "cancelled": "Cancelada"
+  },
+  "exitType": {
+    "resignation": "Demissão",
+    "termination": "Rescisão",
+    "retirement": "Aposentadoria",
+    "end_of_contract": "Fim de contrato",
+    "mutual_separation": "Separação mútua",
+    "absconding": "Abandono"
   }
 }

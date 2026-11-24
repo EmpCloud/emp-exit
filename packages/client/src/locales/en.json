@@ -78,5 +78,37 @@
     "hrAdmin": "HR Admin",
     "hrManager": "HR Manager",
     "employee": "Employee"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Exit management overview and metrics.",
+    "statActiveExits": "Active Exits",
+    "statClearancePending": "Clearance Pending",
+    "statFnfPending": "FnF Pending",
+    "statCompletedMonth": "Completed (Month)",
+    "recentExits": "Recent Exits",
+    "emptyExits": "No exit requests yet. Start by initiating an exit.",
+    "colEmployee": "Employee",
+    "colType": "Type",
+    "colLastWorkingDate": "Last Working Date",
+    "colInitiated": "Initiated",
+    "employeeFallback": "Employee #{{id}}"
+  },
+  "exitStatus": {
+    "initiated": "Initiated",
+    "notice_period": "Notice Period",
+    "clearance_pending": "Clearance Pending",
+    "fnf_pending": "FnF Pending",
+    "fnf_processed": "FnF Processed",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "exitType": {
+    "resignation": "Resignation",
+    "termination": "Termination",
+    "retirement": "Retirement",
+    "end_of_contract": "End of Contract",
+    "mutual_separation": "Mutual Separation",
+    "absconding": "Absconding"
   }
 }

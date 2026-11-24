@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { UserMinus, ClipboardCheck, Shield, DollarSign, ArrowRight, Loader2 } from "lucide-react";
 import { apiGet } from "@/api/client";
 import { cn, formatDate } from "@/lib/utils";
@@ -36,26 +37,29 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: "bg-muted text-muted-foreground",
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  initiated: "Initiated",
-  notice_period: "Notice Period",
-  clearance_pending: "Clearance Pending",
-  fnf_pending: "FnF Pending",
-  fnf_processed: "FnF Processed",
-  completed: "Completed",
-  cancelled: "Cancelled",
+// i18n keys under the shared `exitStatus` / `exitType` namespaces, resolved
+// via t() at render time (see the exit status/type cells below).
+const STATUS_LABEL_KEYS: Record<string, string> = {
+  initiated: "exitStatus.initiated",
+  notice_period: "exitStatus.notice_period",
+  clearance_pending: "exitStatus.clearance_pending",
+  fnf_pending: "exitStatus.fnf_pending",
+  fnf_processed: "exitStatus.fnf_processed",
+  completed: "exitStatus.completed",
+  cancelled: "exitStatus.cancelled",
 };
 
-const TYPE_LABELS: Record<string, string> = {
-  resignation: "Resignation",
-  termination: "Termination",
-  retirement: "Retirement",
-  end_of_contract: "End of Contract",
-  mutual_separation: "Mutual Separation",
-  absconding: "Absconding",
+const TYPE_LABEL_KEYS: Record<string, string> = {
+  resignation: "exitType.resignation",
+  termination: "exitType.termination",
+  retirement: "exitType.retirement",
+  end_of_contract: "exitType.end_of_contract",
+  mutual_separation: "exitType.mutual_separation",
+  absconding: "exitType.absconding",
 };
 
 export function DashboardPage() {
+  const { t } = useTranslation();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentExits, setRecentExits] = useState<ExitListItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -118,7 +122,7 @@ export function DashboardPage() {
 
   const statCards = [
     {
-      label: "Active Exits",
+      label: t("dashboard.statActiveExits"),
       value: stats?.activeExits ?? 0,
       icon: UserMinus,
       color: "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400",
@@ -126,7 +130,7 @@ export function DashboardPage() {
       link: "/exits?status=active",
     },
     {
-      label: "Clearance Pending",
+      label: t("dashboard.statClearancePending"),
       value: stats?.clearancePending ?? 0,
       icon: Shield,
       color: "bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400",
@@ -134,7 +138,7 @@ export function DashboardPage() {
       link: "/clearance",
     },
     {
-      label: "FnF Pending",
+      label: t("dashboard.statFnfPending"),
       value: stats?.fnfPending ?? 0,
       icon: DollarSign,
       color: "bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400",
@@ -142,7 +146,7 @@ export function DashboardPage() {
       link: "/fnf",
     },
     {
-      label: "Completed (Month)",
+      label: t("dashboard.statCompletedMonth"),
       value: stats?.completedThisMonth ?? 0,
       icon: ClipboardCheck,
       color: "bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400",
@@ -154,8 +158,8 @@ export function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Exit management overview and metrics.</p>
+        <h1 className="text-2xl font-bold text-foreground">{t("dashboard.title")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("dashboard.subtitle")}</p>
       </div>
 
       {/* Stat Cards */}
@@ -182,29 +186,29 @@ export function DashboardPage() {
       {/* Recent Exits */}
       <div className="rounded-xl border border-border bg-card">
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
-          <h2 className="text-lg font-semibold text-foreground">Recent Exits</h2>
+          <h2 className="text-lg font-semibold text-foreground">{t("dashboard.recentExits")}</h2>
           <Link
             to="/exits"
             className="inline-flex items-center gap-1 text-sm font-medium text-rose-600 hover:text-rose-700 dark:text-rose-300"
           >
-            View all <ArrowRight className="h-4 w-4" />
+            {t("common.viewAll")} <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
 
         {recentExits.length === 0 ? (
           <div className="px-6 py-12 text-center text-sm text-muted-foreground">
-            No exit requests yet. Start by initiating an exit.
+            {t("dashboard.emptyExits")}
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-border text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  <th className="px-6 py-3">Employee</th>
-                  <th className="px-6 py-3">Type</th>
-                  <th className="px-6 py-3">Status</th>
-                  <th className="px-6 py-3">Last Working Date</th>
-                  <th className="px-6 py-3">Initiated</th>
+                  <th className="px-6 py-3">{t("dashboard.colEmployee")}</th>
+                  <th className="px-6 py-3">{t("dashboard.colType")}</th>
+                  <th className="px-6 py-3">{t("common.status")}</th>
+                  <th className="px-6 py-3">{t("dashboard.colLastWorkingDate")}</th>
+                  <th className="px-6 py-3">{t("dashboard.colInitiated")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -214,14 +218,14 @@ export function DashboardPage() {
                       <Link to={`/exits/${exit.id}`} className="font-medium text-foreground hover:text-rose-600 dark:text-rose-400">
                         {exit.employee
                           ? `${exit.employee.first_name} ${exit.employee.last_name}`
-                          : `Employee #${exit.id.slice(0, 8)}`}
+                          : t("dashboard.employeeFallback", { id: exit.id.slice(0, 8) })}
                       </Link>
                       {exit.employee?.designation && (
                         <p className="text-xs text-muted-foreground">{exit.employee.designation}</p>
                       )}
                     </td>
                     <td className="px-6 py-3 text-muted-foreground">
-                      {TYPE_LABELS[exit.exit_type] || exit.exit_type}
+                      {TYPE_LABEL_KEYS[exit.exit_type] ? t(TYPE_LABEL_KEYS[exit.exit_type]) : exit.exit_type}
                     </td>
                     <td className="px-6 py-3">
                       <span
@@ -230,7 +234,7 @@ export function DashboardPage() {
                           STATUS_COLORS[exit.status] || "bg-muted text-muted-foreground",
                         )}
                       >
-                        {STATUS_LABELS[exit.status] || exit.status}
+                        {STATUS_LABEL_KEYS[exit.status] ? t(STATUS_LABEL_KEYS[exit.status]) : exit.status}
                       </span>
                     </td>
                     <td className="px-6 py-3 text-muted-foreground">

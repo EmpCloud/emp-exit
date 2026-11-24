@@ -78,5 +78,37 @@
     "hrAdmin": "Administrateur RH",
     "hrManager": "Responsable RH",
     "employee": "Employé"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "subtitle": "Aperçu et indicateurs de la gestion des départs.",
+    "statActiveExits": "Départs actifs",
+    "statClearancePending": "Décharge en attente",
+    "statFnfPending": "FnF en attente",
+    "statCompletedMonth": "Terminés (mois)",
+    "recentExits": "Départs récents",
+    "emptyExits": "Aucune demande de départ pour le moment. Commencez par initier un départ.",
+    "colEmployee": "Employé",
+    "colType": "Type",
+    "colLastWorkingDate": "Dernier jour travaillé",
+    "colInitiated": "Initié",
+    "employeeFallback": "Employé #{{id}}"
+  },
+  "exitStatus": {
+    "initiated": "Initié",
+    "notice_period": "Préavis",
+    "clearance_pending": "Décharge en attente",
+    "fnf_pending": "FnF en attente",
+    "fnf_processed": "FnF traité",
+    "completed": "Terminé",
+    "cancelled": "Annulé"
+  },
+  "exitType": {
+    "resignation": "Démission",
+    "termination": "Licenciement",
+    "retirement": "Départ à la retraite",
+    "end_of_contract": "Fin de contrat",
+    "mutual_separation": "Séparation à l'amiable",
+    "absconding": "Abandon de poste"
   }
 }

@@ -78,5 +78,37 @@
     "hrAdmin": "مدير الموارد البشرية",
     "hrManager": "مسؤول الموارد البشرية",
     "employee": "موظف"
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "subtitle": "نظرة عامة ومقاييس إدارة حالات المغادرة.",
+    "statActiveExits": "حالات المغادرة النشطة",
+    "statClearancePending": "إخلاء الطرف المعلق",
+    "statFnfPending": "FnF معلقة",
+    "statCompletedMonth": "المكتملة (هذا الشهر)",
+    "recentExits": "حالات المغادرة الأخيرة",
+    "emptyExits": "لا توجد طلبات مغادرة بعد. ابدأ ببدء عملية مغادرة.",
+    "colEmployee": "الموظف",
+    "colType": "النوع",
+    "colLastWorkingDate": "آخر يوم عمل",
+    "colInitiated": "تم البدء",
+    "employeeFallback": "الموظف #{{id}}"
+  },
+  "exitStatus": {
+    "initiated": "تم البدء",
+    "notice_period": "فترة الإشعار",
+    "clearance_pending": "إخلاء الطرف المعلق",
+    "fnf_pending": "FnF معلقة",
+    "fnf_processed": "FnF تمت معالجتها",
+    "completed": "مكتمل",
+    "cancelled": "ملغى"
+  },
+  "exitType": {
+    "resignation": "استقالة",
+    "termination": "إنهاء الخدمة",
+    "retirement": "تقاعد",
+    "end_of_contract": "انتهاء العقد",
+    "mutual_separation": "انفصال متبادل",
+    "absconding": "تغيّب"
   }
 }

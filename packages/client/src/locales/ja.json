@@ -78,5 +78,37 @@
     "hrAdmin": "人事管理者",
     "hrManager": "人事マネージャー",
     "employee": "従業員"
+  },
+  "dashboard": {
+    "title": "ダッシュボード",
+    "subtitle": "退職管理の概要と指標。",
+    "statActiveExits": "進行中の退職",
+    "statClearancePending": "クリアランス保留中",
+    "statFnfPending": "FnF 保留中",
+    "statCompletedMonth": "完了（今月）",
+    "recentExits": "最近の退職",
+    "emptyExits": "退職リクエストはまだありません。退職を開始してください。",
+    "colEmployee": "従業員",
+    "colType": "種類",
+    "colLastWorkingDate": "最終勤務日",
+    "colInitiated": "開始日",
+    "employeeFallback": "従業員 #{{id}}"
+  },
+  "exitStatus": {
+    "initiated": "開始",
+    "notice_period": "予告期間",
+    "clearance_pending": "クリアランス保留中",
+    "fnf_pending": "FnF 保留中",
+    "fnf_processed": "FnF 処理済み",
+    "completed": "完了",
+    "cancelled": "キャンセル済み"
+  },
+  "exitType": {
+    "resignation": "自己都合退職",
+    "termination": "解雇",
+    "retirement": "定年退職",
+    "end_of_contract": "契約満了",
+    "mutual_separation": "合意退職",
+    "absconding": "無断退職"
   }
 }

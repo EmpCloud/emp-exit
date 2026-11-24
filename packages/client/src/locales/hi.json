@@ -78,5 +78,37 @@
     "hrAdmin": "एचआर एडमिन",
     "hrManager": "एचआर मैनेजर",
     "employee": "कर्मचारी"
+  },
+  "dashboard": {
+    "title": "डैशबोर्ड",
+    "subtitle": "निकास प्रबंधन अवलोकन और मेट्रिक्स।",
+    "statActiveExits": "सक्रिय निकास",
+    "statClearancePending": "क्लीयरेंस लंबित",
+    "statFnfPending": "FnF लंबित",
+    "statCompletedMonth": "पूर्ण (इस माह)",
+    "recentExits": "हाल के निकास",
+    "emptyExits": "अभी तक कोई निकास अनुरोध नहीं। किसी निकास को आरंभ करके शुरू करें।",
+    "colEmployee": "कर्मचारी",
+    "colType": "प्रकार",
+    "colLastWorkingDate": "अंतिम कार्य दिवस",
+    "colInitiated": "आरंभ किया गया",
+    "employeeFallback": "कर्मचारी #{{id}}"
+  },
+  "exitStatus": {
+    "initiated": "आरंभ किया गया",
+    "notice_period": "नोटिस अवधि",
+    "clearance_pending": "क्लीयरेंस लंबित",
+    "fnf_pending": "FnF लंबित",
+    "fnf_processed": "FnF संसाधित",
+    "completed": "पूर्ण",
+    "cancelled": "रद्द"
+  },
+  "exitType": {
+    "resignation": "इस्तीफा",
+    "termination": "समाप्ति",
+    "retirement": "सेवानिवृत्ति",
+    "end_of_contract": "अनुबंध समाप्ति",
+    "mutual_separation": "पारस्परिक पृथक्करण",
+    "absconding": "अनुपस्थिति"
   }
 }

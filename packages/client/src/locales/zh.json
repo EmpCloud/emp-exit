@@ -78,5 +78,37 @@
     "hrAdmin": "人力资源管理员",
     "hrManager": "人力资源经理",
     "employee": "员工"
+  },
+  "dashboard": {
+    "title": "仪表板",
+    "subtitle": "离职管理概览与指标。",
+    "statActiveExits": "进行中的离职",
+    "statClearancePending": "待结算",
+    "statFnfPending": "FnF 待处理",
+    "statCompletedMonth": "已完成（本月）",
+    "recentExits": "最近的离职",
+    "emptyExits": "暂无离职申请。请先发起一项离职。",
+    "colEmployee": "员工",
+    "colType": "类型",
+    "colLastWorkingDate": "最后工作日",
+    "colInitiated": "已发起",
+    "employeeFallback": "员工 #{{id}}"
+  },
+  "exitStatus": {
+    "initiated": "已发起",
+    "notice_period": "通知期",
+    "clearance_pending": "待结算",
+    "fnf_pending": "FnF 待处理",
+    "fnf_processed": "FnF 已处理",
+    "completed": "已完成",
+    "cancelled": "已取消"
+  },
+  "exitType": {
+    "resignation": "辞职",
+    "termination": "解雇",
+    "retirement": "退休",
+    "end_of_contract": "合同到期",
+    "mutual_separation": "协商离职",
+    "absconding": "旷工离职"
   }
 }

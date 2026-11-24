@@ -78,5 +78,37 @@
     "hrAdmin": "HR-Admin",
     "hrManager": "HR-Manager",
     "employee": "Mitarbeiter"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Überblick und Kennzahlen zur Austrittsverwaltung.",
+    "statActiveExits": "Aktive Austritte",
+    "statClearancePending": "Freigabe ausstehend",
+    "statFnfPending": "FnF ausstehend",
+    "statCompletedMonth": "Abgeschlossen (Monat)",
+    "recentExits": "Letzte Austritte",
+    "emptyExits": "Noch keine Austrittsanträge. Beginnen Sie, indem Sie einen Austritt einleiten.",
+    "colEmployee": "Mitarbeiter",
+    "colType": "Typ",
+    "colLastWorkingDate": "Letzter Arbeitstag",
+    "colInitiated": "Eingeleitet",
+    "employeeFallback": "Mitarbeiter #{{id}}"
+  },
+  "exitStatus": {
+    "initiated": "Eingeleitet",
+    "notice_period": "Kündigungsfrist",
+    "clearance_pending": "Freigabe ausstehend",
+    "fnf_pending": "FnF ausstehend",
+    "fnf_processed": "FnF verarbeitet",
+    "completed": "Abgeschlossen",
+    "cancelled": "Storniert"
+  },
+  "exitType": {
+    "resignation": "Kündigung",
+    "termination": "Entlassung",
+    "retirement": "Ruhestand",
+    "end_of_contract": "Vertragsende",
+    "mutual_separation": "Einvernehmliche Trennung",
+    "absconding": "Unentschuldigtes Fernbleiben"
   }
 }
