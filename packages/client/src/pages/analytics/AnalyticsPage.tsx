@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { BarChart3, Loader2, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -18,6 +18,8 @@ import {
 } from "recharts";
 import { apiGet } from "@/api/client";
 import toast from "react-hot-toast";
+import { ErrorState, LoadingState } from "@/components/ui/States";
+import { Button } from "@/components/ui/Button";
 
 const COLORS = [
   "#e11d48", "#f43f5e", "#fb7185", "#fda4af",
@@ -46,9 +48,11 @@ export function AnalyticsPage() {
   const [tenure, setTenure] = useState<any[]>([]);
   const [nps, setNps] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   async function fetchAll() {
     setLoading(true);
+    setError(null);
     try {
       const [attrRes, reasonRes, deptRes, tenureRes, npsRes] = await Promise.all([
         apiGet<any[]>("/analytics/attrition"),
@@ -90,6 +94,7 @@ export function AnalyticsPage() {
         setNps(npsRes.data);
       }
     } catch {
+      setError("We couldn't load the exit analytics. Check your connection and try again.");
       toast.error("Failed to load analytics data");
     } finally {
       setLoading(false);
@@ -101,24 +106,37 @@ export function AnalyticsPage() {
   }, []);
 
   if (loading) {
+    return <LoadingState label="Loading analytics" />;
+  }
+
+  if (error) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-rose-600 dark:text-rose-400" />
+      <div className="app-page">
+        <div className="surface-card">
+          <ErrorState
+            title="Analytics unavailable"
+            description={error}
+            action={<Button onClick={fetchAll}>Try again</Button>}
+          />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Exit Analytics</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Attrition trends, reason analysis, and exit metrics.</p>
-      </div>
+    <div className="app-page">
+      <header className="page-header">
+        <div className="page-header__content">
+          <p className="page-header__eyebrow">Insights</p>
+          <h1 className="page-title">Exit Analytics</h1>
+          <p className="page-subtitle">Attrition trends, reason analysis, and exit metrics.</p>
+        </div>
+      </header>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Attrition Rate — Line Chart */}
-        <div className="rounded-lg border border-border bg-card p-5">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Monthly Exit Count</h3>
+        <section className="surface-card p-5 sm:p-6">
+          <h2 className="mb-4 text-base font-semibold tracking-tight text-foreground">Monthly Exit Count</h2>
           {attrition.length === 0 ? (
             <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">No data</div>
           ) : (
@@ -139,11 +157,11 @@ export function AnalyticsPage() {
               </LineChart>
             </ResponsiveContainer>
           )}
-        </div>
+        </section>
 
         {/* Reason Breakdown — Pie Chart */}
-        <div className="rounded-lg border border-border bg-card p-5">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Reason Breakdown</h3>
+        <section className="surface-card p-5 sm:p-6">
+          <h2 className="mb-4 text-base font-semibold tracking-tight text-foreground">Reason Breakdown</h2>
           {reasons.length === 0 ? (
             <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">No data</div>
           ) : (
@@ -168,11 +186,11 @@ export function AnalyticsPage() {
               </PieChart>
             </ResponsiveContainer>
           )}
-        </div>
+        </section>
 
         {/* Department Trends — Bar Chart */}
-        <div className="rounded-lg border border-border bg-card p-5">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Department Exits</h3>
+        <section className="surface-card p-5 sm:p-6">
+          <h2 className="mb-4 text-base font-semibold tracking-tight text-foreground">Department Exits</h2>
           {departments.length === 0 ? (
             <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">No data</div>
           ) : (
@@ -186,11 +204,11 @@ export function AnalyticsPage() {
               </BarChart>
             </ResponsiveContainer>
           )}
-        </div>
+        </section>
 
         {/* Tenure Distribution — Histogram */}
-        <div className="rounded-lg border border-border bg-card p-5">
-          <h3 className="text-sm font-semibold text-foreground mb-4">Tenure Distribution</h3>
+        <section className="surface-card p-5 sm:p-6">
+          <h2 className="mb-4 text-base font-semibold tracking-tight text-foreground">Tenure Distribution</h2>
           {tenure.length === 0 ? (
             <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">No data</div>
           ) : (
@@ -204,13 +222,13 @@ export function AnalyticsPage() {
               </BarChart>
             </ResponsiveContainer>
           )}
-        </div>
+        </section>
       </div>
 
       {/* NPS Summary Card */}
       <Link
         to="/analytics/nps"
-        className="block rounded-lg border border-border bg-card p-6 transition-colors duration-150 hover:border-brand-400"
+        className="surface-card surface-card--interactive block p-6 focus-visible:ring-2 focus-visible:ring-ring"
       >
         <div className="flex items-center justify-between">
           <div>

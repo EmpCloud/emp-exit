@@ -13,6 +13,7 @@
     "noData": "No data available",
     "success": "Success",
     "error": "Error",
+    "retry": "Try again",
     "confirm": "Confirm",
     "back": "Back",
     "next": "Next",
@@ -48,7 +49,13 @@
     "noNotifications": "No notifications yet",
     "viewAll": "View all",
     "review": "Review",
-    "cancelInvitationTooltip": "Cancel this invitation and remove the unactivated user"
+    "cancelInvitationTooltip": "Cancel this invitation and remove the unactivated user",
+    "changeLanguage": "Change language",
+    "openNavigationMenu": "Open navigation menu",
+    "closeNavigationMenu": "Close navigation menu",
+    "skipToMainContent": "Skip to main content",
+    "unknown": "Unknown",
+    "user": "User"
   },
   "nav": {
     "brand": "EMP Exit",
@@ -70,7 +77,14 @@
     "myExit": "My Exit",
     "myInterview": "My Interview",
     "myKt": "My KT",
-    "logout": "Logout"
+    "logout": "Logout",
+    "overview": "Overview",
+    "exitOperations": "Exit Operations",
+    "settlement": "Settlement",
+    "handoverAssets": "Handover & Assets",
+    "alumniInsights": "Alumni & Insights",
+    "administration": "Administration",
+    "selfService": "Self-service"
   },
   "roles": {
     "superAdmin": "Super Admin",
@@ -92,7 +106,21 @@
     "colType": "Type",
     "colLastWorkingDate": "Last Working Date",
     "colInitiated": "Initiated",
-    "employeeFallback": "Employee #{{id}}"
+    "employeeFallback": "Employee #{{id}}",
+    "stats": {
+      "activeExits": "Active Exits",
+      "clearancePending": "Clearance Pending",
+      "fnfPending": "FnF Pending",
+      "completedThisMonth": "Completed (This Month)"
+    },
+    "emptyState": "No exit requests yet. Start by initiating an exit.",
+    "table": {
+      "employee": "Employee",
+      "type": "Type",
+      "status": "Status",
+      "lastWorkingDate": "Last Working Date",
+      "initiated": "Initiated"
+    }
   },
   "exitStatus": {
     "initiated": "Initiated",
@@ -143,6 +171,29 @@
       "end_of_contract": "End of Contract",
       "mutual_separation": "Mutual Separation",
       "absconding": "Absconding"
+    },
+    "initiateExit": "Initiate Exit",
+    "statusFilterLabel": "Filter exit requests by status",
+    "activeStatus": "Active (in progress)",
+    "resultCount_zero": "{{count}} exit requests found",
+    "resultCount_one": "{{count}} exit request found",
+    "resultCount_two": "{{count}} exit requests found",
+    "resultCount_few": "{{count}} exit requests found",
+    "resultCount_many": "{{count}} exit requests found",
+    "resultCount_other": "{{count}} exit requests found",
+    "emptyState": "No exit requests found.",
+    "tableLabel": "Exit requests",
+    "table": {
+      "employee": "Employee",
+      "type": "Type",
+      "status": "Status",
+      "resignationDate": "Resignation Date",
+      "lastWorkingDate": "Last Working Date",
+      "initiated": "Initiated"
+    },
+    "pagination": {
+      "label": "Exit requests pagination",
+      "page": "Page {{page}} of {{totalPages}}"
     }
   },
   "checklists": {
@@ -240,5 +291,31 @@
       "rejected": "Rejected",
       "waived": "Waived"
     }
+  },
+  "app": {
+    "title": "EMP Exit — Employee Exit Management"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "exitTypes": {
+    "resignation": "Resignation",
+    "termination": "Termination",
+    "retirement": "Retirement",
+    "endOfContract": "End of Contract",
+    "mutualSeparation": "Mutual Separation",
+    "absconding": "Absconding"
+  },
+  "exitStatuses": {
+    "initiated": "Initiated",
+    "noticePeriod": "Notice Period",
+    "clearancePending": "Clearance Pending",
+    "fnfPending": "FnF Pending",
+    "fnfProcessed": "FnF Processed",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
   }
 }

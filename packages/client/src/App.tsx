@@ -1,14 +1,22 @@
 import { Suspense, useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { AlertTriangle, ArrowRight, Loader2 } from "lucide-react";
 import { isLoggedIn, useAuthStore, extractSSOToken, homeFor } from "@/lib/auth-store";
 import { apiPost } from "@/api/client";
 import { AppRoutes } from "@/routes";
 
 function PageLoader() {
   return (
-    <div className="flex h-64 items-center justify-center">
-      <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
+    <div
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      className="flex min-h-dvh flex-col items-center justify-center gap-3 bg-background px-6 py-12 text-center text-muted-foreground"
+    >
+      <span className="grid size-12 place-items-center rounded-xl bg-primary/10 text-primary">
+        <Loader2 className="size-6 animate-spin" aria-hidden="true" />
+      </span>
+      <span className="sr-only">Loading...</span>
     </div>
   );
 }
@@ -76,12 +84,18 @@ function SSOGate({ children }: { children: React.ReactNode }) {
   if (!ready) return <PageLoader />;
   if (error) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
-          <a href="/login" className="text-brand-600 underline">Go to login</a>
+      <main className="grid min-h-dvh place-items-center bg-background px-4 py-12">
+        <div role="alert" className="surface-card w-full max-w-md p-6 text-center shadow-card sm:p-8">
+          <span className="mx-auto grid size-12 place-items-center rounded-xl bg-danger/10 text-danger">
+            <AlertTriangle className="size-6" aria-hidden="true" />
+          </span>
+          <p className="mt-5 text-base font-semibold leading-7 text-foreground">{error}</p>
+          <a href="/login" className="button-primary mt-6 w-full">
+            <span>Go to login</span>
+            <ArrowRight className="size-4 rtl:rotate-180" aria-hidden="true" />
+          </a>
         </div>
-      </div>
+      </main>
     );
   }
   return <>{children}</>;
@@ -90,15 +104,15 @@ function SSOGate({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <SSOGate>
-    <Suspense fallback={<PageLoader />}>
-      <Routes>
-        {/* Root redirect */}
-        <Route path="/" element={<AuthRedirect />} />
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          {/* Root redirect */}
+          <Route path="/" element={<AuthRedirect />} />
 
-        {/* All app routes */}
-        {AppRoutes()}
-      </Routes>
-    </Suspense>
+          {/* All app routes */}
+          {AppRoutes()}
+        </Routes>
+      </Suspense>
     </SSOGate>
   );
 }

@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type KeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { Globe } from "lucide-react";
+import { Check, ChevronDown, Globe } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const LANGUAGES = [
   { code: "en", label: "English", flag: "EN" },
@@ -15,11 +16,15 @@ const LANGUAGES = [
 ];
 
 export default function LanguageSwitcher() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const itemRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const menuId = "language-switcher-menu";
 
-  const currentLang = LANGUAGES.find((l) => l.code === i18n.language) || LANGUAGES[0];
+  const activeLanguage = i18n.resolvedLanguage || i18n.language;
+  const currentLang = LANGUAGES.find((l) => l.code === activeLanguage) || LANGUAGES[0];
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -31,36 +36,95 @@ export default function LanguageSwitcher() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+    const selectedIndex = Math.max(
+      0,
+      LANGUAGES.findIndex((language) => language.code === activeLanguage),
+    );
+    itemRefs.current[selectedIndex]?.focus();
+  }, [activeLanguage, open]);
+
   const handleChange = (code: string) => {
     i18n.changeLanguage(code);
     setOpen(false);
+    triggerRef.current?.focus();
+  };
+
+  const handleMenuKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const activeIndex = itemRefs.current.findIndex((item) => item === document.activeElement);
+    let nextIndex = activeIndex;
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      setOpen(false);
+      triggerRef.current?.focus();
+      return;
+    }
+
+    if (event.key === "ArrowDown") nextIndex = (activeIndex + 1) % LANGUAGES.length;
+    else if (event.key === "ArrowUp") nextIndex = (activeIndex - 1 + LANGUAGES.length) % LANGUAGES.length;
+    else if (event.key === "Home") nextIndex = 0;
+    else if (event.key === "End") nextIndex = LANGUAGES.length - 1;
+    else return;
+
+    event.preventDefault();
+    itemRefs.current[nextIndex]?.focus();
   };
 
   return (
     <div className="relative" ref={dropdownRef}>
       <button
+        ref={triggerRef}
+        type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors text-sm"
-        title="Change language"
+        onKeyDown={(event) => {
+          if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            event.preventDefault();
+            setOpen(true);
+          }
+        }}
+        className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-transparent px-3 text-sm font-medium text-muted-foreground transition-[background-color,border-color,color] hover:border-border hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+        title={t("common.changeLanguage")}
+        aria-label={t("common.changeLanguage")}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={menuId}
       >
-        <Globe className="h-4 w-4" />
+        <Globe className="h-4 w-4" aria-hidden="true" focusable="false" />
         <span className="hidden sm:inline text-xs font-medium">{currentLang.flag}</span>
+        <ChevronDown aria-hidden="true" className={cn("size-3.5 transition-transform", open && "rotate-180")} />
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden py-1">
-          {LANGUAGES.map((lang) => (
+        <div
+          id={menuId}
+          role="menu"
+          aria-label={t("common.changeLanguage")}
+          onKeyDown={handleMenuKeyDown}
+          className="absolute end-0 top-full z-50 mt-2 w-48 overflow-hidden rounded-xl border border-border bg-popover py-1.5 text-popover-foreground shadow-floating"
+        >
+          {LANGUAGES.map((lang, index) => (
             <button
               key={lang.code}
+              ref={(element) => {
+                itemRefs.current[index] = element;
+              }}
+              type="button"
+              role="menuitemradio"
+              aria-checked={activeLanguage === lang.code}
+              tabIndex={activeLanguage === lang.code ? 0 : -1}
               onClick={() => handleChange(lang.code)}
-              className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-gray-50 transition-colors ${
-                i18n.language === lang.code
-                  ? "bg-brand-50 text-brand-700 font-medium"
-                  : "text-gray-700"
-              }`}
+              className={cn(
+                "flex min-h-10 w-full items-center gap-2 px-3 text-start text-sm transition-colors hover:bg-muted focus-visible:ring-inset",
+                activeLanguage === lang.code
+                  ? "bg-brand-50 font-semibold text-brand-700 dark:bg-brand-950/50 dark:text-brand-300"
+                  : "text-popover-foreground",
+              )}
             >
-              <span className="text-xs font-bold w-6 text-center text-gray-400">{lang.flag}</span>
-              {lang.label}
+              <span className="w-6 text-center text-xs font-bold text-muted-foreground">{lang.flag}</span>
+              <span className="flex-1">{lang.label}</span>
+              {activeLanguage === lang.code ? <Check aria-hidden="true" className="size-4" /> : null}
             </button>
           ))}
         </div>

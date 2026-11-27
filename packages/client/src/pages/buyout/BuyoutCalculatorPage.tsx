@@ -12,6 +12,11 @@ import {
 } from "lucide-react";
 import { apiGet, apiPost } from "@/api/client";
 import { cn, formatDate } from "@/lib/utils";
+import { Button, ButtonLink } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Field";
+import { Page, PageDescription, PageHeader, PageHeaderContent, PageTitle } from "@/components/ui/Page";
+import { EmptyState, LoadingState } from "@/components/ui/States";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 function formatINR(amountPaise: number): string {
   const rupees = amountPaise / 100;
@@ -47,6 +52,7 @@ export function BuyoutCalculatorPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [existingBuyout, setExistingBuyout] = useState<any>(null);
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
 
   useEffect(() => {
     loadExit();
@@ -116,13 +122,13 @@ export function BuyoutCalculatorPage() {
     }
   }
 
-  async function handleSubmit() {
+  function handleSubmit() {
     if (!calculation || !exit) return;
+    setShowSubmitConfirm(true);
+  }
 
-    if (!confirm("Are you sure you want to submit this buyout request? This will be sent to your manager for approval.")) {
-      return;
-    }
-
+  async function confirmSubmit() {
+    if (!calculation || !exit) return;
     setSubmitting(true);
     try {
       await apiPost("/self-service/my-buyout/request", {
@@ -133,81 +139,72 @@ export function BuyoutCalculatorPage() {
       setCalcError(err.response?.data?.error?.message || "Failed to submit buyout request");
     } finally {
       setSubmitting(false);
+      setShowSubmitConfirm(false);
     }
   }
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-rose-600 dark:text-rose-400" />
-      </div>
+      <LoadingState label="Loading buyout details" className="surface-card" />
     );
   }
 
   if (!exit) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Notice Period Buyout</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+      <Page>
+        <PageHeader><PageHeaderContent><PageTitle>Notice Period Buyout</PageTitle><PageDescription>
             You need an active exit request to use the buyout calculator.
-          </p>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-12 text-center">
-          <Calculator className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
-          <p className="text-muted-foreground">No active exit request found.</p>
-        </div>
-      </div>
+          </PageDescription></PageHeaderContent></PageHeader>
+        <EmptyState title="No active exit request found." icon={Calculator} className="surface-card" />
+      </Page>
     );
   }
 
   if (submitted) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Notice Period Buyout</h1>
-        </div>
-        <div className="rounded-xl border border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-950/40 p-12 text-center">
+      <Page>
+        <PageHeader><PageHeaderContent><PageTitle>Notice Period Buyout</PageTitle></PageHeaderContent></PageHeader>
+        <div className="rounded-xl border border-green-200 bg-green-50 p-8 text-center shadow-soft dark:border-green-900 dark:bg-green-950/40 sm:p-12">
           <Send className="mx-auto h-12 w-12 text-green-500 mb-4" />
           <h2 className="text-lg font-semibold text-green-800 dark:text-green-300 mb-2">Buyout Request Submitted</h2>
           <p className="text-green-700 dark:text-green-300 mb-1">
             Your request to leave on <strong>{formatDate(requestedDate)}</strong> has been submitted.
           </p>
           <p className="text-green-600 dark:text-green-400 text-sm">
-            Buyout amount: <strong>{calculation ? formatINR(calculation.buyoutAmount) : "--"}</strong>
+            Buyout amount: <strong>{calculation ? formatINR(calculation.buyoutAmount) : "—"}</strong>
           </p>
           <p className="text-sm text-green-600 dark:text-green-400 mt-4">
             You will be notified once your manager reviews the request.
           </p>
-          <Link
+          <ButtonLink
             to="/exits/my"
-            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-green-700"
+            className="mt-6 bg-green-600 hover:bg-green-700"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to My Exit
-          </Link>
+          </ButtonLink>
         </div>
-      </div>
+      </Page>
     );
   }
 
   // If there's an existing pending/approved buyout
   if (existingBuyout && existingBuyout.status !== "rejected") {
     return (
-      <div className="space-y-6">
-        <div>
+      <Page>
+        <PageHeader><PageHeaderContent>
           <Link to="/exits/my" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-muted-foreground mb-2">
             <ArrowLeft className="h-4 w-4" /> Back to My Exit
           </Link>
-          <h1 className="text-2xl font-bold text-foreground">Notice Period Buyout</h1>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-6">
+          <PageTitle>Notice Period Buyout</PageTitle>
+        </PageHeaderContent></PageHeader>
+        <div className="surface-card p-5 sm:p-6">
           <div className="flex items-center gap-3 mb-6">
             <Calculator className="h-6 w-6 text-rose-500" />
             <h2 className="text-lg font-semibold text-foreground">Existing Buyout Request</h2>
             <span
               className={cn(
-                "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
+                "status-pill border-transparent capitalize",
                 existingBuyout.status === "approved"
                   ? "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300"
                   : "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300",
@@ -246,7 +243,7 @@ export function BuyoutCalculatorPage() {
             </div>
           )}
         </div>
-      </div>
+      </Page>
     );
   }
 
@@ -256,16 +253,16 @@ export function BuyoutCalculatorPage() {
   const isDateSoon = calculation && calculation.remainingDays > (exit.notice_period_days * 0.7);
 
   return (
-    <div className="space-y-6">
-      <div>
+    <Page>
+      <PageHeader><PageHeaderContent>
         <Link to="/exits/my" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-muted-foreground mb-2">
           <ArrowLeft className="h-4 w-4" /> Back to My Exit
         </Link>
-        <h1 className="text-2xl font-bold text-foreground">Notice Period Buyout Calculator</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <PageTitle>Notice Period Buyout Calculator</PageTitle>
+        <PageDescription>
           Calculate how much it costs to leave before your notice period ends.
-        </p>
-      </div>
+        </PageDescription>
+      </PageHeaderContent></PageHeader>
 
       {isTerminal && (
         <div className="rounded-lg bg-muted border border-border p-4 text-sm text-muted-foreground">
@@ -276,7 +273,7 @@ export function BuyoutCalculatorPage() {
       {!isTerminal && (
         <>
           {/* Current Exit Info */}
-          <div className="rounded-xl border border-border bg-card p-6">
+          <section className="surface-card p-5 sm:p-6">
             <div className="flex items-center gap-2 mb-4">
               <Clock className="h-5 w-5 text-muted-foreground" />
               <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Current Notice Period</h2>
@@ -289,13 +286,13 @@ export function BuyoutCalculatorPage() {
               <div>
                 <p className="text-xs text-muted-foreground">Resignation Date</p>
                 <p className="text-sm font-medium text-foreground">
-                  {exit.resignation_date ? formatDate(exit.resignation_date) : "--"}
+                  {exit.resignation_date ? formatDate(exit.resignation_date) : "—"}
                 </p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Last Working Date</p>
                 <p className="text-sm font-medium text-foreground">
-                  {exit.last_working_date ? formatDate(exit.last_working_date) : "--"}
+                  {exit.last_working_date ? formatDate(exit.last_working_date) : "—"}
                 </p>
               </div>
               <div>
@@ -305,37 +302,35 @@ export function BuyoutCalculatorPage() {
                 </p>
               </div>
             </div>
-          </div>
+          </section>
 
           {/* Date Picker */}
-          <div className="rounded-xl border border-border bg-card p-6">
+          <section className="surface-card p-5 sm:p-6">
             <div className="flex items-center gap-2 mb-4">
               <Calendar className="h-5 w-5 text-rose-500" />
               <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                 When do you want your last working day to be?
               </h2>
             </div>
-            <input
+            <Input
               type="date"
               value={requestedDate}
               onChange={(e) => setRequestedDate(e.target.value)}
               min={minDate}
               max={maxDate}
-              className="block w-full max-w-xs rounded-lg border border-border bg-card text-foreground px-3 py-2.5 text-sm text-foreground focus:border-rose-500 focus:ring-2 focus:ring-rose-500 focus:outline-none"
+              aria-label="Requested last working date"
+              className="max-w-xs"
             />
             {minDate && maxDate && (
               <p className="mt-2 text-xs text-muted-foreground">
                 Choose a date between {formatDate(minDate)} and {formatDate(maxDate)}
               </p>
             )}
-          </div>
+          </section>
 
           {/* Calculation Result */}
           {calcLoading && (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-rose-500 mr-2" />
-              <span className="text-sm text-muted-foreground">Calculating...</span>
-            </div>
+            <LoadingState label="Calculating" className="surface-card min-h-32" />
           )}
 
           {calcError && (
@@ -345,30 +340,30 @@ export function BuyoutCalculatorPage() {
           )}
 
           {calculation && !calcLoading && (
-            <div className="rounded-xl border border-border bg-card p-6 space-y-5">
+            <section className="surface-card space-y-5 p-5 sm:p-6">
               <div className="flex items-center gap-2">
                 <DollarSign className="h-5 w-5 text-rose-500" />
                 <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Buyout Calculation</h2>
               </div>
 
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                <div className="rounded-lg bg-muted/50 border border-border p-4">
+                <div className="rounded-xl border border-border bg-muted/50 p-4">
                   <p className="text-xs text-muted-foreground mb-1">Original Notice Period</p>
                   <p className="text-lg font-semibold text-foreground">{calculation.originalNoticeDays} days</p>
                 </div>
-                <div className="rounded-lg bg-muted/50 border border-border p-4">
+                <div className="rounded-xl border border-border bg-muted/50 p-4">
                   <p className="text-xs text-muted-foreground mb-1">Days Served</p>
                   <p className="text-lg font-semibold text-foreground">{calculation.servedDays} days</p>
                 </div>
-                <div className="rounded-lg bg-muted/50 border border-border p-4">
+                <div className="rounded-xl border border-border bg-muted/50 p-4">
                   <p className="text-xs text-muted-foreground mb-1">Days to Buy Out</p>
                   <p className="text-lg font-semibold text-amber-600 dark:text-amber-400">{calculation.remainingDays} days</p>
                 </div>
-                <div className="rounded-lg bg-muted/50 border border-border p-4">
+                <div className="rounded-xl border border-border bg-muted/50 p-4">
                   <p className="text-xs text-muted-foreground mb-1">Daily Rate</p>
                   <p className="text-lg font-semibold text-foreground">{formatINR(calculation.dailyRate)}</p>
                 </div>
-                <div className="rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 p-4 sm:col-span-2">
+                <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 dark:border-rose-900 dark:bg-rose-950/40 sm:col-span-2">
                   <p className="text-xs text-rose-500 font-medium mb-1">Buyout Amount</p>
                   <p className="text-3xl font-bold text-rose-600 dark:text-rose-400">{formatINR(calculation.buyoutAmount)}</p>
                   <p className="text-xs text-rose-400 mt-1">
@@ -403,10 +398,10 @@ export function BuyoutCalculatorPage() {
                 </div>
               )}
 
-              <button
+              <Button
                 onClick={handleSubmit}
                 disabled={submitting || calculation.buyoutAmount <= 0}
-                className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-5"
               >
                 {submitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -414,11 +409,22 @@ export function BuyoutCalculatorPage() {
                   <Send className="h-4 w-4" />
                 )}
                 Submit Buyout Request
-              </button>
-            </div>
+              </Button>
+            </section>
           )}
         </>
       )}
-    </div>
+      <ConfirmDialog
+        open={showSubmitConfirm}
+        title="Submit buyout request?"
+        message="This request will be sent to your manager for approval. Review the calculated amount before continuing."
+        confirmLabel="Submit request"
+        cancelLabel="Cancel"
+        tone="primary"
+        loading={submitting}
+        onConfirm={confirmSubmit}
+        onCancel={() => setShowSubmitConfirm(false)}
+      />
+    </Page>
   );
 }

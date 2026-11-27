@@ -2,14 +2,15 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   UserPlus,
-  Loader2,
   ChevronLeft,
   ChevronRight,
-  Search,
   Eye,
 } from "lucide-react";
 import { apiGet } from "@/api/client";
 import toast from "react-hot-toast";
+import { EmptyState, ErrorState, LoadingState } from "@/components/ui/States";
+import { Button } from "@/components/ui/Button";
+import { formatDate } from "@/lib/utils";
 
 const STATUS_COLORS: Record<string, string> = {
   proposed: "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300",
@@ -36,6 +37,7 @@ const REASON_LABELS: Record<string, string> = {
 export function RehireListPage() {
   const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -44,6 +46,7 @@ export function RehireListPage() {
 
   async function fetchRequests() {
     setLoading(true);
+    setError(null);
     try {
       const res = await apiGet<any>("/rehire", {
         page,
@@ -57,6 +60,7 @@ export function RehireListPage() {
         setTotalPages(payload?.totalPages || 0);
       }
     } catch {
+      setError("We couldn't load the rehire proposals. Check your connection and try again.");
       toast.error("Failed to load rehire requests");
     } finally {
       setLoading(false);
@@ -68,29 +72,32 @@ export function RehireListPage() {
   }, [page, statusFilter]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Rehire Proposals</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+    <div className="app-page">
+      <header className="page-header">
+        <div className="page-header__content">
+          <p className="page-header__eyebrow">Alumni & Insights</p>
+          <h1 className="page-title">Rehire Proposals</h1>
+          <p className="page-subtitle">
             Review and manage rehire requests for former employees.
           </p>
         </div>
         <Link
           to="/alumni"
-          className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-rose-700"
+          className="button-primary"
         >
           <UserPlus className="h-4 w-4" />
           Browse Alumni
         </Link>
-      </div>
+      </header>
 
       {/* Filters */}
-      <div className="flex gap-3">
+      <div className="surface-card flex flex-wrap gap-3 p-4">
+        <label htmlFor="rehire-status-filter" className="sr-only">Filter rehire proposals by status</label>
         <select
+          id="rehire-status-filter"
           value={statusFilter}
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          className="rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+          className="control max-w-xs"
         >
           <option value="">All Statuses</option>
           <option value="proposed">Proposed</option>
@@ -102,37 +109,40 @@ export function RehireListPage() {
       </div>
 
       {loading ? (
-        <div className="flex h-32 items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-rose-600 dark:text-rose-400" />
+        <LoadingState label="Loading rehire proposals" />
+      ) : error ? (
+        <div className="surface-card">
+          <ErrorState
+            title="Rehire proposals unavailable"
+            description={error}
+            action={<Button onClick={fetchRequests}>Try again</Button>}
+          />
         </div>
       ) : requests.length === 0 ? (
-        <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
-          <UserPlus className="mx-auto h-10 w-10 text-muted-foreground/50 mb-3" />
-          No rehire requests found.
-        </div>
+        <div className="surface-card"><EmptyState icon={UserPlus} title="No rehire requests found." /></div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-lg border border-border bg-card">
-            <table className="min-w-full divide-y divide-border">
-              <thead className="bg-muted/50">
+          <div className="data-table-shell data-table-scroll">
+            <table className="data-table">
+              <thead>
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Employee</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Position</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Department</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Exit Reason</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase">Date</th>
-                  <th className="px-4 py-3" />
+                  <th scope="col">Employee</th>
+                  <th scope="col">Position</th>
+                  <th scope="col">Department</th>
+                  <th scope="col">Exit Reason</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Date</th>
+                  <th scope="col"><span className="sr-only">Actions</span></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody>
                 {requests.map((req: any) => {
                   const name = req.employee
                     ? `${req.employee.first_name} ${req.employee.last_name}`
                     : `Employee #${req.employee_id}`;
                   return (
-                    <tr key={req.id} className="hover:bg-muted/50">
-                      <td className="px-4 py-3">
+                    <tr key={req.id}>
+                      <td>
                         <div>
                           <p className="text-sm font-medium text-foreground">{name}</p>
                           {req.employee?.emp_code && (
@@ -140,23 +150,23 @@ export function RehireListPage() {
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground">{req.position}</td>
+                      <td className="text-muted-foreground">{req.position}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">{req.department || "—"}</td>
                       <td className="px-4 py-3 text-sm text-muted-foreground">
                         {REASON_LABELS[req.exit_reason] || req.exit_reason || "—"}
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${STATUS_COLORS[req.status] || "bg-muted text-muted-foreground"}`}>
+                      <td>
+                        <span className={`status-pill border-transparent capitalize ${STATUS_COLORS[req.status] || "bg-muted text-muted-foreground"}`}>
                           {req.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground">
-                        {new Date(req.created_at).toLocaleDateString()}
+                      <td className="text-muted-foreground" data-numeric>
+                        {formatDate(req.created_at)}
                       </td>
-                      <td className="px-4 py-3">
+                      <td>
                         <Link
                           to={`/rehire/${req.id}`}
-                          className="inline-flex items-center gap-1 text-sm text-rose-600 hover:text-rose-700 dark:text-rose-300"
+                          className="inline-flex min-h-10 items-center gap-1 rounded-lg px-2 text-sm font-semibold text-primary hover:bg-brand-50 dark:hover:bg-brand-950/40"
                         >
                           <Eye className="h-4 w-4" />
                           View
@@ -171,7 +181,7 @@ export function RehireListPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-muted-foreground">
                 Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} of {total}
               </p>
@@ -179,14 +189,16 @@ export function RehireListPage() {
                 <button
                   onClick={() => setPage(Math.max(1, page - 1))}
                   disabled={page === 1}
-                  className="rounded-lg border border-border p-2 text-muted-foreground hover:bg-muted/50 disabled:opacity-50"
+                  className="button-secondary size-11 p-0"
+                  aria-label="Previous page"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setPage(Math.min(totalPages, page + 1))}
                   disabled={page === totalPages}
-                  className="rounded-lg border border-border p-2 text-muted-foreground hover:bg-muted/50 disabled:opacity-50"
+                  className="button-secondary size-11 p-0"
+                  aria-label="Next page"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </button>

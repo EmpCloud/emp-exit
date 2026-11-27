@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { apiGet, apiPut } from "@/api/client";
 import toast from "react-hot-toast";
+import { LoadingState } from "@/components/ui/States";
 
 type FormState = {
   default_notice_period_days: number;
@@ -42,25 +43,28 @@ const DEFAULTS: FormState = {
 function Toggle({
   checked,
   onChange,
+  label,
 }: {
   checked: boolean;
   onChange: (v: boolean) => void;
+  label: string;
 }) {
   return (
     <button
       type="button"
       role="switch"
       aria-checked={checked}
+      aria-label={label}
       onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2 ${
-        checked ? "bg-rose-600" : "bg-muted"
-      }`}
+      className="relative grid size-11 flex-shrink-0 place-items-center rounded-lg focus-visible:ring-2 focus-visible:ring-ring"
     >
       <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-card shadow transition-transform ${
-          checked ? "translate-x-6" : "translate-x-1"
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+          checked ? "bg-primary" : "bg-muted"
         }`}
-      />
+      >
+        <span className={`inline-block size-4 rounded-full bg-white shadow transition-transform ${checked ? "translate-x-6" : "translate-x-1"}`} />
+      </span>
     </button>
   );
 }
@@ -82,7 +86,7 @@ function ToggleRow({
         <p className="text-sm font-medium text-foreground">{label}</p>
         <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{description}</p>
       </div>
-      <Toggle checked={checked} onChange={onChange} />
+      <Toggle checked={checked} onChange={onChange} label={label} />
     </div>
   );
 }
@@ -100,7 +104,7 @@ function SettingsCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+    <section className="surface-card overflow-hidden">
       <div className="flex items-center gap-3 border-b border-border px-6 py-4">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400">
           {icon}
@@ -111,7 +115,7 @@ function SettingsCard({
         </div>
       </div>
       <div className="px-6 py-2">{children}</div>
-    </div>
+    </section>
   );
 }
 
@@ -174,27 +178,26 @@ export function SettingsPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-rose-600 dark:text-rose-400" />
-      </div>
-    );
+    return <LoadingState label="Loading settings" />;
   }
 
   return (
-    <form onSubmit={handleSave} className="mx-auto max-w-3xl space-y-6 pb-24">
+    <form onSubmit={handleSave} className="app-page mx-auto max-w-4xl pb-24">
       {/* Page header */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-600 text-white">
+      <header className="page-header items-center">
+        <div className="flex items-center gap-3">
+        <div className="grid size-12 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-md shadow-brand-500/20">
           <SettingsIcon className="h-5 w-5" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Exit Settings</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="page-header__eyebrow">Administration</p>
+          <h1 className="page-title">Exit Settings</h1>
+          <p className="page-subtitle">
             Configure notice periods, clearance, FnF, and alumni defaults.
           </p>
         </div>
-      </div>
+        </div>
+      </header>
 
       {/* General */}
       <SettingsCard
@@ -211,14 +214,16 @@ export function SettingsPage() {
           </div>
           <div className="flex items-center gap-2">
             <div className="relative">
-              <Clock className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Clock className="pointer-events-none absolute start-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <label htmlFor="default-notice-period" className="sr-only">Default notice period in days</label>
               <input
+                id="default-notice-period"
                 type="number"
                 min={0}
                 max={365}
                 value={form.default_notice_period_days}
                 onChange={(e) => set({ default_notice_period_days: Number(e.target.value) })}
-                className="w-28 rounded-lg border border-border bg-card text-foreground py-2 pl-8 pr-3 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                className="control w-28 ps-8"
               />
             </div>
             <span className="text-xs text-muted-foreground">days</span>
@@ -300,15 +305,15 @@ export function SettingsPage() {
       </SettingsCard>
 
       {/* Sticky save bar */}
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card/95 backdrop-blur">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3 sm:px-6">
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card/95 shadow-[0_-8px_24px_rgba(15,23,42,0.06)] backdrop-blur lg:start-[17.5rem]">
+        <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <span className="text-xs text-muted-foreground">
             {dirty ? "You have unsaved changes." : "All changes saved."}
           </span>
           <button
             type="submit"
             disabled={saving || !dirty}
-            className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="button-primary"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             {saving ? "Saving…" : "Save Settings"}

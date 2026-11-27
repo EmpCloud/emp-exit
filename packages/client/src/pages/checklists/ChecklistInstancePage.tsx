@@ -9,6 +9,11 @@ import {
 } from "lucide-react";
 import { apiGet, apiPost, apiPatch } from "@/api/client";
 import { cn } from "@/lib/utils";
+import { Page, PageDescription, PageHeader, PageHeaderContent, PageTitle } from "@/components/ui/Page";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { EmptyState, LoadingState } from "@/components/ui/States";
+import { Select } from "@/components/ui/Field";
 
 const CHECKLIST_STATUS_COLORS: Record<string, string> = {
   pending: "bg-muted text-muted-foreground",
@@ -93,70 +98,62 @@ export function ChecklistInstancePage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-rose-600 dark:text-rose-400" />
-      </div>
-    );
+    return <Card><LoadingState label={t("common.loading")} /></Card>;
   }
 
   const hasItems = checklist && checklist.items && checklist.items.length > 0;
 
   return (
-    <div className="space-y-6">
-      <div>
+    <Page>
+      <PageHeader>
+        <PageHeaderContent>
         <Link
           to="/exits"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-muted-foreground mb-2"
+          className="mb-2 inline-flex min-h-10 items-center gap-1 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <ArrowLeft className="h-4 w-4" /> {t("checklists.backToExits")}
+          <ArrowLeft aria-hidden="true" className="size-4" /> {t("checklists.backToExits")}
         </Link>
-        <h1 className="text-2xl font-bold text-foreground">{t("checklists.instanceTitle")}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {t("checklists.instanceSubtitle")}
-        </p>
-      </div>
+        <PageTitle>{t("checklists.instanceTitle")}</PageTitle>
+        <PageDescription>{t("checklists.instanceSubtitle")}</PageDescription>
+        </PageHeaderContent>
+      </PageHeader>
 
       {/* Generate from template */}
       {templates.length > 0 && (
-        <div className="rounded-xl border border-border bg-card p-5">
-          <h3 className="text-sm font-medium text-muted-foreground mb-3">{t("checklists.generateFromTemplate")}</h3>
-          <div className="flex items-center gap-3">
-            <select
+        <Card className="p-5 sm:p-6">
+          <h2 className="mb-3 text-sm font-semibold text-foreground">{t("checklists.generateFromTemplate")}</h2>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Select
               value={selectedTemplate}
               onChange={(e) => setSelectedTemplate(e.target.value)}
-              className="rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+              className="sm:max-w-xl"
             >
               {templates.map((tmpl) => (
                 <option key={tmpl.id} value={tmpl.id}>
                   {t("checklists.templateOption", { name: tmpl.name, count: tmpl.item_count })}
                 </option>
               ))}
-            </select>
-            <button
+            </Select>
+            <Button
               onClick={handleGenerate}
               disabled={generating || !selectedTemplate}
-              className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50"
             >
-              {generating && <Loader2 className="h-4 w-4 animate-spin" />}
+              {generating && <Loader2 aria-hidden="true" className="size-4 animate-spin" />}
               {t("checklists.generate")}
-            </button>
+            </Button>
           </div>
           {hasItems && (
             <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
               {t("checklists.replaceWarning")}
             </p>
           )}
-        </div>
+        </Card>
       )}
 
       {/* Checklist items */}
-      <div className="rounded-xl border border-border bg-card">
+      <Card className="overflow-hidden">
         {!hasItems ? (
-          <div className="px-6 py-12 text-center">
-            <ClipboardCheck className="mx-auto h-10 w-10 text-muted-foreground/50 mb-3" />
-            <p className="text-sm text-muted-foreground">{t("checklists.noItemsYet")}</p>
-          </div>
+          <EmptyState icon={ClipboardCheck} title={t("checklists.noItemsYet")} />
         ) : (
           <>
             {/* Progress bar */}
@@ -168,7 +165,7 @@ export function ChecklistInstancePage() {
               </div>
               <div className="w-full bg-muted rounded-full h-2">
                 <div
-                  className="bg-rose-500 h-2 rounded-full transition-all"
+                  className="h-2 rounded-full bg-primary transition-[width] duration-300"
                   style={{ width: `${checklist.progress}%` }}
                 />
               </div>
@@ -176,7 +173,7 @@ export function ChecklistInstancePage() {
 
             <div className="divide-y divide-border">
               {checklist.items.map((item: any) => (
-                <div key={item.id} className="flex items-center justify-between px-6 py-3.5">
+                <div key={item.id} className="flex flex-col gap-3 px-5 py-4 transition-colors hover:bg-muted/40 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                   <div className="flex items-center gap-3 flex-1">
                     {item.status === "completed" ? (
                       <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
@@ -206,7 +203,7 @@ export function ChecklistInstancePage() {
                     value={item.status}
                     onChange={(e) => handleUpdateItem(item.id, e.target.value)}
                     className={cn(
-                      "rounded-full px-2.5 py-1 text-xs font-medium border-0 cursor-pointer",
+                      "min-h-10 cursor-pointer rounded-full border-0 px-3 text-xs font-semibold sm:w-auto",
                       CHECKLIST_STATUS_COLORS[item.status] || "bg-muted text-muted-foreground",
                     )}
                   >
@@ -219,7 +216,7 @@ export function ChecklistInstancePage() {
             </div>
           </>
         )}
-      </div>
-    </div>
+      </Card>
+    </Page>
   );
 }

@@ -1,18 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useId, useRef } from "react";
 import {
   FileSignature,
   Plus,
   Edit3,
   Eye,
-  Loader2,
   X,
   Code,
   Trash2,
 } from "lucide-react";
 import { apiGet, apiPost, apiPut, apiDelete } from "@/api/client";
 import toast from "react-hot-toast";
-import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { Button } from "@/components/ui/Button";
+import { FieldLabel, Input, Select, Textarea } from "@/components/ui/Field";
+import { Page, PageActions, PageDescription, PageHeader, PageHeaderContent, PageTitle } from "@/components/ui/Page";
+import { EmptyState, LoadingState } from "@/components/ui/States";
 
 const LETTER_TYPES = [
   { key: "experience", label: "Experience Letter" },
@@ -39,6 +42,7 @@ const VARIABLES = [
 ];
 
 export function LetterTemplatesPage() {
+  const { t } = useTranslation();
   const [templates, setTemplates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -53,6 +57,10 @@ export function LetterTemplatesPage() {
     is_default: false,
   });
   const [submitting, setSubmitting] = useState(false);
+  const previewTitleId = useId();
+  const previewCloseRef = useRef<HTMLButtonElement>(null);
+  const previewDialogRef = useRef<HTMLDivElement>(null);
+  const previewReturnFocusRef = useRef<HTMLElement | null>(null);
 
   async function fetchTemplates() {
     setLoading(true);
@@ -69,6 +77,38 @@ export function LetterTemplatesPage() {
   useEffect(() => {
     fetchTemplates();
   }, []);
+
+  useEffect(() => {
+    if (!preview) return;
+    previewReturnFocusRef.current = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.requestAnimationFrame(() => previewCloseRef.current?.focus());
+    const handlePreviewKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setPreview(null);
+        return;
+      }
+      if (event.key !== "Tab" || !previewDialogRef.current) return;
+      const focusable = Array.from(previewDialogRef.current.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'));
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", handlePreviewKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handlePreviewKeyDown);
+      document.body.style.overflow = previousOverflow;
+      previewReturnFocusRef.current?.focus();
+    };
+  }, [preview]);
 
   function openEdit(t: any) {
     setEditing(t);
@@ -123,35 +163,34 @@ export function LetterTemplatesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Letter Templates</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+    <Page>
+      <PageHeader>
+        <PageHeaderContent>
+          <PageTitle>Letter Templates</PageTitle>
+          <PageDescription>
             Manage experience, relieving, and NOC letter templates using Handlebars syntax.
-          </p>
-        </div>
-        <button
+          </PageDescription>
+        </PageHeaderContent>
+        <PageActions><Button
           onClick={openNew}
-          className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
         >
-          <Plus className="h-4 w-4" />
+          <Plus aria-hidden="true" className="h-4 w-4" />
           New Template
-        </button>
-      </div>
+        </Button></PageActions>
+      </PageHeader>
 
       {/* Variable reference */}
-      <details className="rounded-lg border border-border bg-card">
-        <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-muted-foreground flex items-center gap-2">
-          <Code className="h-4 w-4" />
+      <details className="surface-card overflow-hidden">
+        <summary className="flex min-h-12 cursor-pointer items-center gap-2 px-5 text-sm font-semibold text-foreground marker:text-primary">
+          <Code aria-hidden="true" className="h-4 w-4 text-primary" />
           Template Variable Reference
         </summary>
         <div className="border-t border-border px-4 py-3">
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {VARIABLES.map((v) => (
               <div key={v.var} className="text-xs">
                 <code className="rounded bg-muted px-1.5 py-0.5 text-rose-600 dark:text-rose-400 font-mono">{v.var}</code>
-                <span className="ml-1 text-muted-foreground">{v.desc}</span>
+                <span className="ms-1 text-muted-foreground">{v.desc}</span>
               </div>
             ))}
           </div>
@@ -160,15 +199,15 @@ export function LetterTemplatesPage() {
 
       {/* Preview modal */}
       {preview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setPreview(null)}>
-          <div className="relative mx-4 max-h-[80vh] w-full max-w-3xl overflow-auto rounded-xl bg-card p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setPreview(null)} className="absolute right-4 top-4 text-muted-foreground hover:text-muted-foreground">
-              <X className="h-5 w-5" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain bg-slate-950/55 p-4 backdrop-blur-sm" onMouseDown={(event) => { if (event.target === event.currentTarget) setPreview(null); }}>
+          <div ref={previewDialogRef} className="surface-card relative max-h-[85dvh] w-full max-w-3xl overflow-auto p-5 shadow-floating sm:p-6" role="dialog" aria-modal="true" aria-labelledby={previewTitleId}>
+            <button ref={previewCloseRef} type="button" onClick={() => setPreview(null)} className="absolute end-4 top-4 grid size-10 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground" aria-label={t("common.close")}>
+              <X aria-hidden="true" className="h-5 w-5" />
             </button>
-            <h3 className="text-lg font-semibold text-foreground mb-2">{preview.name}</h3>
+            <h2 id={previewTitleId} className="mb-2 pe-12 text-lg font-semibold text-foreground">{preview.name}</h2>
             <p className="text-xs text-muted-foreground mb-4">Type: {preview.letter_type?.replace("_", " ")}</p>
             <div className="rounded-lg border border-border bg-muted/50 p-4">
-              <pre className="whitespace-pre-wrap text-sm text-muted-foreground font-mono">{preview.body_template}</pre>
+              <pre className="whitespace-pre-wrap break-words text-sm leading-6 text-muted-foreground font-mono">{preview.body_template}</pre>
             </div>
           </div>
         </div>
@@ -176,45 +215,43 @@ export function LetterTemplatesPage() {
 
       {/* Form */}
       {showForm && (
-        <form onSubmit={handleSubmit} className="rounded-lg border border-border bg-card p-6 space-y-4">
-          <h3 className="text-lg font-semibold text-foreground">
+        <form onSubmit={handleSubmit} className="surface-card space-y-5 p-5 sm:p-6">
+          <h2 className="text-lg font-semibold text-foreground">
             {editing ? "Edit Template" : "New Template"}
-          </h3>
+          </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-muted-foreground">Letter Type</label>
-              <select
+              <FieldLabel htmlFor="letter-type">Letter Type</FieldLabel>
+              <Select id="letter-type"
                 value={form.letter_type}
                 onChange={(e) => setForm({ ...form, letter_type: e.target.value })}
-                className="mt-1 block w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
               >
                 {LETTER_TYPES.map((lt) => (
                   <option key={lt.key} value={lt.key}>{lt.label}</option>
                 ))}
-              </select>
+              </Select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-muted-foreground">Template Name</label>
-              <input
+              <FieldLabel htmlFor="template-name">Template Name</FieldLabel>
+              <Input id="template-name"
                 type="text"
                 required
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="mt-1 block w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
                 placeholder="Standard Experience Letter"
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-muted-foreground">
+            <FieldLabel htmlFor="template-body">
               Body Template (Handlebars)
-            </label>
-            <textarea
+            </FieldLabel>
+            <Textarea id="template-body"
               required
               value={form.body_template}
               onChange={(e) => setForm({ ...form, body_template: e.target.value })}
               rows={12}
-              className="mt-1 block w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm font-mono focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+              className="min-h-72 font-mono"
               placeholder="<h1>Experience Letter</h1>&#10;<p>This is to certify that {{employee.fullName}} was employed at {{organization.name}}...</p>"
             />
           </div>
@@ -229,73 +266,67 @@ export function LetterTemplatesPage() {
             <label htmlFor="is_default" className="text-sm text-muted-foreground">Set as default</label>
           </div>
           <div className="flex gap-3">
-            <button
+            <Button
               type="submit"
               disabled={submitting}
-              className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50"
             >
               {submitting ? "Saving..." : editing ? "Update Template" : "Create Template"}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => setShowForm(false)}
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/50"
+              variant="secondary"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </form>
       )}
 
       {/* Templates list */}
       {loading ? (
-        <div className="flex h-32 items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-rose-600 dark:text-rose-400" />
-        </div>
+        <LoadingState label="Loading letter templates" className="surface-card" />
       ) : templates.length === 0 ? (
-        <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
-          <FileSignature className="mx-auto h-10 w-10 text-muted-foreground/50 mb-3" />
-          No letter templates yet. Create one to get started.
-        </div>
+        <EmptyState title="No letter templates yet." description="Create one to get started." icon={FileSignature} className="surface-card" action={<Button onClick={openNew}><Plus aria-hidden="true" className="size-4" />New Template</Button>} />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {templates.map((t: any) => (
-            <div key={t.id} className="rounded-lg border border-border bg-card p-5 transition-colors duration-150 hover:border-brand-400">
+            <article key={t.id} className="surface-card surface-card--interactive flex min-h-44 flex-col p-5">
               <div className="flex items-start justify-between">
                 <div>
                   <h4 className="text-sm font-semibold text-foreground">{t.name}</h4>
                   <p className="mt-1 text-xs text-muted-foreground capitalize">
                     {t.letter_type?.replace("_", " ")}
                     {t.is_default && (
-                      <span className="ml-2 rounded-full bg-rose-100 dark:bg-rose-950/40 px-2 py-0.5 text-rose-700 dark:text-rose-300">Default</span>
+                      <span className="status-pill ms-2 border-brand-200 bg-brand-50 text-brand-700 dark:border-brand-900 dark:bg-brand-950/40 dark:text-brand-300">Default</span>
                     )}
                   </p>
                 </div>
               </div>
-              <div className="mt-3 flex gap-2">
-                <button
+              <div className="mt-auto flex flex-wrap gap-1 pt-5">
+                <Button
                   onClick={() => setPreview(t)}
-                  className="inline-flex items-center gap-1 rounded bg-muted/50 px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted"
+                  variant="ghost" className="min-h-9 px-2.5 text-xs"
                 >
                   <Eye className="h-3 w-3" />
                   Preview
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => openEdit(t)}
-                  className="inline-flex items-center gap-1 rounded bg-muted/50 px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted"
+                  variant="ghost" className="min-h-9 px-2.5 text-xs"
                 >
                   <Edit3 className="h-3 w-3" />
                   Edit
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => setDeleteTarget(t)}
-                  className="inline-flex items-center gap-1 rounded bg-red-50 dark:bg-red-950/40 px-2 py-1 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/40"
+                  variant="ghost" className="min-h-9 px-2.5 text-xs text-danger"
                 >
                   <Trash2 className="h-3 w-3" />
                   Delete
-                </button>
+                </Button>
               </div>
-            </div>
+            </article>
           ))}
         </div>
       )}
@@ -310,6 +341,6 @@ export function LetterTemplatesPage() {
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
       />
-    </div>
+    </Page>
   );
 }

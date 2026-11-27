@@ -4,7 +4,6 @@ import {
   CheckCircle2,
   Circle,
   FileText,
-  Loader2,
   Clock,
   CheckCircle,
 } from "lucide-react";
@@ -12,6 +11,10 @@ import { apiGet, apiPut } from "@/api/client";
 import toast from "react-hot-toast";
 import { cn, formatDate } from "@/lib/utils";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Page, PageDescription, PageHeader, PageHeaderContent, PageTitle } from "@/components/ui/Page";
+import { EmptyState, LoadingState } from "@/components/ui/States";
 
 const KT_STATUS: Record<string, { label: string; color: string }> = {
   not_started: { label: "Not Started", color: "bg-muted text-muted-foreground" },
@@ -75,66 +78,60 @@ export function MyKTPage() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-rose-600 dark:text-rose-400" />
-      </div>
+      <LoadingState label="Loading knowledge transfer" className="surface-card" />
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">My Knowledge Transfer</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+    <Page>
+      <PageHeader><PageHeaderContent>
+        <PageTitle>My Knowledge Transfer</PageTitle>
+        <PageDescription>
           Track the knowledge transfer items assigned to you and mark them complete.
-        </p>
-      </div>
+        </PageDescription>
+      </PageHeaderContent></PageHeader>
 
       {!kt ? (
-        <div className="rounded-lg border border-border bg-card p-8 text-center">
-          <BookOpen className="mx-auto h-10 w-10 text-muted-foreground/50 mb-3" />
-          <p className="text-muted-foreground">No knowledge transfer has been assigned to you.</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Your HR team will set up a KT plan if one is needed for your exit.
-          </p>
-        </div>
+        <EmptyState title="No knowledge transfer has been assigned to you." description="Your HR team will set up a KT plan if one is needed for your exit." icon={BookOpen} className="surface-card" />
       ) : (
         <>
           {/* KT info */}
-          <div className="rounded-lg border border-border bg-card p-5">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-foreground">KT Plan Overview</h3>
-              <span className={cn("rounded-full px-3 py-1 text-xs font-medium", KT_STATUS[kt.status]?.color)}>
+          <Card>
+            <CardHeader>
+              <CardTitle>KT Plan Overview</CardTitle>
+              <span className={cn("status-pill border-transparent", KT_STATUS[kt.status]?.color)}>
                 {KT_STATUS[kt.status]?.label}
               </span>
-            </div>
-            <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
+            </CardHeader>
+            <CardContent className="pt-3">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
-                <Clock className="h-3.5 w-3.5" />
+                <Clock aria-hidden="true" className="h-4 w-4" />
                 Due: {kt.due_date ? formatDate(kt.due_date) : "Not set"}
               </span>
               <span>
                 {kt.items?.filter((i: any) => i.status === "completed").length || 0}/{kt.items?.length || 0} completed
               </span>
             </div>
-          </div>
+            {items.length > 0 ? <div aria-hidden="true" className="mt-4 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary transition-[width]" style={{ width: `${Math.round((items.filter((i: any) => i.status === "completed").length / items.length) * 100)}%` }} /></div> : null}
+            </CardContent>
+          </Card>
 
           {/* Items */}
           <div className="space-y-2">
             {!kt.items || kt.items.length === 0 ? (
-              <div className="rounded-lg border border-border bg-card p-6 text-center text-muted-foreground text-sm">
-                No KT items have been assigned yet.
-              </div>
+              <EmptyState title="No KT items have been assigned yet." icon={BookOpen} className="surface-card min-h-40" />
             ) : (
               kt.items.map((item: any) => (
                 <div
                   key={item.id}
-                  className="flex items-start gap-3 rounded-lg border border-border bg-card p-4"
+                  className="surface-card surface-card--interactive flex items-start gap-3 p-4"
                 >
                   <button
                     onClick={() => toggleItem(item.id, item.status)}
                     disabled={planCompleted}
-                    className={cn("mt-0.5 flex-shrink-0", planCompleted && "cursor-default")}
+                    aria-label={item.status === "completed" ? `Reopen ${item.title}` : `Complete ${item.title}`}
+                    className={cn("mt-0.5 grid size-10 flex-shrink-0 place-items-center rounded-lg hover:bg-muted", planCompleted && "cursor-default")}
                   >
                     {item.status === "completed" ? (
                       <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
@@ -156,7 +153,7 @@ export function MyKTPage() {
                         rel="noopener noreferrer"
                         className="mt-1 inline-flex items-center gap-1 text-xs text-rose-600 dark:text-rose-400 hover:underline"
                       >
-                        <FileText className="h-3 w-3" />
+                        <FileText aria-hidden="true" className="h-3 w-3" />
                         Document
                       </a>
                     )}
@@ -169,8 +166,8 @@ export function MyKTPage() {
           {/* Complete-KT action / completed banner */}
           {items.length > 0 && (
             planCompleted ? (
-              <div className="flex items-center gap-3 rounded-lg border border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-950/40 p-4">
-                <CheckCircle className="h-5 w-5 flex-shrink-0 text-green-600 dark:text-green-400" />
+              <div className="flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 p-5 shadow-soft dark:border-green-900 dark:bg-green-950/40">
+                <CheckCircle aria-hidden="true" className="h-5 w-5 flex-shrink-0 text-green-600 dark:text-green-400" />
                 <div>
                   <p className="text-sm font-medium text-green-800 dark:text-green-300">Knowledge transfer completed</p>
                   <p className="text-xs text-green-700 dark:text-green-300">
@@ -181,20 +178,19 @@ export function MyKTPage() {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col gap-3 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="surface-card flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm text-muted-foreground">
                   {allItemsDone
                     ? "All items are done. Finish your knowledge transfer to sign it off."
                     : "Complete all the items above to finish your knowledge transfer."}
                 </p>
-                <button
+                <Button
                   onClick={() => setConfirmOpen(true)}
                   disabled={!allItemsDone}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <CheckCircle className="h-4 w-4" />
+                  <CheckCircle aria-hidden="true" className="h-4 w-4" />
                   Mark KT as Complete
-                </button>
+                </Button>
               </div>
             )
           )}
@@ -211,6 +207,6 @@ export function MyKTPage() {
         onConfirm={handleCompleteKT}
         onCancel={() => setConfirmOpen(false)}
       />
-    </div>
+    </Page>
   );
 }

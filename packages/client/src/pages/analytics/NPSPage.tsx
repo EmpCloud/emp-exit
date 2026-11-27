@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Loader2, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { ArrowLeft, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -15,6 +15,7 @@ import {
 } from "recharts";
 import { apiGet } from "@/api/client";
 import toast from "react-hot-toast";
+import { LoadingState } from "@/components/ui/States";
 
 function getNPSColor(nps: number): string {
   if (nps > 50) return "#16a34a";
@@ -56,11 +57,7 @@ export function NPSPage() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-rose-600 dark:text-rose-400" />
-      </div>
-    );
+    return <LoadingState label="Loading NPS insights" />;
   }
 
   const nps = npsData?.nps ?? 0;
@@ -86,25 +83,29 @@ export function NPSPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
+    <div className="app-page">
+      <header className="page-header">
+      <div className="flex items-start gap-3">
         <Link
           to="/analytics"
-          className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-muted-foreground"
+          className="button-secondary size-11 shrink-0 p-0"
+          aria-label="Back to analytics"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Exit Survey NPS</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+        <div className="page-header__content">
+          <p className="page-header__eyebrow">Experience insights</p>
+          <h1 className="page-title">Exit Survey NPS</h1>
+          <p className="page-subtitle">
             Net Promoter Score from exit interviews ({totalResponses} responses)
           </p>
         </div>
       </div>
+      </header>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* NPS Score Card with Gauge */}
-        <div className="rounded-lg border border-border bg-card p-6 text-center">
+        <section className="surface-card p-5 text-center sm:p-6">
           <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-6">NPS Score</h3>
 
           {/* SVG Gauge */}
@@ -169,10 +170,10 @@ export function NPSPage() {
             <span>+50</span>
             <span>+100</span>
           </div>
-        </div>
+        </section>
 
         {/* Breakdown Card */}
-        <div className="rounded-lg border border-border bg-card p-6">
+        <section className="surface-card p-5 sm:p-6">
           <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-4">Breakdown</h3>
 
           {/* Stacked horizontal bar */}
@@ -213,7 +214,7 @@ export function NPSPage() {
               </div>
               <div className="text-right">
                 <span className="text-sm font-semibold text-foreground">{promoters}</span>
-                <span className="text-xs text-muted-foreground ml-1">({promoterPct}%)</span>
+                <span className="ms-1 text-xs text-muted-foreground">({promoterPct}%)</span>
               </div>
             </div>
             <div className="flex items-center justify-between">
@@ -223,7 +224,7 @@ export function NPSPage() {
               </div>
               <div className="text-right">
                 <span className="text-sm font-semibold text-foreground">{passives}</span>
-                <span className="text-xs text-muted-foreground ml-1">({passivePct}%)</span>
+                <span className="ms-1 text-xs text-muted-foreground">({passivePct}%)</span>
               </div>
             </div>
             <div className="flex items-center justify-between">
@@ -233,7 +234,7 @@ export function NPSPage() {
               </div>
               <div className="text-right">
                 <span className="text-sm font-semibold text-foreground">{detractors}</span>
-                <span className="text-xs text-muted-foreground ml-1">({detractorPct}%)</span>
+                <span className="ms-1 text-xs text-muted-foreground">({detractorPct}%)</span>
               </div>
             </div>
           </div>
@@ -242,10 +243,10 @@ export function NPSPage() {
             <p className="text-xs text-muted-foreground">Total responses</p>
             <p className="text-2xl font-bold text-foreground">{totalResponses}</p>
           </div>
-        </div>
+        </section>
 
         {/* Industry Benchmark Card */}
-        <div className="rounded-lg border border-border bg-card p-6">
+        <section className="surface-card p-5 sm:p-6">
           <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-4">Industry Benchmarks</h3>
           <div className="space-y-4">
             {[
@@ -262,7 +263,7 @@ export function NPSPage() {
                 </div>
                 <div className="h-2 rounded-full bg-muted overflow-hidden">
                   <div
-                    className="h-full rounded-full transition-all duration-500"
+                    className="h-full rounded-full transition-[width] duration-500"
                     style={{
                       width: `${Math.max(0, ((item.value + 100) / 200) * 100)}%`,
                       backgroundColor: item.color,
@@ -291,11 +292,11 @@ export function NPSPage() {
               </p>
             </div>
           </div>
-        </div>
+        </section>
       </div>
 
       {/* Monthly NPS Trend */}
-      <div className="rounded-lg border border-border bg-card p-6">
+      <section className="surface-card p-5 sm:p-6">
         <h3 className="text-sm font-semibold text-foreground mb-4">Monthly NPS Trend (Last 12 Months)</h3>
         {trendData.length === 0 ? (
           <div className="flex h-48 items-center justify-center text-sm text-muted-foreground">
@@ -353,7 +354,7 @@ export function NPSPage() {
             </LineChart>
           </ResponsiveContainer>
         )}
-      </div>
+      </section>
     </div>
   );
 }

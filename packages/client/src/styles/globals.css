@@ -21,6 +21,20 @@
   --border: 214 32% 91%;            /* gray-200 */
   --input: 214 32% 91%;
   --ring: 350 89% 60%;              /* brand-500 (rose #F43F5E) */
+  --primary: 350 89% 60%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 221 83% 53%;
+  --accent-foreground: 0 0% 100%;
+  --success: 152 69% 38%;
+  --success-foreground: 0 0% 100%;
+  --warning: 35 92% 50%;
+  --warning-foreground: 24 10% 10%;
+  --danger: 0 72% 51%;
+  --danger-foreground: 0 0% 100%;
+  --sidebar: 0 0% 100%;
+  --sidebar-foreground: 222 47% 11%;
+  --sidebar-muted: 210 40% 96%;
+  --sidebar-border: 214 32% 91%;
 }
 
 .dark {
@@ -38,11 +52,79 @@
   --border: 215 28% 17%;           /* gray-800 border */
   --input: 215 28% 17%;
   --ring: 350 89% 60%;             /* brand-500 (rose) */
+  --primary: 350 89% 60%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 217 91% 60%;
+  --accent-foreground: 222 47% 11%;
+  --success: 151 55% 46%;
+  --success-foreground: 222 47% 11%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 222 47% 11%;
+  --danger: 0 84% 60%;
+  --danger-foreground: 0 0% 100%;
+  --sidebar: 222 47% 8%;
+  --sidebar-foreground: 220 14% 96%;
+  --sidebar-muted: 215 28% 17%;
+  --sidebar-border: 215 28% 17%;
 }
 
 @layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    color-scheme: light;
+    scroll-behavior: smooth;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply min-h-screen bg-background text-foreground font-sans antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.18);
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button,
+  [role="button"] {
+    touch-action: manipulation;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  table,
+  [data-numeric] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  select {
+    @apply bg-card text-foreground;
   }
 
   /* Themed scrollbars in dark mode so the deep canvas doesn't get a bright
@@ -76,5 +158,139 @@
     -webkit-text-fill-color: hsl(var(--foreground));
     -webkit-box-shadow: 0 0 0 1000px hsl(var(--card)) inset;
     caret-color: hsl(var(--foreground));
+  }
+}
+
+@layer components {
+  .skip-link {
+    @apply fixed start-4 top-3 z-[100] -translate-y-20 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-floating transition-transform focus:translate-y-0;
+  }
+
+  .app-shell-main {
+    @apply min-w-0 flex-1 bg-background;
+  }
+
+  .app-page {
+    @apply w-full space-y-6;
+  }
+
+  .page-header {
+    @apply flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .page-header__content {
+    @apply min-w-0 space-y-1;
+  }
+
+  .page-header__eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.16em] text-primary;
+  }
+
+  .page-title {
+    @apply text-2xl font-bold tracking-tight text-foreground sm:text-[1.75rem];
+  }
+
+  .page-subtitle {
+    @apply max-w-3xl text-sm leading-6 text-muted-foreground sm:text-[0.9375rem];
+  }
+
+  .page-actions {
+    @apply flex shrink-0 flex-wrap items-center gap-2;
+  }
+
+  .surface-card {
+    @apply rounded-xl border border-border bg-card text-card-foreground shadow-soft;
+  }
+
+  .surface-card--interactive {
+    @apply transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-card;
+  }
+
+  .control {
+    @apply min-h-11 w-full rounded-lg border border-input bg-card px-3 text-sm text-foreground shadow-sm outline-none transition-[border-color,box-shadow] placeholder:text-muted-foreground/75 hover:border-muted-foreground/40 focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .field-label {
+    @apply mb-1.5 block text-sm font-medium text-foreground;
+  }
+
+  .button-base {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-[background-color,border-color,color,box-shadow,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 active:translate-y-px;
+  }
+
+  .button-primary {
+    @apply button-base border border-primary bg-primary text-primary-foreground shadow-sm hover:bg-brand-600 hover:shadow-md;
+  }
+
+  .button-secondary {
+    @apply button-base border border-border bg-card text-foreground shadow-sm hover:border-primary/30 hover:bg-muted;
+  }
+
+  .button-ghost {
+    @apply button-base border border-transparent text-muted-foreground hover:bg-muted hover:text-foreground;
+  }
+
+  .button-danger {
+    @apply button-base border border-danger bg-danger text-danger-foreground shadow-sm hover:bg-danger/90;
+  }
+
+  .data-table-shell {
+    @apply overflow-hidden rounded-xl border border-border bg-card shadow-soft;
+  }
+
+  .data-table-toolbar {
+    @apply flex flex-col gap-3 border-b border-border bg-card px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5;
+  }
+
+  .data-table-scroll {
+    @apply max-w-full overflow-x-auto overscroll-x-contain;
+  }
+
+  .data-table {
+    @apply w-full min-w-[760px] border-collapse text-start text-sm;
+  }
+
+  .data-table thead {
+    @apply bg-muted/70;
+  }
+
+  .data-table th {
+    @apply h-11 px-4 text-start text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground;
+  }
+
+  .data-table td {
+    @apply border-t border-border px-4 py-3.5 align-middle text-sm;
+  }
+
+  .data-table tbody tr {
+    @apply transition-colors hover:bg-muted/45;
+  }
+
+  .status-pill {
+    @apply inline-flex min-h-6 items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold;
+  }
+
+  .empty-state,
+  .loading-state {
+    @apply flex min-h-56 flex-col items-center justify-center gap-3 px-6 py-12 text-center;
+  }
+
+  .empty-state__icon {
+    @apply grid size-12 place-items-center rounded-xl bg-muted text-muted-foreground;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }

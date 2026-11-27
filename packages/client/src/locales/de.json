@@ -13,6 +13,7 @@
     "noData": "Keine Daten verfügbar",
     "success": "Erfolg",
     "error": "Fehler",
+    "retry": "Erneut versuchen",
     "confirm": "Bestätigen",
     "back": "Zurück",
     "next": "Weiter",
@@ -48,7 +49,13 @@
     "noNotifications": "Noch keine Benachrichtigungen",
     "viewAll": "Alle anzeigen",
     "review": "Prüfen",
-    "cancelInvitationTooltip": "Diese Einladung stornieren und den nicht aktivierten Benutzer entfernen"
+    "cancelInvitationTooltip": "Diese Einladung stornieren und den nicht aktivierten Benutzer entfernen",
+    "changeLanguage": "Sprache ändern",
+    "openNavigationMenu": "Navigationsmenü öffnen",
+    "closeNavigationMenu": "Navigationsmenü schließen",
+    "skipToMainContent": "Zum Hauptinhalt springen",
+    "unknown": "Unbekannt",
+    "user": "Benutzer"
   },
   "nav": {
     "brand": "EMP Exit",
@@ -70,7 +77,14 @@
     "myExit": "Mein Austritt",
     "myInterview": "Mein Interview",
     "myKt": "Mein KT",
-    "logout": "Abmelden"
+    "logout": "Abmelden",
+    "overview": "Überblick",
+    "exitOperations": "Austrittsvorgänge",
+    "settlement": "Abrechnung",
+    "handoverAssets": "Übergabe & Assets",
+    "alumniInsights": "Alumni & Einblicke",
+    "administration": "Administration",
+    "selfService": "Self-Service"
   },
   "roles": {
     "superAdmin": "Super-Admin",
@@ -81,18 +95,32 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "subtitle": "Überblick und Kennzahlen zur Austrittsverwaltung.",
+    "subtitle": "Überblick und Kennzahlen zum Austrittsmanagement.",
     "statActiveExits": "Aktive Austritte",
     "statClearancePending": "Freigabe ausstehend",
     "statFnfPending": "FnF ausstehend",
     "statCompletedMonth": "Abgeschlossen (Monat)",
-    "recentExits": "Letzte Austritte",
+    "recentExits": "Kürzliche Austritte",
     "emptyExits": "Noch keine Austrittsanträge. Beginnen Sie, indem Sie einen Austritt einleiten.",
     "colEmployee": "Mitarbeiter",
     "colType": "Typ",
     "colLastWorkingDate": "Letzter Arbeitstag",
     "colInitiated": "Eingeleitet",
-    "employeeFallback": "Mitarbeiter #{{id}}"
+    "employeeFallback": "Mitarbeiter #{{id}}",
+    "stats": {
+      "activeExits": "Aktive Austritte",
+      "clearancePending": "Freigabe ausstehend",
+      "fnfPending": "FnF ausstehend",
+      "completedThisMonth": "Abgeschlossen (dieser Monat)"
+    },
+    "emptyState": "Es liegen noch keine Austrittsanträge vor. Leiten Sie zunächst einen Austritt ein.",
+    "table": {
+      "employee": "Mitarbeiter",
+      "type": "Art",
+      "status": "Status",
+      "lastWorkingDate": "Letzter Arbeitstag",
+      "initiated": "Eingeleitet"
+    }
   },
   "exitStatus": {
     "initiated": "Eingeleitet",
@@ -113,7 +141,7 @@
   },
   "exitList": {
     "title": "Austrittsanträge",
-    "subtitle": "Alle Austrittsanträge von Mitarbeitern anzeigen und verwalten.",
+    "subtitle": "Alle Austrittsanträge von Mitarbeitenden anzeigen und verwalten.",
     "initiate": "Austritt einleiten",
     "allStatuses": "Alle Status",
     "activeInProgress": "Aktiv (in Bearbeitung)",
@@ -125,7 +153,7 @@
     "colLastWorkingDate": "Letzter Arbeitstag",
     "colInitiated": "Eingeleitet",
     "noneFound": "Keine Austrittsanträge gefunden.",
-    "deletedEmployee": "Gelöschter Mitarbeiter #{{id}}",
+    "deletedEmployee": "Gelöschter Mitarbeiter Nr. {{id}}",
     "pageInfo": "Seite {{page}} von {{total}}",
     "status": {
       "initiated": "Eingeleitet",
@@ -143,6 +171,29 @@
       "end_of_contract": "Vertragsende",
       "mutual_separation": "Einvernehmliche Trennung",
       "absconding": "Unentschuldigtes Fernbleiben"
+    },
+    "initiateExit": "Austritt einleiten",
+    "statusFilterLabel": "Austrittsanträge nach Status filtern",
+    "activeStatus": "Aktiv (in Bearbeitung)",
+    "resultCount_zero": "{{count}} Austrittsanträge gefunden",
+    "resultCount_one": "{{count}} Austrittsantrag gefunden",
+    "resultCount_two": "{{count}} Austrittsanträge gefunden",
+    "resultCount_few": "{{count}} Austrittsanträge gefunden",
+    "resultCount_many": "{{count}} Austrittsanträge gefunden",
+    "resultCount_other": "{{count}} Austrittsanträge gefunden",
+    "emptyState": "Keine Austrittsanträge gefunden.",
+    "tableLabel": "Austrittsanträge",
+    "table": {
+      "employee": "Mitarbeiter",
+      "type": "Art",
+      "status": "Status",
+      "resignationDate": "Kündigungsdatum",
+      "lastWorkingDate": "Letzter Arbeitstag",
+      "initiated": "Eingeleitet"
+    },
+    "pagination": {
+      "label": "Seitennavigation der Austrittsanträge",
+      "page": "Seite {{page}} von {{totalPages}}"
     }
   },
   "checklists": {
@@ -240,5 +291,31 @@
       "rejected": "Abgelehnt",
       "waived": "Erlassen"
     }
+  },
+  "app": {
+    "title": "EMP Exit — Mitarbeiteraustrittsmanagement"
+  },
+  "theme": {
+    "label": "Design",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System"
+  },
+  "exitTypes": {
+    "resignation": "Eigenkündigung",
+    "termination": "Beendigung",
+    "retirement": "Ruhestand",
+    "endOfContract": "Vertragsende",
+    "mutualSeparation": "Einvernehmliche Trennung",
+    "absconding": "Unerlaubtes Fernbleiben"
+  },
+  "exitStatuses": {
+    "initiated": "Eingeleitet",
+    "noticePeriod": "Kündigungsfrist",
+    "clearancePending": "Freigabe ausstehend",
+    "fnfPending": "FnF ausstehend",
+    "fnfProcessed": "FnF bearbeitet",
+    "completed": "Abgeschlossen",
+    "cancelled": "Storniert"
   }
 }

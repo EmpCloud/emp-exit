@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { GraduationCap, Loader2, Save, CheckCircle2 } from "lucide-react";
+import { GraduationCap, Save, CheckCircle2 } from "lucide-react";
 import { apiGet, apiPost, apiPut } from "@/api/client";
 import { useAuthStore } from "@/lib/auth-store";
 import toast from "react-hot-toast";
+import { LoadingState } from "@/components/ui/States";
 
 export function MyAlumniPage() {
   const user = useAuthStore((s) => s.user);
@@ -90,24 +91,23 @@ export function MyAlumniPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-rose-600 dark:text-rose-400" />
-      </div>
-    );
+    return <LoadingState label="Loading alumni profile" />;
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">My Alumni Profile</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+    <div className="app-page">
+      <header className="page-header">
+        <div className="page-header__content">
+          <p className="page-header__eyebrow">Alumni</p>
+          <h1 className="page-title">My Alumni Profile</h1>
+          <p className="page-subtitle">
           Manage your alumni network profile and stay connected.
         </p>
-      </div>
+        </div>
+      </header>
 
       {!profile ? (
-        <div className="rounded-lg border border-border bg-card p-8">
+        <section className="surface-card p-6 sm:p-8">
           <div className="text-center mb-6">
             <GraduationCap className="mx-auto h-12 w-12 text-muted-foreground/50 mb-3" />
             <h3 className="text-lg font-semibold text-foreground">Join the Alumni Network</h3>
@@ -127,21 +127,21 @@ export function MyAlumniPage() {
                 onChange={(e) => setOptInExitId(e.target.value)}
                 required
                 placeholder="Enter your exit request UUID"
-                className="mt-1 block w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                className="control mt-1"
               />
             </div>
             <button
               type="submit"
               disabled={optingIn}
-              className="w-full rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50"
+              className="button-primary w-full"
             >
               {optingIn ? "Opting in..." : "Opt In to Alumni Network"}
             </button>
           </form>
-        </div>
+        </section>
       ) : (
-        <form onSubmit={handleSave} className="rounded-lg border border-border bg-card p-6 space-y-6">
-          <div className="flex items-center gap-3">
+        <form onSubmit={handleSave} className="surface-card space-y-6 p-5 sm:p-6">
+          <div className="flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900 dark:bg-emerald-950/40">
             <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
             <span className="text-sm font-medium text-green-700 dark:text-green-300">You are part of the alumni network</span>
           </div>
@@ -153,7 +153,7 @@ export function MyAlumniPage() {
                 type="email"
                 value={form.personal_email}
                 onChange={(e) => setForm({ ...form, personal_email: e.target.value })}
-                className="mt-1 block w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                className="control mt-1"
                 placeholder="your.email@gmail.com"
               />
             </div>
@@ -163,7 +163,7 @@ export function MyAlumniPage() {
                 type="tel"
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                className="mt-1 block w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                className="control mt-1"
                 placeholder="+91 98765 43210"
               />
             </div>
@@ -173,7 +173,7 @@ export function MyAlumniPage() {
                 type="url"
                 value={form.linkedin_url}
                 onChange={(e) => setForm({ ...form, linkedin_url: e.target.value })}
-                className="mt-1 block w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                className="control mt-1"
                 placeholder="https://linkedin.com/in/yourprofile"
               />
             </div>
@@ -188,7 +188,7 @@ export function MyAlumniPage() {
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50"
+            className="button-primary"
           >
             <Save className="h-4 w-4" />
             {saving ? "Saving..." : "Update Profile"}

@@ -19,6 +19,7 @@ import type {
   ExitInterviewTemplate,
   InterviewQuestionType,
 } from "@emp-exit/shared";
+import { EmptyState, LoadingState } from "@/components/ui/States";
 
 interface InterviewDetail extends ExitInterview {
   responses: (ExitInterviewResponse & { question?: ExitInterviewQuestion })[];
@@ -152,7 +153,7 @@ export function InterviewDetailPage() {
             onChange={(e) => handleAnswerChange(q.id, "text", e.target.value)}
             rows={3}
             disabled={isReadOnly}
-            className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 disabled:bg-muted/50 disabled:text-muted-foreground"
+            className="control min-h-24 resize-y py-3 disabled:bg-muted/50 disabled:text-muted-foreground"
             placeholder="Type your answer..."
           />
         );
@@ -181,7 +182,7 @@ export function InterviewDetailPage() {
               </button>
             ))}
             {answer.rating && (
-              <span className="ml-2 text-sm text-muted-foreground">{answer.rating}/5</span>
+              <span className="ms-2 text-sm text-muted-foreground">{answer.rating}/5</span>
             )}
           </div>
         );
@@ -238,16 +239,12 @@ export function InterviewDetailPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-rose-200 dark:border-rose-900 border-t-rose-600" />
-      </div>
-    );
+    return <div className="surface-card"><LoadingState /></div>;
   }
 
   if (!interview) {
     return (
-      <div className="space-y-6">
+      <div className="app-page">
         <button
           onClick={() => navigate(-1)}
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
@@ -255,13 +252,7 @@ export function InterviewDetailPage() {
           <ArrowLeft className="h-4 w-4" />
           Back
         </button>
-        <div className="rounded-lg border border-border bg-card p-12 text-center">
-          <MessageSquare className="mx-auto h-12 w-12 text-muted-foreground/50" />
-          <h3 className="mt-4 text-sm font-medium text-foreground">No interview found</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            No exit interview has been scheduled for this exit request.
-          </p>
-        </div>
+        <div className="surface-card"><EmptyState icon={MessageSquare} title="No interview found" description="No exit interview has been scheduled for this exit request." /></div>
       </div>
     );
   }
@@ -287,10 +278,10 @@ export function InterviewDetailPage() {
   const status = statusConfig[interview.status] || statusConfig.scheduled;
 
   return (
-    <div className="space-y-6">
+    <div className="app-page">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="page-header">
+        <div className="page-header__content">
           <button
             onClick={() => navigate(-1)}
             className="mb-2 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
@@ -298,17 +289,17 @@ export function InterviewDetailPage() {
             <ArrowLeft className="h-4 w-4" />
             Back
           </button>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <MessageSquare className="h-6 w-6 text-rose-600 dark:text-rose-400" />
+          <h1 className="page-title flex items-center gap-2">
+            <MessageSquare className="size-6 text-primary" />
             Exit Interview
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="page-subtitle">
             {template?.name || "Interview"} — Exit #{exitId?.slice(0, 8)}
           </p>
         </div>
         <span
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium",
+            "status-pill",
             status.bg,
           )}
         >
@@ -320,7 +311,7 @@ export function InterviewDetailPage() {
       {error && (
         <div className="rounded-lg border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 p-3 text-sm text-red-700 dark:text-red-300">
           {error}
-          <button onClick={() => setError(null)} className="ml-2 underline">
+          <button onClick={() => setError(null)} className="ms-2 underline">
             dismiss
           </button>
         </div>
@@ -329,7 +320,7 @@ export function InterviewDetailPage() {
       {/* Interview metadata */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {interview.scheduled_date && (
-          <div className="rounded-lg border border-border bg-card p-4">
+          <div className="surface-card p-5">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Scheduled</p>
             <p className="mt-1 text-sm font-medium text-foreground">
               {formatDate(interview.scheduled_date)}
@@ -337,7 +328,7 @@ export function InterviewDetailPage() {
           </div>
         )}
         {interview.completed_date && (
-          <div className="rounded-lg border border-border bg-card p-4">
+          <div className="surface-card p-5">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Completed</p>
             <p className="mt-1 text-sm font-medium text-foreground">
               {formatDate(interview.completed_date)}
@@ -345,7 +336,7 @@ export function InterviewDetailPage() {
           </div>
         )}
         {interview.interviewer_id && (
-          <div className="rounded-lg border border-border bg-card p-4">
+          <div className="surface-card p-5">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Interviewer</p>
             <p className="mt-1 text-sm font-medium text-foreground flex items-center gap-1">
               <User className="h-4 w-4 text-muted-foreground" />
@@ -370,7 +361,7 @@ export function InterviewDetailPage() {
       {/* Questions */}
       <div className="space-y-4">
         {questions.map((q, idx) => (
-          <div key={q.id} className="rounded-lg border border-border bg-card p-5">
+          <div key={q.id} className="surface-card p-5 sm:p-6">
             <div className="flex items-start gap-3">
               <span className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-rose-100 dark:bg-rose-950/40 text-xs font-semibold text-rose-700 dark:text-rose-300">
                 {idx + 1}
@@ -378,7 +369,7 @@ export function InterviewDetailPage() {
               <div className="flex-1">
                 <p className="font-medium text-foreground">
                   {q.question_text}
-                  {Boolean(Number(q.is_required)) && <span className="ml-1 text-red-500">*</span>}
+                  {Boolean(Number(q.is_required)) && <span className="ms-1 text-red-500">*</span>}
                 </p>
                 <div className="mt-3">{renderQuestionInput(q)}</div>
               </div>
@@ -389,7 +380,7 @@ export function InterviewDetailPage() {
 
       {/* Overall rating & would recommend */}
       {questions.length > 0 && (
-        <div className="rounded-lg border border-border bg-card p-5">
+        <div className="surface-card p-5">
           <h3 className="font-medium text-foreground mb-4">Overall Feedback</h3>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div>
@@ -403,7 +394,7 @@ export function InterviewDetailPage() {
                     disabled={isReadOnly}
                     onClick={() => setOverallRating(star)}
                     className={cn(
-                      "flex h-8 w-8 items-center justify-center rounded text-xs font-medium transition-colors",
+                      "grid size-11 place-items-center rounded-lg text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring",
                       overallRating >= star
                         ? "bg-rose-600 text-white"
                         : "bg-muted text-muted-foreground hover:bg-muted",
@@ -429,7 +420,7 @@ export function InterviewDetailPage() {
                     disabled={isReadOnly}
                     onClick={() => setWouldRecommend(opt.val)}
                     className={cn(
-                      "rounded-lg border px-6 py-2 text-sm font-medium transition-colors",
+                      "min-h-11 rounded-lg border px-6 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring",
                       wouldRecommend === opt.val ? opt.color : "border-border text-muted-foreground hover:bg-muted/50",
                       isReadOnly && "cursor-default",
                     )}
@@ -449,21 +440,21 @@ export function InterviewDetailPage() {
           <button
             onClick={handleSubmitResponses}
             disabled={submitting}
-            className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-rose-700 disabled:opacity-50 transition-colors"
+            className="button-primary"
           >
             <Send className="h-4 w-4" />
             {submitting ? "Submitting..." : "Submit Responses"}
           </button>
           <button
             onClick={handleComplete}
-            className="inline-flex items-center gap-2 rounded-lg border border-green-300 dark:border-green-900 bg-card px-4 py-2.5 text-sm font-medium text-green-700 dark:text-green-300 hover:bg-green-50 dark:hover:bg-green-950/40 transition-colors"
+            className="button-secondary border-green-300 text-green-700 hover:bg-green-50 dark:border-green-900 dark:text-green-300 dark:hover:bg-green-950/40"
           >
             <CheckCircle2 className="h-4 w-4" />
             Complete Interview
           </button>
           <button
             onClick={handleSkip}
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
+            className="button-secondary"
           >
             <SkipForward className="h-4 w-4" />
             Skip

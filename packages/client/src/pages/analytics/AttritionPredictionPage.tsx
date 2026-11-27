@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, useRef, Fragment } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   AlertTriangle,
@@ -27,6 +27,7 @@ import {
 } from "recharts";
 import { apiGet, apiPost } from "@/api/client";
 import toast from "react-hot-toast";
+import { LoadingState } from "@/components/ui/States";
 import type {
   FlightRiskDashboard,
   HighRiskEmployee,
@@ -72,7 +73,7 @@ function ScoreBar({ score }: { score: number }) {
     <div className="flex items-center gap-2">
       <div className="h-2.5 w-24 rounded-full bg-muted">
         <div
-          className="h-2.5 rounded-full transition-all"
+          className="h-2.5 rounded-full transition-[width]"
           style={{ width: `${score}%`, backgroundColor: barColor }}
         />
       </div>
@@ -92,6 +93,48 @@ function EmployeeRiskModal({
   employee: HighRiskEmployee;
   onClose: () => void;
 }) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+
+  useEffect(() => {
+    returnFocusRef.current = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.requestAnimationFrame(() => closeButtonRef.current?.focus());
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeRef.current();
+        return;
+      }
+      if (event.key !== "Tab" || !dialogRef.current) return;
+      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ));
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      returnFocusRef.current?.focus();
+    };
+  }, []);
+
   // Gauge color
   let gaugeColor = "#22c55e";
   if (employee.score >= 80) gaugeColor = "#dc2626";
@@ -123,13 +166,13 @@ function EmployeeRiskModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative z-50 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-card shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain p-4">
+      <button type="button" className="fixed inset-0 cursor-default bg-slate-950/55 backdrop-blur-sm" onClick={onClose} aria-label="Close risk details" tabIndex={-1} />
+      <div ref={dialogRef} className="surface-card relative z-50 max-h-[90dvh] w-full max-w-2xl overflow-y-auto shadow-floating" role="dialog" aria-modal="true" aria-labelledby="risk-detail-title" tabIndex={-1}>
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <div>
-            <h2 className="text-lg font-bold text-foreground">
+            <h2 id="risk-detail-title" className="text-lg font-bold text-foreground">
               {employee.first_name} {employee.last_name}
             </h2>
             <p className="text-sm text-muted-foreground">
@@ -138,8 +181,11 @@ function EmployeeRiskModal({
             </p>
           </div>
           <button
+            ref={closeButtonRef}
+            type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-muted-foreground"
+            className="button-ghost size-11 p-0"
+            aria-label="Close risk details"
           >
             <X className="h-5 w-5" />
           </button>
@@ -276,30 +322,27 @@ export function AttritionPredictionPage() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-rose-600 dark:text-rose-400" />
-      </div>
-    );
+    return <LoadingState label="Loading flight risk insights" />;
   }
 
   const noData =
     !dashboard || dashboard.riskDistribution.every((r) => r.value === 0);
 
   return (
-    <div className="space-y-6">
+    <div className="app-page">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Flight Risk Dashboard</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+      <header className="page-header">
+        <div className="page-header__content">
+          <p className="page-header__eyebrow">Predictive insights</p>
+          <h1 className="page-title">Flight Risk Dashboard</h1>
+          <p className="page-subtitle">
             Predictive attrition scoring based on employee data patterns.
           </p>
         </div>
         <button
           onClick={handleCalculate}
           disabled={calculating}
-          className="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
+          className="button-primary"
         >
           {calculating ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -308,10 +351,10 @@ export function AttritionPredictionPage() {
           )}
           Calculate Scores
         </button>
-      </div>
+      </header>
 
       {noData ? (
-        <div className="rounded-lg border border-border bg-card p-12 text-center">
+        <div className="surface-card p-12 text-center">
           <UserMinus className="mx-auto h-12 w-12 text-muted-foreground/50" />
           <h3 className="mt-4 text-lg font-semibold text-foreground">No Risk Data Yet</h3>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -322,7 +365,7 @@ export function AttritionPredictionPage() {
         <>
           {/* Summary cards */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-lg border border-border bg-card p-5">
+            <div className="surface-card p-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/40">
                   <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -336,7 +379,7 @@ export function AttritionPredictionPage() {
               </div>
             </div>
 
-            <div className="rounded-lg border border-border bg-card p-5">
+            <div className="surface-card p-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-50 dark:bg-red-950/40">
                   <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
@@ -350,7 +393,7 @@ export function AttritionPredictionPage() {
               </div>
             </div>
 
-            <div className="rounded-lg border border-border bg-card p-5">
+            <div className="surface-card p-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-50 dark:bg-orange-950/40">
                   <TrendingDown className="h-5 w-5 text-orange-600 dark:text-orange-400" />
@@ -364,7 +407,7 @@ export function AttritionPredictionPage() {
               </div>
             </div>
 
-            <div className="rounded-lg border border-border bg-card p-5">
+            <div className="surface-card p-5">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-50 dark:bg-yellow-950/40">
                   <UserMinus className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
@@ -384,7 +427,7 @@ export function AttritionPredictionPage() {
           {/* Charts row */}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Risk Distribution — Donut */}
-            <div className="rounded-lg border border-border bg-card p-5">
+            <div className="surface-card p-5 sm:p-6">
               <h3 className="text-sm font-semibold text-foreground mb-4">Risk Distribution</h3>
               <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
@@ -415,7 +458,7 @@ export function AttritionPredictionPage() {
             </div>
 
             {/* Department Risk Heatmap — Bar chart colored by risk */}
-            <div className="rounded-lg border border-border bg-card p-5">
+            <div className="surface-card p-5 sm:p-6">
               <h3 className="text-sm font-semibold text-foreground mb-4">
                 Department Risk Heatmap
               </h3>
@@ -454,7 +497,7 @@ export function AttritionPredictionPage() {
 
           {/* Prediction Trends */}
           {trends.length > 0 && (
-            <div className="rounded-lg border border-border bg-card p-5">
+            <div className="surface-card p-5 sm:p-6">
               <h3 className="text-sm font-semibold text-foreground mb-4">
                 Prediction Trends (Predicted vs Actual)
               </h3>
@@ -489,7 +532,7 @@ export function AttritionPredictionPage() {
           )}
 
           {/* High Risk Employees Table */}
-          <div className="rounded-lg border border-border bg-card">
+          <div className="surface-card overflow-hidden">
             <div className="border-b border-border px-5 py-4">
               <h3 className="text-sm font-semibold text-foreground">
                 High Risk Employees ({highRisk.length})
@@ -500,17 +543,17 @@ export function AttritionPredictionPage() {
                 No high-risk employees found
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+              <div className="data-table-scroll">
+                <table className="data-table">
                   <thead>
                     <tr className="border-b border-border bg-muted/50 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                      <th className="px-5 py-3">Employee</th>
-                      <th className="px-5 py-3">Department</th>
-                      <th className="px-5 py-3">Tenure</th>
-                      <th className="px-5 py-3">Risk Score</th>
-                      <th className="px-5 py-3">Level</th>
-                      <th className="px-5 py-3">Top Factor</th>
-                      <th className="px-5 py-3"></th>
+                      <th scope="col" className="px-5 py-3">Employee</th>
+                      <th scope="col" className="px-5 py-3">Department</th>
+                      <th scope="col" className="px-5 py-3">Tenure</th>
+                      <th scope="col" className="px-5 py-3">Risk Score</th>
+                      <th scope="col" className="px-5 py-3">Level</th>
+                      <th scope="col" className="px-5 py-3">Top Factor</th>
+                      <th scope="col" className="px-5 py-3"><span className="sr-only">View details</span></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -557,7 +600,17 @@ export function AttritionPredictionPage() {
                             {topFactor ? topFactor.name : "N/A"}
                           </td>
                           <td className="px-5 py-3">
-                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                            <button
+                              type="button"
+                              className="button-ghost size-10 p-0"
+                              aria-label={`View risk details for ${emp.first_name} ${emp.last_name}`}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                setSelectedEmployee(emp);
+                              }}
+                            >
+                              <ChevronRight className="h-4 w-4 text-muted-foreground rtl:rotate-180" aria-hidden="true" />
+                            </button>
                           </td>
                         </tr>
                       );
@@ -570,7 +623,7 @@ export function AttritionPredictionPage() {
 
           {/* Top Risk Factors */}
           {dashboard!.topRiskFactors.length > 0 && (
-            <div className="rounded-lg border border-border bg-card p-5">
+            <div className="surface-card p-5 sm:p-6">
               <h3 className="text-sm font-semibold text-foreground mb-4">
                 Top Risk Factors (among high-risk employees)
               </h3>

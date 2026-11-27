@@ -12,6 +12,8 @@ import {
 import { useTranslation } from "react-i18next";
 import { apiGet, apiPost, apiPut, apiDelete } from "@/api/client";
 import { cn } from "@/lib/utils";
+import { EmptyState, LoadingState } from "@/components/ui/States";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 // value -> i18n key, resolved via t() at render.
 const EXIT_TYPE_KEYS: { value: string; key: string }[] = [
@@ -45,6 +47,11 @@ interface TemplateItem {
   is_mandatory: boolean;
 }
 
+type DeleteTarget =
+  | { kind: "template"; id: string }
+  | { kind: "item"; id: string }
+  | null;
+
 export function ChecklistTemplatesPage() {
   const { t } = useTranslation();
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -68,6 +75,8 @@ export function ChecklistTemplatesPage() {
   const [itemTitle, setItemTitle] = useState("");
   const [itemDescription, setItemDescription] = useState("");
   const [itemIsMandatory, setItemIsMandatory] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadTemplates();
@@ -146,17 +155,30 @@ export function ChecklistTemplatesPage() {
     }
   }
 
-  async function handleDeleteTemplate(id: string) {
-    if (!confirm(t("checklists.confirmDeleteTemplate"))) return;
+  function handleDeleteTemplate(id: string) {
+    setDeleteTarget({ kind: "template", id });
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
     try {
-      await apiDelete(`/checklists/templates/${id}`);
-      if (expandedId === id) {
-        setExpandedId(null);
-        setExpandedItems([]);
+      if (deleteTarget.kind === "template") {
+        await apiDelete(`/checklists/templates/${deleteTarget.id}`);
+        if (expandedId === deleteTarget.id) {
+          setExpandedId(null);
+          setExpandedItems([]);
+        }
+      } else {
+        await apiDelete(`/checklists/items/${deleteTarget.id}`);
+        setExpandedItems((prev) => prev.filter((item) => item.id !== deleteTarget.id));
       }
+      setDeleteTarget(null);
       await loadTemplates();
     } catch {
       // handled
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -213,38 +235,27 @@ export function ChecklistTemplatesPage() {
     }
   }
 
-  async function handleDeleteItem(itemId: string) {
-    if (!confirm(t("checklists.confirmDeleteItem"))) return;
-    try {
-      await apiDelete(`/checklists/items/${itemId}`);
-      setExpandedItems((prev) => prev.filter((i) => i.id !== itemId));
-      await loadTemplates();
-    } catch {
-      // handled
-    }
+  function handleDeleteItem(itemId: string) {
+    setDeleteTarget({ kind: "item", id: itemId });
   }
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-rose-600 dark:text-rose-400" />
-      </div>
-    );
+    return <div className="surface-card"><LoadingState label={t("common.loading")} /></div>;
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">{t("checklists.templatesTitle")}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{t("checklists.templatesSubtitle")}</p>
+    <div className="app-page">
+      <div className="page-header">
+        <div className="page-header__content">
+          <h1 className="page-title">{t("checklists.templatesTitle")}</h1>
+          <p className="page-subtitle">{t("checklists.templatesSubtitle")}</p>
         </div>
         <button
           onClick={() => {
             resetTemplateForm();
             setShowCreateForm(true);
           }}
-          className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-rose-700 transition-colors"
+          className="button-primary"
         >
           <Plus className="h-4 w-4" />
           {t("checklists.newTemplate")}
@@ -253,12 +264,12 @@ export function ChecklistTemplatesPage() {
 
       {/* Create / Edit Template Form */}
       {(showCreateForm || editingTemplateId) && (
-        <div className="rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50/50 dark:bg-rose-950/30 p-5">
+        <div className="surface-card border-brand-200 bg-brand-50/35 p-5 dark:border-brand-900 dark:bg-brand-950/20 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-foreground">
               {editingTemplateId ? t("checklists.editTemplate") : t("checklists.createTemplate")}
             </h3>
-            <button onClick={resetTemplateForm} className="text-muted-foreground hover:text-muted-foreground">
+            <button onClick={resetTemplateForm} className="grid size-10 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground" aria-label={t("common.cancel")}>
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -272,7 +283,7 @@ export function ChecklistTemplatesPage() {
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                   placeholder={t("checklists.namePlaceholder")}
-                  className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  className="control"
                 />
               </div>
               <div>
@@ -280,7 +291,7 @@ export function ChecklistTemplatesPage() {
                 <select
                   value={formExitType}
                   onChange={(e) => setFormExitType(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  className="control"
                 >
                   {EXIT_TYPE_KEYS.map((opt) => (
                     <option key={opt.value} value={opt.value}>{t(opt.key)}</option>
@@ -295,7 +306,7 @@ export function ChecklistTemplatesPage() {
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
                 placeholder={t("checklists.descriptionPlaceholder")}
-                className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                className="control"
               />
             </div>
             <label className="flex items-center gap-2 cursor-pointer">
@@ -311,14 +322,14 @@ export function ChecklistTemplatesPage() {
               <button
                 type="submit"
                 disabled={saving || !formName}
-                className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50"
+                className="button-primary"
               >
                 {saving ? t("checklists.saving") : editingTemplateId ? t("checklists.saveChanges") : t("common.create")}
               </button>
               <button
                 type="button"
                 onClick={resetTemplateForm}
-                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/50"
+                className="button-secondary"
               >
                 {t("common.cancel")}
               </button>
@@ -329,17 +340,14 @@ export function ChecklistTemplatesPage() {
 
       {/* Templates List */}
       {templates.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-12 text-center">
-          <ClipboardCheck className="mx-auto h-12 w-12 text-muted-foreground/50 mb-3" />
-          <p className="text-sm text-muted-foreground">{t("checklists.noTemplates")}</p>
-        </div>
+        <div className="surface-card"><EmptyState icon={ClipboardCheck} title={t("checklists.noTemplates")} /></div>
       ) : (
         <div className="space-y-3">
           {templates.map((tmpl) => (
-            <div key={tmpl.id} className="rounded-xl border border-border bg-card overflow-hidden">
+            <div key={tmpl.id} className="surface-card overflow-hidden">
               {/* Template header */}
               <div
-                className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-muted/50"
+                className="flex min-h-16 cursor-pointer items-center justify-between px-5 py-4 transition-colors hover:bg-muted/50 focus-within:bg-muted/50"
                 onClick={() => toggleExpand(tmpl.id)}
               >
                 <div className="flex items-center gap-3">
@@ -366,15 +374,17 @@ export function ChecklistTemplatesPage() {
                 <div className="flex items-center gap-1">
                   <button
                     onClick={(e) => { e.stopPropagation(); startEditTemplate(tmpl); }}
-                    className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-muted-foreground"
+                    className="grid size-10 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
                     title={t("checklists.editTemplateTitle")}
+                    aria-label={t("checklists.editTemplateTitle")}
                   >
                     <Edit2 className="h-4 w-4" />
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDeleteTemplate(tmpl.id); }}
-                    className="rounded-lg p-1.5 text-muted-foreground hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-500"
+                    className="grid size-10 place-items-center rounded-lg text-muted-foreground hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/40"
                     title={t("checklists.deleteTemplateTitle")}
+                    aria-label={t("checklists.deleteTemplateTitle")}
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -383,7 +393,7 @@ export function ChecklistTemplatesPage() {
 
               {/* Expanded items */}
               {expandedId === tmpl.id && (
-                <div className="border-t border-border bg-muted/50/50 px-5 py-4">
+                <div className="border-t border-border bg-muted/35 px-5 py-4">
                   {loadingItems ? (
                     <div className="flex justify-center py-4">
                       <Loader2 className="h-5 w-5 animate-spin text-rose-600 dark:text-rose-400" />
@@ -397,7 +407,7 @@ export function ChecklistTemplatesPage() {
                           {expandedItems.map((item, idx) => (
                             <div
                               key={item.id}
-                              className="flex items-center justify-between rounded-lg bg-card border border-border px-4 py-2.5"
+                              className="surface-card flex items-center justify-between px-4 py-3"
                             >
                               <div>
                                 <p className="text-sm font-medium text-foreground">
@@ -420,15 +430,17 @@ export function ChecklistTemplatesPage() {
                               <div className="flex items-center gap-1">
                                 <button
                                   onClick={() => startEditItem(item)}
-                                  className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-muted-foreground"
+                                  className="grid size-11 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
                                   title={t("checklists.editItemTitle")}
+                                  aria-label={t("checklists.editItemTitle")}
                                 >
                                   <Edit2 className="h-3.5 w-3.5" />
                                 </button>
                                 <button
                                   onClick={() => handleDeleteItem(item.id)}
-                                  className="rounded p-1 text-muted-foreground hover:text-red-500"
+                                  className="grid size-11 place-items-center rounded-lg text-muted-foreground hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/40"
                                   title={t("checklists.deleteItemTitle")}
+                                  aria-label={t("checklists.deleteItemTitle")}
                                 >
                                   <Trash2 className="h-3.5 w-3.5" />
                                 </button>
@@ -442,7 +454,7 @@ export function ChecklistTemplatesPage() {
                       {addingItemToId === tmpl.id || (editingItemId && expandedItems.some((i) => i.id === editingItemId)) ? (
                         <form
                           onSubmit={(e) => handleSubmitItemForm(e, tmpl.id)}
-                          className="space-y-3 rounded-lg border border-rose-200 dark:border-rose-900 bg-card p-4"
+                          className="space-y-3 rounded-xl border border-brand-200 bg-card p-4 shadow-sm dark:border-brand-900"
                         >
                           <p className="text-xs font-semibold text-muted-foreground">
                             {editingItemId ? t("checklists.editItem") : t("checklists.addItem")}
@@ -453,14 +465,14 @@ export function ChecklistTemplatesPage() {
                             value={itemTitle}
                             onChange={(e) => setItemTitle(e.target.value)}
                             placeholder={t("checklists.itemTitlePlaceholder")}
-                            className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                            className="control"
                           />
                           <input
                             type="text"
                             value={itemDescription}
                             onChange={(e) => setItemDescription(e.target.value)}
                             placeholder={t("checklists.itemDescPlaceholder")}
-                            className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                            className="control"
                           />
                           <label className="flex items-center gap-2 cursor-pointer">
                             <input
@@ -475,14 +487,14 @@ export function ChecklistTemplatesPage() {
                             <button
                               type="submit"
                               disabled={saving || !itemTitle}
-                              className="rounded-lg bg-rose-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50"
+                              className="button-primary"
                             >
                               {saving ? t("checklists.saving") : editingItemId ? t("checklists.saveChanges") : t("checklists.addItemButton")}
                             </button>
                             <button
                               type="button"
                               onClick={resetItemForm}
-                              className="rounded-lg border border-border px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted/50"
+                              className="button-secondary"
                             >
                               {t("common.cancel")}
                             </button>
@@ -494,7 +506,7 @@ export function ChecklistTemplatesPage() {
                             resetItemForm();
                             setAddingItemToId(tmpl.id);
                           }}
-                          className="inline-flex items-center gap-1.5 text-sm font-medium text-rose-600 hover:text-rose-700 dark:text-rose-300"
+                          className="button-ghost px-2 text-primary"
                         >
                           <Plus className="h-4 w-4" />
                           {t("checklists.addItemButton")}
@@ -508,6 +520,19 @@ export function ChecklistTemplatesPage() {
           ))}
         </div>
       )}
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title={t("common.delete")}
+        message={deleteTarget?.kind === "item"
+          ? t("checklists.confirmDeleteItem")
+          : t("checklists.confirmDeleteTemplate")}
+        confirmLabel={t("common.delete")}
+        cancelLabel={t("common.cancel")}
+        tone="danger"
+        loading={deleting}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }

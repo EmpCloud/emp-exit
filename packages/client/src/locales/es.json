@@ -13,6 +13,7 @@
     "noData": "No hay datos disponibles",
     "success": "Éxito",
     "error": "Error",
+    "retry": "Reintentar",
     "confirm": "Confirmar",
     "back": "Volver",
     "next": "Siguiente",
@@ -48,7 +49,13 @@
     "noNotifications": "Aún no hay notificaciones",
     "viewAll": "Ver todo",
     "review": "Revisar",
-    "cancelInvitationTooltip": "Cancelar esta invitación y eliminar al usuario no activado"
+    "cancelInvitationTooltip": "Cancelar esta invitación y eliminar al usuario no activado",
+    "changeLanguage": "Cambiar idioma",
+    "openNavigationMenu": "Abrir menú de navegación",
+    "closeNavigationMenu": "Cerrar menú de navegación",
+    "skipToMainContent": "Saltar al contenido principal",
+    "unknown": "Desconocido",
+    "user": "Usuario"
   },
   "nav": {
     "brand": "EMP Exit",
@@ -70,7 +77,14 @@
     "myExit": "Mi salida",
     "myInterview": "Mi entrevista",
     "myKt": "Mi KT",
-    "logout": "Cerrar sesión"
+    "logout": "Cerrar sesión",
+    "overview": "Resumen",
+    "exitOperations": "Operaciones de salida",
+    "settlement": "Liquidación",
+    "handoverAssets": "Entrega y activos",
+    "alumniInsights": "Exalumnos e información",
+    "administration": "Administración",
+    "selfService": "Autoservicio"
   },
   "roles": {
     "superAdmin": "Superadministrador",
@@ -81,7 +95,7 @@
   },
   "dashboard": {
     "title": "Panel",
-    "subtitle": "Resumen y métricas de gestión de salidas.",
+    "subtitle": "Resumen y métricas de la gestión de salidas.",
     "statActiveExits": "Salidas activas",
     "statClearancePending": "Autorización pendiente",
     "statFnfPending": "FnF pendiente",
@@ -92,7 +106,21 @@
     "colType": "Tipo",
     "colLastWorkingDate": "Último día laboral",
     "colInitiated": "Iniciada",
-    "employeeFallback": "Empleado #{{id}}"
+    "employeeFallback": "Empleado n.º {{id}}",
+    "stats": {
+      "activeExits": "Salidas activas",
+      "clearancePending": "Autorizaciones pendientes",
+      "fnfPending": "FnF pendiente",
+      "completedThisMonth": "Completadas (este mes)"
+    },
+    "emptyState": "Aún no hay solicitudes de salida. Empieza iniciando una salida.",
+    "table": {
+      "employee": "Empleado",
+      "type": "Tipo",
+      "status": "Estado",
+      "lastWorkingDate": "Último día de trabajo",
+      "initiated": "Iniciada"
+    }
   },
   "exitStatus": {
     "initiated": "Iniciada",
@@ -113,7 +141,7 @@
   },
   "exitList": {
     "title": "Solicitudes de salida",
-    "subtitle": "Ver y gestionar todas las solicitudes de salida de empleados.",
+    "subtitle": "Consulta y gestiona todas las solicitudes de salida de empleados.",
     "initiate": "Iniciar salida",
     "allStatuses": "Todos los estados",
     "activeInProgress": "Activas (en curso)",
@@ -125,7 +153,7 @@
     "colLastWorkingDate": "Último día laboral",
     "colInitiated": "Iniciada",
     "noneFound": "No se encontraron solicitudes de salida.",
-    "deletedEmployee": "Empleado eliminado #{{id}}",
+    "deletedEmployee": "Empleado eliminado n.º {{id}}",
     "pageInfo": "Página {{page}} de {{total}}",
     "status": {
       "initiated": "Iniciada",
@@ -143,6 +171,29 @@
       "end_of_contract": "Fin de contrato",
       "mutual_separation": "Separación mutua",
       "absconding": "Abandono"
+    },
+    "initiateExit": "Iniciar salida",
+    "statusFilterLabel": "Filtrar solicitudes de salida por estado",
+    "activeStatus": "Activa (en curso)",
+    "resultCount_zero": "Se encontraron {{count}} solicitudes de salida",
+    "resultCount_one": "Se encontró {{count}} solicitud de salida",
+    "resultCount_two": "Se encontraron {{count}} solicitudes de salida",
+    "resultCount_few": "Se encontraron {{count}} solicitudes de salida",
+    "resultCount_many": "Se encontraron {{count}} solicitudes de salida",
+    "resultCount_other": "Se encontraron {{count}} solicitudes de salida",
+    "emptyState": "No se encontraron solicitudes de salida.",
+    "tableLabel": "Solicitudes de salida",
+    "table": {
+      "employee": "Empleado",
+      "type": "Tipo",
+      "status": "Estado",
+      "resignationDate": "Fecha de renuncia",
+      "lastWorkingDate": "Último día de trabajo",
+      "initiated": "Iniciada"
+    },
+    "pagination": {
+      "label": "Paginación de solicitudes de salida",
+      "page": "Página {{page}} de {{totalPages}}"
     }
   },
   "checklists": {
@@ -240,5 +291,31 @@
       "rejected": "Rechazada",
       "waived": "Exenta"
     }
+  },
+  "app": {
+    "title": "EMP Exit — Gestión de salidas de empleados"
+  },
+  "theme": {
+    "label": "Tema",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema"
+  },
+  "exitTypes": {
+    "resignation": "Renuncia",
+    "termination": "Terminación",
+    "retirement": "Jubilación",
+    "endOfContract": "Fin de contrato",
+    "mutualSeparation": "Separación de mutuo acuerdo",
+    "absconding": "Abandono del puesto"
+  },
+  "exitStatuses": {
+    "initiated": "Iniciada",
+    "noticePeriod": "Período de preaviso",
+    "clearancePending": "Autorización pendiente",
+    "fnfPending": "FnF pendiente",
+    "fnfProcessed": "FnF procesado",
+    "completed": "Completada",
+    "cancelled": "Cancelada"
   }
 }

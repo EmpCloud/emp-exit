@@ -13,6 +13,7 @@
     "noData": "Aucune donnée disponible",
     "success": "Succès",
     "error": "Erreur",
+    "retry": "Réessayer",
     "confirm": "Confirmer",
     "back": "Retour",
     "next": "Suivant",
@@ -48,7 +49,13 @@
     "noNotifications": "Aucune notification pour le moment",
     "viewAll": "Voir tout",
     "review": "Examiner",
-    "cancelInvitationTooltip": "Annuler cette invitation et supprimer l'utilisateur non activé"
+    "cancelInvitationTooltip": "Annuler cette invitation et supprimer l'utilisateur non activé",
+    "changeLanguage": "Changer de langue",
+    "openNavigationMenu": "Ouvrir le menu de navigation",
+    "closeNavigationMenu": "Fermer le menu de navigation",
+    "skipToMainContent": "Aller au contenu principal",
+    "unknown": "Inconnu",
+    "user": "Utilisateur"
   },
   "nav": {
     "brand": "EMP Exit",
@@ -70,7 +77,14 @@
     "myExit": "Mon départ",
     "myInterview": "Mon entretien",
     "myKt": "Mon KT",
-    "logout": "Déconnexion"
+    "logout": "Déconnexion",
+    "overview": "Vue d’ensemble",
+    "exitOperations": "Opérations de départ",
+    "settlement": "Règlement",
+    "handoverAssets": "Transfert et actifs",
+    "alumniInsights": "Anciens et analyses",
+    "administration": "Administration",
+    "selfService": "Libre-service"
   },
   "roles": {
     "superAdmin": "Super administrateur",
@@ -92,7 +106,21 @@
     "colType": "Type",
     "colLastWorkingDate": "Dernier jour travaillé",
     "colInitiated": "Initié",
-    "employeeFallback": "Employé #{{id}}"
+    "employeeFallback": "Employé n° {{id}}",
+    "stats": {
+      "activeExits": "Départs actifs",
+      "clearancePending": "Décharges en attente",
+      "fnfPending": "FnF en attente",
+      "completedThisMonth": "Terminés (ce mois-ci)"
+    },
+    "emptyState": "Aucune demande de départ pour le moment. Commencez par initier un départ.",
+    "table": {
+      "employee": "Employé",
+      "type": "Type",
+      "status": "Statut",
+      "lastWorkingDate": "Dernier jour de travail",
+      "initiated": "Date d’initiation"
+    }
   },
   "exitStatus": {
     "initiated": "Initié",
@@ -125,7 +153,7 @@
     "colLastWorkingDate": "Dernier jour travaillé",
     "colInitiated": "Initiée",
     "noneFound": "Aucune demande de départ trouvée.",
-    "deletedEmployee": "Employé supprimé #{{id}}",
+    "deletedEmployee": "Employé supprimé n° {{id}}",
     "pageInfo": "Page {{page}} sur {{total}}",
     "status": {
       "initiated": "Initié",
@@ -143,6 +171,29 @@
       "end_of_contract": "Fin de contrat",
       "mutual_separation": "Séparation à l'amiable",
       "absconding": "Abandon de poste"
+    },
+    "initiateExit": "Initier un départ",
+    "statusFilterLabel": "Filtrer les demandes de départ par statut",
+    "activeStatus": "Actives (en cours)",
+    "resultCount_zero": "{{count}} demande de départ trouvée",
+    "resultCount_one": "{{count}} demande de départ trouvée",
+    "resultCount_two": "{{count}} demandes de départ trouvées",
+    "resultCount_few": "{{count}} demandes de départ trouvées",
+    "resultCount_many": "{{count}} demandes de départ trouvées",
+    "resultCount_other": "{{count}} demandes de départ trouvées",
+    "emptyState": "Aucune demande de départ trouvée.",
+    "tableLabel": "Demandes de départ",
+    "table": {
+      "employee": "Employé",
+      "type": "Type",
+      "status": "Statut",
+      "resignationDate": "Date de démission",
+      "lastWorkingDate": "Dernier jour de travail",
+      "initiated": "Date d’initiation"
+    },
+    "pagination": {
+      "label": "Pagination des demandes de départ",
+      "page": "Page {{page}} sur {{totalPages}}"
     }
   },
   "checklists": {
@@ -240,5 +291,31 @@
       "rejected": "Rejetée",
       "waived": "Dispensée"
     }
+  },
+  "app": {
+    "title": "EMP Exit — Gestion des départs des employés"
+  },
+  "theme": {
+    "label": "Thème",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  },
+  "exitTypes": {
+    "resignation": "Démission",
+    "termination": "Licenciement",
+    "retirement": "Retraite",
+    "endOfContract": "Fin de contrat",
+    "mutualSeparation": "Séparation à l’amiable",
+    "absconding": "Abandon de poste"
+  },
+  "exitStatuses": {
+    "initiated": "Initié",
+    "noticePeriod": "Préavis",
+    "clearancePending": "Décharge en attente",
+    "fnfPending": "FnF en attente",
+    "fnfProcessed": "FnF traité",
+    "completed": "Terminé",
+    "cancelled": "Annulé"
   }
 }

@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { UserMinus, ClipboardCheck, Shield, DollarSign, ArrowRight, Loader2 } from "lucide-react";
+import { UserMinus, ClipboardCheck, Shield, DollarSign, ArrowRight, Plus } from "lucide-react";
 import { apiGet } from "@/api/client";
-import { cn, formatDate } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
+import { Badge, type BadgeTone } from "@/components/ui/Badge";
+import { Button, ButtonLink } from "@/components/ui/Button";
+import { MetricCard } from "@/components/ui/MetricCard";
+import { Page, PageActions, PageDescription, PageHeader, PageHeaderContent, PageTitle } from "@/components/ui/Page";
+import { EmptyState, ErrorState, LoadingState } from "@/components/ui/States";
+import { Table, TableScroll, TableShell, TableToolbar } from "@/components/ui/Table";
 import type { ExitStatus, ExitType } from "@emp-exit/shared";
 
 interface ExitListItem {
@@ -27,19 +33,19 @@ interface DashboardStats {
   completedThisMonth: number;
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  initiated: "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300",
-  notice_period: "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300",
-  clearance_pending: "bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300",
-  fnf_pending: "bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300",
-  fnf_processed: "bg-indigo-100 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300",
-  completed: "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300",
-  cancelled: "bg-muted text-muted-foreground",
+const STATUS_TONES: Record<string, BadgeTone> = {
+  initiated: "info",
+  notice_period: "warning",
+  clearance_pending: "warning",
+  fnf_pending: "brand",
+  fnf_processed: "info",
+  completed: "success",
+  cancelled: "neutral",
 };
 
 // i18n keys under the shared `exitStatus` / `exitType` namespaces, resolved
 // via t() at render time (see the exit status/type cells below).
-const STATUS_LABEL_KEYS: Record<string, string> = {
+const STATUS_LABEL_KEYS: Record<ExitStatus, string> = {
   initiated: "exitStatus.initiated",
   notice_period: "exitStatus.notice_period",
   clearance_pending: "exitStatus.clearance_pending",
@@ -49,7 +55,7 @@ const STATUS_LABEL_KEYS: Record<string, string> = {
   cancelled: "exitStatus.cancelled",
 };
 
-const TYPE_LABEL_KEYS: Record<string, string> = {
+const TYPE_LABEL_KEYS: Record<ExitType, string> = {
   resignation: "exitType.resignation",
   termination: "exitType.termination",
   retirement: "exitType.retirement",
@@ -59,15 +65,19 @@ const TYPE_LABEL_KEYS: Record<string, string> = {
 };
 
 export function DashboardPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentExits, setRecentExits] = useState<ExitListItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
+      setLoading(true);
+      setError(false);
       try {
         // Recent exits for the table (top 10) + a full fetch for accurate
         // counts (computing stats from only 10 rows undercounts everything).
@@ -101,7 +111,9 @@ export function DashboardPage() {
       } catch (err) {
         // silently fail for dashboard — data will show as 0
         if (!cancelled) {
-          setStats({ activeExits: 0, clearancePending: 0, fnfPending: 0, completedThisMonth: 0 });
+          setStats(null);
+          setRecentExits([]);
+          setError(true);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -110,112 +122,134 @@ export function DashboardPage() {
 
     load();
     return () => { cancelled = true; };
-  }, []);
+  }, [reloadKey]);
 
   if (loading) {
+    return <LoadingState label={t("common.loading")} />;
+  }
+
+  if (error) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-rose-600 dark:text-rose-400" />
-      </div>
+      <Page>
+        <PageHeader>
+          <PageHeaderContent>
+            <PageTitle>{t("dashboard.title")}</PageTitle>
+            <PageDescription>{t("dashboard.subtitle")}</PageDescription>
+          </PageHeaderContent>
+        </PageHeader>
+        <TableShell>
+          <ErrorState
+            title={t("common.error")}
+            description={t("common.noData")}
+            action={<Button onClick={() => setReloadKey((value) => value + 1)} variant="secondary">{t("common.retry")}</Button>}
+          />
+        </TableShell>
+      </Page>
     );
   }
 
+  const locale = i18n.resolvedLanguage || i18n.language;
   const statCards = [
     {
+      id: "active-exits",
       label: t("dashboard.statActiveExits"),
       value: stats?.activeExits ?? 0,
       icon: UserMinus,
-      color: "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400",
-      iconBg: "bg-rose-100 dark:bg-rose-950/40",
+      tone: "brand" as const,
       link: "/exits?status=active",
     },
     {
+      id: "clearance-pending",
       label: t("dashboard.statClearancePending"),
       value: stats?.clearancePending ?? 0,
       icon: Shield,
-      color: "bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400",
-      iconBg: "bg-amber-100 dark:bg-amber-950/40",
+      tone: "amber" as const,
       link: "/clearance",
     },
     {
+      id: "fnf-pending",
       label: t("dashboard.statFnfPending"),
       value: stats?.fnfPending ?? 0,
       icon: DollarSign,
-      color: "bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400",
-      iconBg: "bg-purple-100 dark:bg-purple-950/40",
+      tone: "violet" as const,
       link: "/fnf",
     },
     {
+      id: "completed-this-month",
       label: t("dashboard.statCompletedMonth"),
       value: stats?.completedThisMonth ?? 0,
       icon: ClipboardCheck,
-      color: "bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400",
-      iconBg: "bg-green-100 dark:bg-green-950/40",
+      tone: "emerald" as const,
       link: "/exits?status=completed",
     },
   ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">{t("dashboard.title")}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t("dashboard.subtitle")}</p>
-      </div>
+    <Page>
+      <PageHeader>
+        <PageHeaderContent>
+          <PageTitle>{t("dashboard.title")}</PageTitle>
+          <PageDescription>{t("dashboard.subtitle")}</PageDescription>
+        </PageHeaderContent>
+        <PageActions>
+          <ButtonLink to="/exits/new">
+            <Plus aria-hidden="true" className="size-4" />
+            {t("exitList.initiateExit")}
+          </ButtonLink>
+        </PageActions>
+      </PageHeader>
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((card) => (
-          <Link
-            key={card.label}
+          <MetricCard
+            key={card.id}
             to={card.link}
-            className="rounded-xl border border-border bg-card p-5 transition-colors duration-150 hover:border-brand-400"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">{card.label}</p>
-                <p className="mt-1 text-3xl font-bold text-foreground">{card.value}</p>
-              </div>
-              <div className={cn("flex h-12 w-12 items-center justify-center rounded-lg", card.iconBg)}>
-                <card.icon className={cn("h-6 w-6", card.color.split(" ")[1])} />
-              </div>
-            </div>
-          </Link>
+            label={card.label}
+            value={card.value}
+            icon={card.icon}
+            tone={card.tone}
+          />
         ))}
       </div>
 
       {/* Recent Exits */}
-      <div className="rounded-xl border border-border bg-card">
-        <div className="flex items-center justify-between border-b border-border px-6 py-4">
-          <h2 className="text-lg font-semibold text-foreground">{t("dashboard.recentExits")}</h2>
+      <TableShell>
+        <TableToolbar>
+          <h2 id="recent-exits-heading" className="text-lg font-semibold text-foreground">
+            {t("dashboard.recentExits")}
+          </h2>
           <Link
             to="/exits"
-            className="inline-flex items-center gap-1 text-sm font-medium text-rose-600 hover:text-rose-700 dark:text-rose-300"
+            className="inline-flex min-h-10 items-center gap-1 rounded-lg px-2 text-sm font-semibold text-primary hover:bg-brand-50 dark:hover:bg-brand-950/40"
           >
-            {t("common.viewAll")} <ArrowRight className="h-4 w-4" />
+            {t("common.viewAll")} <ArrowRight aria-hidden="true" className="h-4 w-4" />
           </Link>
-        </div>
+        </TableToolbar>
 
         {recentExits.length === 0 ? (
-          <div className="px-6 py-12 text-center text-sm text-muted-foreground">
-            {t("dashboard.emptyExits")}
-          </div>
+          <EmptyState
+            title={t("dashboard.emptyExits")}
+            icon={UserMinus}
+            action={<ButtonLink to="/exits/new" variant="secondary"><Plus aria-hidden="true" className="size-4" />{t("exitList.initiateExit")}</ButtonLink>}
+          />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+          <TableScroll>
+            <Table aria-labelledby="recent-exits-heading">
               <thead>
-                <tr className="border-b border-border text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                  <th className="px-6 py-3">{t("dashboard.colEmployee")}</th>
-                  <th className="px-6 py-3">{t("dashboard.colType")}</th>
-                  <th className="px-6 py-3">{t("common.status")}</th>
-                  <th className="px-6 py-3">{t("dashboard.colLastWorkingDate")}</th>
-                  <th className="px-6 py-3">{t("dashboard.colInitiated")}</th>
+                <tr>
+                  <th scope="col">{t("dashboard.colEmployee")}</th>
+                  <th scope="col">{t("dashboard.colType")}</th>
+                  <th scope="col">{t("common.status")}</th>
+                  <th scope="col">{t("dashboard.colLastWorkingDate")}</th>
+                  <th scope="col">{t("dashboard.colInitiated")}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody>
                 {recentExits.map((exit) => (
-                  <tr key={exit.id} className="hover:bg-muted/50">
-                    <td className="px-6 py-3">
-                      <Link to={`/exits/${exit.id}`} className="font-medium text-foreground hover:text-rose-600 dark:text-rose-400">
+                  <tr key={exit.id}>
+                    <td>
+                      <Link to={`/exits/${exit.id}`} className="font-semibold text-foreground hover:text-primary">
                         {exit.employee
                           ? `${exit.employee.first_name} ${exit.employee.last_name}`
                           : t("dashboard.employeeFallback", { id: exit.id.slice(0, 8) })}
@@ -224,30 +258,27 @@ export function DashboardPage() {
                         <p className="text-xs text-muted-foreground">{exit.employee.designation}</p>
                       )}
                     </td>
-                    <td className="px-6 py-3 text-muted-foreground">
-                      {TYPE_LABEL_KEYS[exit.exit_type] ? t(TYPE_LABEL_KEYS[exit.exit_type]) : exit.exit_type}
+                    <td className="text-muted-foreground">
+                      {t(TYPE_LABEL_KEYS[exit.exit_type] ?? "common.unknown")}
                     </td>
-                    <td className="px-6 py-3">
-                      <span
-                        className={cn(
-                          "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
-                          STATUS_COLORS[exit.status] || "bg-muted text-muted-foreground",
-                        )}
-                      >
-                        {STATUS_LABEL_KEYS[exit.status] ? t(STATUS_LABEL_KEYS[exit.status]) : exit.status}
-                      </span>
+                    <td>
+                      <Badge tone={STATUS_TONES[exit.status] || "neutral"}>
+                        {t(STATUS_LABEL_KEYS[exit.status] ?? "common.unknown")}
+                      </Badge>
                     </td>
-                    <td className="px-6 py-3 text-muted-foreground">
-                      {exit.last_working_date ? formatDate(exit.last_working_date) : "--"}
+                    <td className="text-muted-foreground">
+                      {exit.last_working_date ? formatDate(exit.last_working_date, locale) : "—"}
                     </td>
-                    <td className="px-6 py-3 text-muted-foreground">{formatDate(exit.created_at)}</td>
+                    <td className="text-muted-foreground">
+                      {formatDate(exit.created_at, locale)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
-            </table>
-          </div>
+            </Table>
+          </TableScroll>
         )}
-      </div>
-    </div>
+      </TableShell>
+    </Page>
   );
 }

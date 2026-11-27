@@ -13,6 +13,7 @@
     "noData": "データがありません",
     "success": "成功",
     "error": "エラー",
+    "retry": "再試行",
     "confirm": "確認",
     "back": "戻る",
     "next": "次へ",
@@ -48,7 +49,13 @@
     "noNotifications": "通知はまだありません",
     "viewAll": "すべて表示",
     "review": "確認",
-    "cancelInvitationTooltip": "この招待をキャンセルし、未有効化のユーザーを削除します"
+    "cancelInvitationTooltip": "この招待をキャンセルし、未有効化のユーザーを削除します",
+    "changeLanguage": "言語を変更",
+    "openNavigationMenu": "ナビゲーションメニューを開く",
+    "closeNavigationMenu": "ナビゲーションメニューを閉じる",
+    "skipToMainContent": "メインコンテンツへ移動",
+    "unknown": "不明",
+    "user": "ユーザー"
   },
   "nav": {
     "brand": "EMP Exit",
@@ -70,7 +77,14 @@
     "myExit": "自分の退職",
     "myInterview": "自分の面談",
     "myKt": "自分のKT",
-    "logout": "ログアウト"
+    "logout": "ログアウト",
+    "overview": "概要",
+    "exitOperations": "退職手続き",
+    "settlement": "精算",
+    "handoverAssets": "引き継ぎと資産",
+    "alumniInsights": "アルムナイと分析",
+    "administration": "管理",
+    "selfService": "セルフサービス"
   },
   "roles": {
     "superAdmin": "スーパー管理者",
@@ -92,7 +106,21 @@
     "colType": "種類",
     "colLastWorkingDate": "最終勤務日",
     "colInitiated": "開始日",
-    "employeeFallback": "従業員 #{{id}}"
+    "employeeFallback": "従業員 #{{id}}",
+    "stats": {
+      "activeExits": "進行中の退職",
+      "clearancePending": "クリアランス待ち",
+      "fnfPending": "FnF待ち",
+      "completedThisMonth": "今月完了"
+    },
+    "emptyState": "退職申請はまだありません。退職手続きを開始してください。",
+    "table": {
+      "employee": "従業員",
+      "type": "種類",
+      "status": "ステータス",
+      "lastWorkingDate": "最終出勤日",
+      "initiated": "開始日"
+    }
   },
   "exitStatus": {
     "initiated": "開始",
@@ -113,7 +141,7 @@
   },
   "exitList": {
     "title": "退職申請",
-    "subtitle": "すべての従業員の退職申請を表示・管理します。",
+    "subtitle": "従業員のすべての退職申請を表示・管理します。",
     "initiate": "退職を開始",
     "allStatuses": "すべてのステータス",
     "activeInProgress": "進行中",
@@ -143,6 +171,29 @@
       "end_of_contract": "契約満了",
       "mutual_separation": "合意退職",
       "absconding": "無断退職"
+    },
+    "initiateExit": "退職手続きを開始",
+    "statusFilterLabel": "ステータスで退職申請を絞り込む",
+    "activeStatus": "進行中",
+    "resultCount_zero": "{{count}}件の退職申請が見つかりました",
+    "resultCount_one": "{{count}}件の退職申請が見つかりました",
+    "resultCount_two": "{{count}}件の退職申請が見つかりました",
+    "resultCount_few": "{{count}}件の退職申請が見つかりました",
+    "resultCount_many": "{{count}}件の退職申請が見つかりました",
+    "resultCount_other": "{{count}}件の退職申請が見つかりました",
+    "emptyState": "退職申請が見つかりません。",
+    "tableLabel": "退職申請一覧",
+    "table": {
+      "employee": "従業員",
+      "type": "種類",
+      "status": "ステータス",
+      "resignationDate": "退職届提出日",
+      "lastWorkingDate": "最終出勤日",
+      "initiated": "開始日"
+    },
+    "pagination": {
+      "label": "退職申請のページネーション",
+      "page": "{{totalPages}}ページ中{{page}}ページ"
     }
   },
   "checklists": {
@@ -240,5 +291,31 @@
       "rejected": "却下",
       "waived": "免除"
     }
+  },
+  "app": {
+    "title": "EMP Exit — 従業員退職管理"
+  },
+  "theme": {
+    "label": "テーマ",
+    "light": "ライト",
+    "dark": "ダーク",
+    "system": "システム"
+  },
+  "exitTypes": {
+    "resignation": "自己都合退職",
+    "termination": "解雇",
+    "retirement": "定年退職",
+    "endOfContract": "契約満了",
+    "mutualSeparation": "合意退職",
+    "absconding": "無断退職"
+  },
+  "exitStatuses": {
+    "initiated": "開始済み",
+    "noticePeriod": "予告期間",
+    "clearancePending": "クリアランス待ち",
+    "fnfPending": "FnF待ち",
+    "fnfProcessed": "FnF処理済み",
+    "completed": "完了",
+    "cancelled": "キャンセル済み"
   }
 }

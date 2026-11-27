@@ -1,71 +1,105 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { Outlet, Navigate, NavLink, useLocation } from "react-router-dom";
-import {
-  LayoutDashboard,
-  LogOut as LogOutIcon,
-  DoorOpen,
-  ClipboardCheck,
-  ShieldCheck,
-  MessageSquare,
-  Calculator,
-  DollarSign,
-  Package,
-  BookOpen,
-  FileSignature,
-  GraduationCap,
-  BarChart3,
-  AlertTriangle,
-  Settings,
-  Menu,
-  X,
-  UserPlus,
-  UserMinus,
-} from "lucide-react";
+import { DoorOpen, LogOut as LogOutIcon, Menu, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { isLoggedIn, getUser, useAuthStore, isAdmin } from "@/lib/auth-store";
 import { cn, getInitials } from "@/lib/utils";
-import { BackToDashboard } from "@/components/BackToDashboard";
+import { BackToDashboard, hasEmpCloudReturnLink } from "@/components/BackToDashboard";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
-
-interface NavItem {
-  to: string;
-  // i18n key under the `nav` namespace, resolved via t() at render time.
-  label: string;
-  icon: any;
-}
+import { ADMIN_NAV_GROUPS, EMPLOYEE_NAV_GROUPS, isNavItemActive, type NavGroup } from "@/components/layout/nav-config";
 
 // Full management console — shown to admin / HR roles.
-const ADMIN_NAV: NavItem[] = [
-  { to: "/dashboard", label: "nav.dashboard", icon: LayoutDashboard },
-  { to: "/exits", label: "nav.exits", icon: DoorOpen },
-  { to: "/checklists", label: "nav.checklists", icon: ClipboardCheck },
-  { to: "/clearance", label: "nav.clearance", icon: ShieldCheck },
-  { to: "/interviews", label: "nav.interviews", icon: MessageSquare },
-  { to: "/fnf", label: "nav.fnf", icon: Calculator },
-  { to: "/buyout", label: "nav.buyout", icon: DollarSign },
-  { to: "/assets", label: "nav.assets", icon: Package },
-  { to: "/kt", label: "nav.kt", icon: BookOpen },
-  { to: "/letters", label: "nav.letters", icon: FileSignature },
-  { to: "/alumni", label: "nav.alumni", icon: GraduationCap },
-  { to: "/rehire", label: "nav.rehire", icon: UserPlus },
-  { to: "/analytics", label: "nav.analytics", icon: BarChart3 },
-  { to: "/analytics/flight-risk", label: "nav.flightRisk", icon: AlertTriangle },
-  { to: "/settings", label: "nav.settings", icon: Settings },
-];
-
 // Self-service hub — shown to the employee role. Every link points at a
 // "my own" page; no org-wide management views.
-const EMPLOYEE_NAV: NavItem[] = [
-  { to: "/exits/my", label: "nav.myExit", icon: UserMinus },
-  { to: "/interviews/my", label: "nav.myInterview", icon: MessageSquare },
-  { to: "/kt/my", label: "nav.myKt", icon: BookOpen },
-  { to: "/alumni/my", label: "nav.alumni", icon: GraduationCap },
-];
+interface SidebarProps {
+  navGroups: NavGroup[];
+  pathname: string;
+  displayName: string;
+  roleLabel: string;
+  onLogout: () => void;
+  onNavigate?: () => void;
+  onClose?: () => void;
+}
+
+function AppSidebar({ navGroups, pathname, displayName, roleLabel, onLogout, onNavigate, onClose }: SidebarProps) {
+  const { t } = useTranslation();
+
+  return (
+    <aside className="flex h-full w-[17.5rem] flex-col border-e border-sidebar-border bg-sidebar text-sidebar-foreground">
+      <div className="flex min-h-20 items-center gap-3 border-b border-sidebar-border px-5">
+        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-md shadow-brand-500/20">
+          <DoorOpen className="size-5" aria-hidden="true" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-base font-bold tracking-tight">{t("nav.brand")}</p>
+          <p className="truncate text-[0.6875rem] text-muted-foreground">{t("dashboard.subtitle")}</p>
+        </div>
+        {onClose ? (
+          <button type="button" onClick={onClose} className="grid size-11 place-items-center rounded-lg text-muted-foreground hover:bg-sidebar-muted hover:text-sidebar-foreground lg:hidden" aria-label={t("common.closeNavigationMenu")}>
+            <X className="size-5" aria-hidden="true" />
+          </button>
+        ) : null}
+      </div>
+
+      <nav className="flex-1 space-y-6 overflow-y-auto overscroll-contain px-3 py-5" aria-label={t("nav.brand")}>
+        {navGroups.map((group) => (
+          <div key={group.label}>
+            <p className="mb-2 px-3 text-[0.625rem] font-bold uppercase tracking-[0.16em] text-muted-foreground/80">
+              {t(group.label)}
+            </p>
+            <div className="space-y-1">
+              {group.items.map((item) => {
+                const active = isNavItemActive(pathname, item);
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    end={item.exact}
+                    aria-current={active ? "page" : undefined}
+                    onClick={onNavigate}
+                    className={cn(
+                      "group relative flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-[background-color,color] focus-visible:ring-2 focus-visible:ring-ring",
+                      active
+                        ? "bg-brand-50 text-brand-700 dark:bg-brand-950/45 dark:text-brand-300"
+                        : "text-muted-foreground hover:bg-sidebar-muted hover:text-sidebar-foreground",
+                    )}
+                  >
+                    <span aria-hidden="true" className={cn("absolute inset-y-2 start-0 w-0.5 rounded-full bg-primary opacity-0", active && "opacity-100")} />
+                    <item.icon className={cn("size-[1.125rem] shrink-0", active ? "text-primary" : "text-muted-foreground group-hover:text-sidebar-foreground")} aria-hidden="true" />
+                    <span className="truncate">{t(item.label)}</span>
+                  </NavLink>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </nav>
+
+      <div className="border-t border-sidebar-border p-3">
+        <div className="flex items-center gap-3 rounded-xl bg-sidebar-muted/70 p-2.5">
+          <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-brand-100 text-sm font-bold text-brand-700 dark:bg-brand-950/60 dark:text-brand-300">
+            {getInitials(displayName)}
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold text-sidebar-foreground">{displayName}</p>
+            <p className="truncate text-xs text-muted-foreground">{roleLabel}</p>
+          </div>
+          <button type="button" onClick={onLogout} className="grid size-10 shrink-0 place-items-center rounded-lg text-muted-foreground hover:bg-card hover:text-danger" title={t("nav.logout")} aria-label={t("nav.logout")}>
+            <LogOutIcon className="size-4" aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+    </aside>
+  );
+}
 
 export function DashboardLayout() {
   const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const mobileTriggerRef = useRef<HTMLButtonElement>(null);
+  const mobilePanelRef = useRef<HTMLDivElement>(null);
+  const shellContentRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const logout = useAuthStore((s) => s.logout);
   const user = getUser();
@@ -74,8 +108,26 @@ export function DashboardLayout() {
     setMobileOpen(false);
   }, [location.pathname]);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    shellContentRef.current?.setAttribute("inert", "");
+    window.requestAnimationFrame(() => {
+      mobilePanelRef.current?.querySelector<HTMLElement>("button, a")?.focus();
+    });
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      shellContentRef.current?.removeAttribute("inert");
+      mobileTriggerRef.current?.focus();
+    };
+  }, [mobileOpen]);
+
   if (!isLoggedIn()) return <Navigate to="/login" replace />;
-  const displayName = user ? `${user.firstName} ${user.lastName}` : "User";
+  const displayName = user ? `${user.firstName} ${user.lastName}` : t("common.user");
+  const showEmpCloudReturn = hasEmpCloudReturnLink();
   const ROLE_KEYS: Record<string, string> = {
     super_admin: "roles.superAdmin",
     org_admin: "roles.orgAdmin",
@@ -84,109 +136,116 @@ export function DashboardLayout() {
     employee: "roles.employee",
   };
   const roleLabel = t(ROLE_KEYS[user?.role || "employee"] || "roles.employee");
-  const navItems = isAdmin(user) ? ADMIN_NAV : EMPLOYEE_NAV;
+  const navGroups = isAdmin(user) ? ADMIN_NAV_GROUPS : EMPLOYEE_NAV_GROUPS;
 
-  function SidebarContent() {
+  const handleMobileNavigationKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      setMobileOpen(false);
+      return;
+    }
+    if (event.key !== "Tab" || !mobilePanelRef.current) return;
+
+    const focusable = Array.from(
+      mobilePanelRef.current.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'),
+    );
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+
+  function SidebarContent({ mobile = false }: { mobile?: boolean }) {
     return (
-      <div className="flex h-full w-64 flex-col bg-card border-r border-border">
-        {/* Logo */}
-        <div className="flex h-16 items-center gap-3 px-6 border-b border-border">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600">
-            <DoorOpen className="h-5 w-5 text-white" />
-          </div>
-          <span className="text-lg font-bold text-foreground">{t("nav.brand")}</span>
-        </div>
-
-        {/* Nav */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              // `end` forces exact-path matching. Without this, NavLink uses
-              // prefix-match, so visiting /analytics/flight-risk highlights
-              // both "Analytics" (/analytics) and "Flight Risk"
-              // (/analytics/flight-risk) at the same time.
-              end
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-brand-50 dark:bg-brand-950/40 text-brand-700 dark:text-brand-300"
-                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                )
-              }
-            >
-              <item.icon className="h-5 w-5" />
-              {t(item.label)}
-            </NavLink>
-          ))}
-        </nav>
-
-        {/* User card */}
-        <div className="border-t border-border p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 dark:bg-brand-950/40 text-brand-700 dark:text-brand-300 text-sm font-semibold">
-              {getInitials(displayName)}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">{displayName}</p>
-              <p className="text-xs text-muted-foreground">{roleLabel}</p>
-            </div>
-            <button
-              onClick={logout}
-              className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-muted-foreground"
-              title={t("nav.logout")}
-            >
-              <LogOutIcon className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      </div>
+      <AppSidebar
+        navGroups={navGroups}
+        pathname={location.pathname}
+        displayName={displayName}
+        roleLabel={roleLabel}
+        onLogout={logout}
+        onNavigate={mobile ? () => setMobileOpen(false) : undefined}
+        onClose={mobile ? () => setMobileOpen(false) : undefined}
+      />
     );
   }
 
+  const activeNavItem = navGroups.flatMap((group) => group.items).find((item) => isNavItemActive(location.pathname, item));
+  const activeLabel = activeNavItem ? t(activeNavItem.label) : t("nav.brand");
+
   return (
-    <div className="flex h-screen bg-muted/50">
+    <div className="relative flex h-dvh overflow-hidden bg-background">
+      <a href="#main-content" className="skip-link">{t("common.skipToMainContent")}</a>
       {/* Desktop sidebar */}
-      <div className="hidden lg:block">
+      <div className="hidden shrink-0 lg:block">
         <SidebarContent />
       </div>
 
       {/* Mobile sidebar overlay */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="fixed inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-          <div className="fixed left-0 top-0 z-50 h-full">
-            <SidebarContent />
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label={t("nav.brand")} onKeyDown={handleMobileNavigationKeyDown}>
+          <button
+            type="button"
+            className="fixed inset-0 cursor-default bg-slate-950/55 backdrop-blur-sm"
+            onClick={() => setMobileOpen(false)}
+            aria-label={t("common.closeNavigationMenu")}
+          />
+          <div ref={mobilePanelRef} id="mobile-navigation" className="fixed inset-y-0 start-0 z-50 h-full shadow-floating">
+            <SidebarContent mobile />
           </div>
         </div>
       )}
 
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div ref={shellContentRef} className="app-shell-main flex flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="flex h-16 items-center justify-between border-b border-border bg-card px-4 lg:px-8">
+        <header className="relative z-30 flex min-h-16 shrink-0 items-center justify-between border-b border-border bg-card/90 px-3 backdrop-blur-xl sm:px-5 lg:px-6">
           <button
+            ref={mobileTriggerRef}
+            type="button"
             onClick={() => setMobileOpen(true)}
-            className="rounded-lg p-2 text-muted-foreground hover:bg-muted lg:hidden"
+            className="grid size-11 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground lg:hidden"
+            aria-label={t("common.openNavigationMenu")}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-navigation"
           >
-            <Menu className="h-5 w-5" />
+            <Menu className="size-5" aria-hidden="true" />
           </button>
-          <BackToDashboard />
-          <div className="flex-1" />
-          <div className="flex items-center gap-3">
+          <div className="ms-1 hidden min-w-0 items-center gap-3 sm:flex lg:ms-0">
+            {showEmpCloudReturn && (
+              <>
+                <BackToDashboard />
+                <span aria-hidden="true" className="h-5 w-px bg-border" />
+              </>
+            )}
+            <p className="truncate text-sm font-semibold text-foreground">{activeLabel}</p>
+          </div>
+          <div className="flex-1 sm:hidden" />
+          <div className="flex items-center gap-1 sm:gap-2">
             <LanguageSwitcher />
             <ThemeToggle />
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 dark:bg-brand-950/40 text-brand-700 dark:text-brand-300 text-xs font-semibold">
-              {getInitials(displayName)}
+            <span aria-hidden="true" className="mx-1 hidden h-6 w-px bg-border md:block" />
+            <div className="hidden min-w-0 items-center gap-2.5 md:flex">
+              <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-brand-100 text-xs font-bold text-brand-700 dark:bg-brand-950/50 dark:text-brand-300">
+                {getInitials(displayName)}
+              </span>
+              <div className="min-w-0">
+                <p className="max-w-40 truncate text-sm font-semibold text-foreground">{displayName}</p>
+                <p className="truncate text-[0.6875rem] text-muted-foreground">{roleLabel}</p>
+              </div>
             </div>
-            <span className="hidden md:block text-sm font-medium text-muted-foreground">{displayName}</span>
           </div>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-8">
-          <Outlet />
+        <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto overscroll-contain">
+          <div className="mx-auto w-full max-w-[1680px] p-4 sm:p-6 lg:p-8">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

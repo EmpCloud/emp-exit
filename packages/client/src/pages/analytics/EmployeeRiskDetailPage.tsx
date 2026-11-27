@@ -4,7 +4,6 @@ import {
   AlertTriangle,
   ArrowLeft,
   ChevronRight,
-  Loader2,
   Mail,
   Briefcase,
   Building,
@@ -22,6 +21,8 @@ import {
 import { apiGet } from "@/api/client";
 import toast from "react-hot-toast";
 import type { RiskLevel, RiskFactor } from "@emp-exit/shared";
+import { EmptyState, LoadingState } from "@/components/ui/States";
+import { formatDate } from "@/lib/utils";
 
 interface EmployeeRiskDetail {
   employee_id: number;
@@ -122,30 +123,20 @@ export function EmployeeRiskDetailPage() {
   }, [employeeId]);
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-rose-600 dark:text-rose-400" />
-      </div>
-    );
+    return <LoadingState label="Loading employee risk" />;
   }
 
   if (!data) {
     return (
-      <div className="space-y-4">
+      <div className="app-page">
         <button
           onClick={() => navigate("/analytics/flight-risk")}
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-muted-foreground"
+          className="button-ghost w-fit"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Flight Risk Dashboard
         </button>
-        <div className="rounded-lg border border-border bg-card p-12 text-center">
-          <AlertTriangle className="mx-auto h-12 w-12 text-muted-foreground/50" />
-          <h3 className="mt-4 text-lg font-semibold text-foreground">No Risk Data</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Risk scores have not been calculated for this employee yet.
-          </p>
-        </div>
+        <div className="surface-card"><EmptyState icon={AlertTriangle} title="No Risk Data" description="Risk scores have not been calculated for this employee yet." /></div>
       </div>
     );
   }
@@ -171,11 +162,11 @@ export function EmployeeRiskDetailPage() {
   const recs = RECOMMENDATIONS[data.risk_level];
 
   return (
-    <div className="space-y-6">
+    <div className="app-page">
       {/* Back link */}
       <button
         onClick={() => navigate("/analytics/flight-risk")}
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-muted-foreground"
+        className="button-ghost w-fit"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to Flight Risk Dashboard
@@ -184,7 +175,7 @@ export function EmployeeRiskDetailPage() {
       {/* Employee Info Card + Score */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Info */}
-        <div className="lg:col-span-2 rounded-lg border border-border bg-card p-6">
+        <section className="surface-card p-5 sm:p-6 lg:col-span-2">
           <h2 className="text-xl font-bold text-foreground">
             {data.first_name} {data.last_name}
           </h2>
@@ -207,12 +198,12 @@ export function EmployeeRiskDetailPage() {
             </div>
           </div>
           <div className="mt-3 text-xs text-muted-foreground">
-            Last calculated: {new Date(data.calculated_at).toLocaleDateString()}
+            Last calculated: {formatDate(data.calculated_at)}
           </div>
-        </div>
+        </section>
 
         {/* Score Gauge */}
-        <div className="rounded-lg border border-border bg-card p-6 flex flex-col items-center justify-center">
+        <section className="surface-card flex flex-col items-center justify-center p-5 sm:p-6">
           <div className="relative h-36 w-36">
             <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
               <circle
@@ -244,11 +235,11 @@ export function EmployeeRiskDetailPage() {
             </div>
           </div>
           <div className="mt-3">{riskBadge(data.risk_level)}</div>
-        </div>
+        </section>
       </div>
 
       {/* Risk Factors */}
-      <div className="rounded-lg border border-border bg-card p-6">
+      <section className="surface-card p-5 sm:p-6">
         <h3 className="text-lg font-semibold text-foreground mb-4">Risk Factor Breakdown</h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {(data.factors || []).map((f, i) => {
@@ -260,7 +251,7 @@ export function EmployeeRiskDetailPage() {
             return (
               <div
                 key={i}
-                className="rounded-lg border border-border p-4 transition-colors duration-150 hover:border-brand-400"
+                className="rounded-xl border border-border bg-muted/20 p-4 transition-colors duration-150 hover:border-brand-400 hover:bg-muted/40"
               >
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="text-sm font-semibold text-foreground">{f.name}</h4>
@@ -273,7 +264,7 @@ export function EmployeeRiskDetailPage() {
                 </div>
                 <div className="h-2 w-full rounded-full bg-muted mb-2">
                   <div
-                    className="h-2 rounded-full transition-all"
+                    className="h-2 rounded-full transition-[width]"
                     style={{
                       width: `${f.impact}%`,
                       backgroundColor: factorColor,
@@ -290,18 +281,18 @@ export function EmployeeRiskDetailPage() {
             );
           })}
         </div>
-      </div>
+      </section>
 
       {/* Historical Score Trend */}
       {data.history && data.history.length > 1 && (
-        <div className="rounded-lg border border-border bg-card p-6">
+        <section className="surface-card p-5 sm:p-6">
           <h3 className="text-lg font-semibold text-foreground mb-4">
             Score History
           </h3>
           <ResponsiveContainer width="100%" height={220}>
             <LineChart
               data={data.history.map((h) => ({
-                date: new Date(h.calculated_at).toLocaleDateString(),
+                date: formatDate(h.calculated_at),
                 score: h.score,
               }))}
             >
@@ -319,11 +310,11 @@ export function EmployeeRiskDetailPage() {
               />
             </LineChart>
           </ResponsiveContainer>
-        </div>
+        </section>
       )}
 
       {/* Recommended Actions */}
-      <div className="rounded-lg border border-border bg-card p-6">
+      <section className="surface-card p-5 sm:p-6">
         <h3 className="text-lg font-semibold text-foreground mb-1">{recs.title}</h3>
         <p className="text-sm text-muted-foreground mb-4">
           Based on the {data.risk_level} risk level for this employee.
@@ -336,7 +327,7 @@ export function EmployeeRiskDetailPage() {
             </li>
           ))}
         </ul>
-      </div>
+      </section>
     </div>
   );
 }

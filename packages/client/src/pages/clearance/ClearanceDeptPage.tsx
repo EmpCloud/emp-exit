@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Shield, Plus, Trash2, Edit2, Loader2, X, Check } from "lucide-react";
+import { Shield, Plus, Trash2, Edit2, X, Check } from "lucide-react";
 import { apiGet, apiPost, apiPut, apiDelete } from "@/api/client";
 import { cn } from "@/lib/utils";
+import { EmptyState, LoadingState } from "@/components/ui/States";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 interface Department {
   id: string;
@@ -27,6 +29,8 @@ export function ClearanceDeptPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editApproverRole, setEditApproverRole] = useState("");
+  const [deleteDepartmentId, setDeleteDepartmentId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadDepartments();
@@ -63,13 +67,21 @@ export function ClearanceDeptPage() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm(t("clearance.confirmDeleteDept"))) return;
+  function handleDelete(id: string) {
+    setDeleteDepartmentId(id);
+  }
+
+  async function confirmDelete() {
+    if (!deleteDepartmentId) return;
+    setDeleting(true);
     try {
-      await apiDelete(`/clearance/departments/${id}`);
+      await apiDelete(`/clearance/departments/${deleteDepartmentId}`);
+      setDeleteDepartmentId(null);
       await loadDepartments();
     } catch {
       // handled
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -105,25 +117,21 @@ export function ClearanceDeptPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-rose-600 dark:text-rose-400" />
-      </div>
-    );
+    return <div className="surface-card"><LoadingState label={t("common.loading")} /></div>;
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">{t("clearance.deptTitle")}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+    <div className="app-page">
+      <div className="page-header">
+        <div className="page-header__content">
+          <h1 className="page-title">{t("clearance.deptTitle")}</h1>
+          <p className="page-subtitle">
             {t("clearance.deptSubtitle")}
           </p>
         </div>
         <button
           onClick={() => setShowCreate(true)}
-          className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-rose-700 transition-colors"
+          className="button-primary"
         >
           <Plus className="h-4 w-4" />
           {t("clearance.addDepartment")}
@@ -132,10 +140,10 @@ export function ClearanceDeptPage() {
 
       {/* Create Form */}
       {showCreate && (
-        <div className="rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50/50 dark:bg-rose-950/30 p-5">
+        <div className="surface-card border-brand-200 bg-brand-50/35 p-5 dark:border-brand-900 dark:bg-brand-950/20 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-foreground">{t("clearance.addDepartment")}</h3>
-            <button onClick={() => setShowCreate(false)} className="text-muted-foreground hover:text-muted-foreground">
+            <button onClick={() => setShowCreate(false)} className="grid size-10 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground" aria-label={t("common.cancel")}>
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -151,7 +159,7 @@ export function ClearanceDeptPage() {
                   value={createName}
                   onChange={(e) => setCreateName(e.target.value)}
                   placeholder={t("clearance.deptNamePlaceholder")}
-                  className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  className="control"
                 />
               </div>
               <div>
@@ -163,7 +171,7 @@ export function ClearanceDeptPage() {
                   value={createApproverRole}
                   onChange={(e) => setCreateApproverRole(e.target.value)}
                   placeholder={t("clearance.approverRolePlaceholder")}
-                  className="w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  className="control"
                 />
               </div>
             </div>
@@ -171,14 +179,14 @@ export function ClearanceDeptPage() {
               <button
                 type="submit"
                 disabled={saving || !createName}
-                className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50"
+                className="button-primary"
               >
                 {saving ? t("clearance.adding") : t("clearance.add")}
               </button>
               <button
                 type="button"
                 onClick={() => setShowCreate(false)}
-                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/50"
+                className="button-secondary"
               >
                 {t("common.cancel")}
               </button>
@@ -189,25 +197,23 @@ export function ClearanceDeptPage() {
 
       {/* Departments List */}
       {departments.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card p-12 text-center">
-          <Shield className="mx-auto h-12 w-12 text-muted-foreground/50 mb-3" />
-          <p className="text-sm text-muted-foreground">{t("clearance.noDepartments")}</p>
-        </div>
+        <div className="surface-card"><EmptyState icon={Shield} title={t("clearance.noDepartments")} /></div>
       ) : (
-        <div className="rounded-xl border border-border bg-card overflow-x-auto -mx-4 lg:mx-0">
-          <table className="w-full text-left text-sm">
+        <div className="data-table-shell">
+          <div className="data-table-scroll">
+          <table className="data-table">
             <thead>
-              <tr className="border-b border-border text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                <th className="px-6 py-3">{t("clearance.colOrder")}</th>
-                <th className="px-6 py-3">{t("clearance.colDepartment")}</th>
-                <th className="px-6 py-3">{t("clearance.colApproverRole")}</th>
-                <th className="px-6 py-3">{t("common.status")}</th>
-                <th className="px-6 py-3 text-right">{t("common.actions")}</th>
+              <tr>
+                <th scope="col">{t("clearance.colOrder")}</th>
+                <th scope="col">{t("clearance.colDepartment")}</th>
+                <th scope="col">{t("clearance.colApproverRole")}</th>
+                <th scope="col">{t("common.status")}</th>
+                <th scope="col" className="text-end">{t("common.actions")}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody>
               {departments.map((dept) => (
-                <tr key={dept.id} className="hover:bg-muted/50">
+                <tr key={dept.id}>
                   <td className="px-6 py-3 text-muted-foreground">{dept.sort_order + 1}</td>
                   <td className="px-6 py-3">
                     {editingId === dept.id ? (
@@ -215,7 +221,7 @@ export function ClearanceDeptPage() {
                         type="text"
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
-                        className="rounded border border-border bg-card text-foreground px-2 py-1 text-sm focus:border-rose-500 focus:outline-none"
+                        className="control"
                       />
                     ) : (
                       <span className="font-medium text-foreground">{dept.name}</span>
@@ -227,17 +233,17 @@ export function ClearanceDeptPage() {
                         type="text"
                         value={editApproverRole}
                         onChange={(e) => setEditApproverRole(e.target.value)}
-                        className="rounded border border-border bg-card text-foreground px-2 py-1 text-sm focus:border-rose-500 focus:outline-none"
+                        className="control"
                       />
                     ) : (
-                      <span className="text-muted-foreground">{dept.approver_role || "--"}</span>
+                      <span className="text-muted-foreground">{dept.approver_role || "—"}</span>
                     )}
                   </td>
                   <td className="px-6 py-3">
                     <button
                       onClick={() => handleToggleActive(dept)}
                       className={cn(
-                        "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium cursor-pointer",
+                        "status-pill min-h-11 cursor-pointer px-3",
                         dept.is_active
                           ? "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300"
                           : "bg-muted text-muted-foreground",
@@ -253,13 +259,15 @@ export function ClearanceDeptPage() {
                           <button
                             onClick={() => handleSaveEdit(dept.id)}
                             disabled={saving}
-                            className="rounded p-1.5 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-950/40"
+                            className="grid size-10 place-items-center rounded-lg text-green-600 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-950/40"
+                            aria-label={t("checklists.saveChanges", { defaultValue: "Save" })}
                           >
                             <Check className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => setEditingId(null)}
-                            className="rounded p-1.5 text-muted-foreground hover:bg-muted"
+                            className="grid size-10 place-items-center rounded-lg text-muted-foreground hover:bg-muted"
+                            aria-label={t("common.cancel")}
                           >
                             <X className="h-4 w-4" />
                           </button>
@@ -268,13 +276,15 @@ export function ClearanceDeptPage() {
                         <>
                           <button
                             onClick={() => startEdit(dept)}
-                            className="rounded p-1.5 text-muted-foreground hover:bg-muted hover:text-muted-foreground"
+                            className="grid size-10 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+                            aria-label={t("common.edit", { defaultValue: "Edit" })}
                           >
                             <Edit2 className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(dept.id)}
-                            className="rounded p-1.5 text-muted-foreground hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-500"
+                            className="grid size-10 place-items-center rounded-lg text-muted-foreground hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/40"
+                            aria-label={t("common.delete", { defaultValue: "Delete" })}
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -286,8 +296,20 @@ export function ClearanceDeptPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
+      <ConfirmDialog
+        open={deleteDepartmentId !== null}
+        title={t("common.delete")}
+        message={t("clearance.confirmDeleteDept")}
+        confirmLabel={t("common.delete")}
+        cancelLabel={t("common.cancel")}
+        tone="danger"
+        loading={deleting}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteDepartmentId(null)}
+      />
     </div>
   );
 }

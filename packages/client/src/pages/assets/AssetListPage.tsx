@@ -7,11 +7,14 @@ import {
   AlertTriangle,
   XCircle,
   Clock,
-  Loader2,
 } from "lucide-react";
 import { apiGet, apiPost, apiPut } from "@/api/client";
 import toast from "react-hot-toast";
 import { cn, formatDate } from "@/lib/utils";
+import { Button } from "@/components/ui/Button";
+import { FieldLabel, Input, Select } from "@/components/ui/Field";
+import { Page, PageActions, PageDescription, PageHeader, PageHeaderContent, PageTitle } from "@/components/ui/Page";
+import { EmptyState, LoadingState } from "@/components/ui/States";
 
 const CATEGORIES = [
   { key: "laptop", label: "Laptop" },
@@ -103,56 +106,52 @@ export function AssetListPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Asset Returns</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+    <Page>
+      <PageHeader>
+        <PageHeaderContent>
+          <PageTitle>Asset Returns</PageTitle>
+          <PageDescription>
             Track company asset returns for exiting employees.
-          </p>
-        </div>
+          </PageDescription>
+        </PageHeaderContent>
         {exitId && (
-          <button
+          <PageActions><Button
             onClick={() => setShowForm(!showForm)}
-            className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+            aria-expanded={showForm}
           >
-            <Plus className="h-4 w-4" />
+            <Plus aria-hidden="true" className="h-4 w-4" />
             Add Asset
-          </button>
+          </Button></PageActions>
         )}
-      </div>
+      </PageHeader>
 
       {/* Org-wide asset list (shown when no specific exit is selected) */}
       {!exitId && (
         loading ? (
-          <div className="flex h-32 items-center justify-center">
-            <Loader2 className="h-6 w-6 animate-spin text-rose-600 dark:text-rose-400" />
-          </div>
+          <LoadingState label="Loading assets" className="surface-card" />
         ) : allAssets.length === 0 ? (
-          <div className="rounded-lg border border-border bg-card p-8 text-center">
-            <Package className="mx-auto h-10 w-10 text-muted-foreground/50 mb-3" />
-            <p className="text-sm font-medium text-foreground">No assets tracked yet</p>
-            <p className="mt-1 text-sm text-muted-foreground">
+          <EmptyState title="No assets tracked yet" icon={Package} className="surface-card" action={
+            <p className="text-sm text-muted-foreground">
               Asset returns are tracked per exit. Open an exit from the{" "}
-              <a href="/exits" className="font-medium text-rose-600 hover:text-rose-700 dark:text-rose-300 underline">
+              <Link to="/exits" className="font-semibold text-primary underline decoration-primary/30 underline-offset-4 hover:decoration-primary">
                 Exits list
-              </a>{" "}
+              </Link>{" "}
               and add the assets to be returned.
             </p>
-          </div>
+          } />
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-border bg-card -mx-4 lg:mx-0">
-            <table className="min-w-full divide-y divide-border">
-              <thead className="bg-muted/50">
+          <div className="data-table-shell"><div className="data-table-scroll">
+            <table className="data-table">
+              <thead>
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Employee</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Asset</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Category</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Status</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground"></th>
+                  <th scope="col">Employee</th>
+                  <th scope="col">Asset</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Status</th>
+                  <th scope="col"><span className="sr-only">Actions</span></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody>
                 {allAssets.map((asset: any) => {
                   const sc = STATUS_CONFIG[asset.status] || STATUS_CONFIG.pending;
                   const Icon = sc.icon;
@@ -160,28 +159,28 @@ export function AssetListPage() {
                     ? `${asset.employee.first_name} ${asset.employee.last_name}`
                     : "—";
                   return (
-                    <tr key={asset.id} className="hover:bg-muted/50">
-                      <td className="px-4 py-3">
+                    <tr key={asset.id}>
+                      <td>
                         <p className="text-sm font-medium text-foreground">{name}</p>
                         {asset.employee?.designation && (
                           <p className="text-xs text-muted-foreground">{asset.employee.designation}</p>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground">
+                      <td className="text-muted-foreground">
                         {asset.asset_name}
-                        {asset.asset_tag && <span className="ml-1 text-xs text-muted-foreground">({asset.asset_tag})</span>}
+                        {asset.asset_tag && <span className="ms-1 text-xs text-muted-foreground">({asset.asset_tag})</span>}
                       </td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground capitalize">{asset.category?.replace("_", " ")}</td>
-                      <td className="px-4 py-3">
-                        <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium", sc.color)}>
-                          <Icon className="h-3 w-3" />
+                      <td className="capitalize text-muted-foreground">{asset.category?.replace("_", " ")}</td>
+                      <td>
+                        <span className={cn("status-pill", sc.color)}>
+                          <Icon aria-hidden="true" className="h-3 w-3" />
                           {sc.label}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="text-end">
                         <Link
                           to={`/assets?exitId=${asset.exit_request_id}`}
-                          className="text-sm font-medium text-rose-600 hover:text-rose-700 dark:text-rose-300"
+                          className="inline-flex min-h-9 items-center rounded-lg px-3 text-sm font-semibold text-primary hover:bg-brand-50 dark:hover:bg-brand-950/40"
                         >
                           Manage
                         </Link>
@@ -191,140 +190,129 @@ export function AssetListPage() {
                 })}
               </tbody>
             </table>
-          </div>
+          </div></div>
         )
       )}
 
       {showForm && (
-        <form onSubmit={handleAdd} className="rounded-lg border border-border bg-card p-6 space-y-4">
-          <h3 className="text-lg font-semibold text-foreground">Add Asset</h3>
+        <form onSubmit={handleAdd} className="surface-card space-y-5 p-5 sm:p-6">
+          <div><h2 className="text-lg font-semibold text-foreground">Add Asset</h2><p className="mt-1 text-sm text-muted-foreground">Record the item and its expected return details.</p></div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-muted-foreground">Asset Name</label>
-              <input
+              <FieldLabel htmlFor="asset-name">Asset Name</FieldLabel>
+              <Input
+                id="asset-name"
                 type="text"
                 required
                 value={form.asset_name}
                 onChange={(e) => setForm({ ...form, asset_name: e.target.value })}
-                className="mt-1 block w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
                 placeholder="MacBook Pro 14"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-muted-foreground">Asset Tag</label>
-              <input
+              <FieldLabel htmlFor="asset-tag">Asset Tag</FieldLabel>
+              <Input
+                id="asset-tag"
                 type="text"
                 value={form.asset_tag}
                 onChange={(e) => setForm({ ...form, asset_tag: e.target.value })}
-                className="mt-1 block w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
                 placeholder="IT-LAP-0042"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-muted-foreground">Category</label>
-              <select
+              <FieldLabel htmlFor="asset-category">Category</FieldLabel>
+              <Select
+                id="asset-category"
                 value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value })}
-                className="mt-1 block w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
               >
                 {CATEGORIES.map((c) => (
                   <option key={c.key} value={c.key}>{c.label}</option>
                 ))}
-              </select>
+              </Select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-muted-foreground">Damage / Replacement Cost</label>
-              <input
+              <FieldLabel htmlFor="replacement-cost">Damage / Replacement Cost</FieldLabel>
+              <Input
+                id="replacement-cost"
                 type="number"
                 min={0}
                 step="0.01"
                 value={form.replacement_cost}
                 onChange={(e) => setForm({ ...form, replacement_cost: e.target.value })}
-                className="mt-1 block w-full rounded-lg border border-border bg-card text-foreground px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
                 placeholder="0"
               />
             </div>
           </div>
           <div className="flex gap-3">
-            <button
+            <Button
               type="submit"
               disabled={submitting}
-              className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-50"
             >
               {submitting ? "Adding..." : "Add Asset"}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => setShowForm(false)}
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/50"
+              variant="secondary"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         </form>
       )}
 
       {!exitId ? null : loading ? (
-        <div className="flex h-32 items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-rose-600 dark:text-rose-400" />
-        </div>
+        <LoadingState label="Loading assets" className="surface-card" />
       ) : assets.length === 0 ? (
-        <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
-          <Package className="mx-auto h-10 w-10 text-muted-foreground/50 mb-3" />
-          No assets tracked yet.
-        </div>
+        <EmptyState title="No assets tracked yet." icon={Package} className="surface-card" />
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border bg-card -mx-4 lg:mx-0">
-          <table className="min-w-full divide-y divide-border">
-            <thead className="bg-muted/50">
+        <div className="data-table-shell"><div className="data-table-scroll">
+          <table className="data-table">
+            <thead>
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Asset</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Tag</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Category</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Return Date</th>
-                <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">Actions</th>
+                <th scope="col">Asset</th><th scope="col">Tag</th><th scope="col">Category</th><th scope="col">Status</th><th scope="col">Return Date</th><th scope="col">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody>
               {assets.map((asset: any) => {
                 const sc = STATUS_CONFIG[asset.status] || STATUS_CONFIG.pending;
                 const Icon = sc.icon;
                 return (
-                  <tr key={asset.id} className="hover:bg-muted/50">
-                    <td className="px-4 py-3 text-sm font-medium text-foreground">{asset.asset_name}</td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground">{asset.asset_tag || "-"}</td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground capitalize">{asset.category?.replace("_", " ")}</td>
-                    <td className="px-4 py-3">
-                      <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium", sc.color)}>
-                        <Icon className="h-3 w-3" />
+                  <tr key={asset.id}>
+                    <td className="font-medium text-foreground">{asset.asset_name}</td>
+                    <td className="text-muted-foreground">{asset.asset_tag || "—"}</td>
+                    <td className="capitalize text-muted-foreground">{asset.category?.replace("_", " ")}</td>
+                    <td>
+                      <span className={cn("status-pill", sc.color)}>
+                        <Icon aria-hidden="true" className="h-3 w-3" />
                         {sc.label}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-sm text-muted-foreground">
-                      {asset.returned_date ? formatDate(asset.returned_date) : "-"}
+                    <td className="text-muted-foreground">
+                      {asset.returned_date ? formatDate(asset.returned_date) : "—"}
                     </td>
-                    <td className="px-4 py-3">
+                    <td>
                       {asset.status === "pending" && (
                         <div className="flex gap-2">
-                          <button
+                          <Button
                             onClick={() => handleStatusUpdate(asset.id, "returned")}
-                            className="rounded bg-green-50 dark:bg-green-950/40 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-950/40"
+                            variant="ghost" className="min-h-9 px-2 text-xs text-emerald-700 dark:text-emerald-300"
                           >
                             Returned
-                          </button>
-                          <button
+                          </Button>
+                          <Button
                             onClick={() => handleStatusUpdate(asset.id, "damaged")}
-                            className="rounded bg-orange-50 dark:bg-orange-950/40 px-2 py-1 text-xs font-medium text-orange-700 dark:text-orange-300 hover:bg-orange-100 dark:hover:bg-orange-950/40"
+                            variant="ghost" className="min-h-9 px-2 text-xs text-amber-700 dark:text-amber-300"
                           >
                             Damaged
-                          </button>
-                          <button
+                          </Button>
+                          <Button
                             onClick={() => handleStatusUpdate(asset.id, "lost")}
-                            className="rounded bg-red-50 dark:bg-red-950/40 px-2 py-1 text-xs font-medium text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-950/40"
+                            variant="ghost" className="min-h-9 px-2 text-xs text-red-700 dark:text-red-300"
                           >
                             Lost
-                          </button>
+                          </Button>
                         </div>
                       )}
                     </td>
@@ -333,8 +321,8 @@ export function AssetListPage() {
               })}
             </tbody>
           </table>
-        </div>
+        </div></div>
       )}
-    </div>
+    </Page>
   );
 }

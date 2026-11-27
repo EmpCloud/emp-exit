@@ -6,18 +6,25 @@
 
 import { useTheme, type Theme } from "@/lib/theme";
 import { Sun, Moon, Monitor } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 
 export function ThemeToggle() {
+  const { t } = useTranslation();
   const { theme, setTheme } = useTheme();
 
   const options: { value: Theme; icon: typeof Sun; label: string }[] = [
-    { value: "light", icon: Sun, label: "Light" },
-    { value: "dark", icon: Moon, label: "Dark" },
-    { value: "system", icon: Monitor, label: "System" },
+    { value: "light", icon: Sun, label: t("theme.light") },
+    { value: "dark", icon: Moon, label: t("theme.dark") },
+    { value: "system", icon: Monitor, label: t("theme.system") },
   ];
 
   return (
-    <div className="inline-flex items-center rounded-md border border-border bg-muted p-0.5">
+    <div
+      role="group"
+      aria-label={t("theme.label")}
+      className="inline-flex items-center rounded-lg border border-border bg-muted/70 p-1 shadow-sm"
+    >
       {options.map(({ value, icon: Icon, label }) => {
         const active = theme === value;
         return (
@@ -28,13 +35,14 @@ export function ThemeToggle() {
             title={label}
             aria-label={label}
             aria-pressed={active}
-            className={`rounded p-1.5 transition-colors ${
+            className={cn(
+              "grid size-9 place-items-center rounded-md transition-[background-color,color,box-shadow] focus-visible:ring-2 focus-visible:ring-ring",
               active
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
+                ? "bg-card text-primary shadow-sm"
+                : "text-muted-foreground hover:bg-card/60 hover:text-foreground",
+            )}
           >
-            <Icon className="h-4 w-4" />
+            <Icon className="h-4 w-4" aria-hidden="true" focusable="false" />
           </button>
         );
       })}

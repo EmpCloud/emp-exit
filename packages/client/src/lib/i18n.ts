@@ -36,18 +36,20 @@ i18n.use(initReactI18next).init({
   },
 });
 
-// Apply text direction (RTL for Arabic) on init and on every language change.
-function applyDirection(lng: string) {
-  const dir = RTL_LANGUAGES.includes(lng) ? "rtl" : "ltr";
+// Keep document-level language metadata in sync on init and every change.
+function applyDocumentLanguage(lng: string) {
+  const baseLanguage = lng.split("-")[0];
+  const dir = RTL_LANGUAGES.includes(baseLanguage) ? "rtl" : "ltr";
   document.documentElement.setAttribute("dir", dir);
   document.documentElement.setAttribute("lang", lng);
+  document.title = i18n.t("app.title", { lng });
 }
 
-applyDirection(savedLanguage);
+applyDocumentLanguage(i18n.resolvedLanguage || savedLanguage);
 
 i18n.on("languageChanged", (lng: string) => {
   localStorage.setItem("emp-exit-language", lng);
-  applyDirection(lng);
+  applyDocumentLanguage(i18n.resolvedLanguage || lng);
 });
 
 export default i18n;

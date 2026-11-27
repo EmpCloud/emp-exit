@@ -14,6 +14,11 @@ import {
 import { apiGet, api } from "@/api/client";
 import toast from "react-hot-toast";
 import { cn, formatDate } from "@/lib/utils";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { Badge, type BadgeTone } from "@/components/ui/Badge";
+import { Button, ButtonLink } from "@/components/ui/Button";
+import { Page, PageDescription, PageHeader, PageHeaderContent, PageTitle } from "@/components/ui/Page";
+import { EmptyState, LoadingState } from "@/components/ui/States";
 
 const LETTER_TYPES: Record<string, string> = {
   experience: "Experience Letter",
@@ -22,14 +27,14 @@ const LETTER_TYPES: Record<string, string> = {
   noc: "NOC",
 };
 
-const STATUS_COLORS: Record<string, string> = {
-  initiated: "bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300",
-  notice_period: "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300",
-  clearance_pending: "bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300",
-  fnf_pending: "bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300",
-  fnf_processed: "bg-indigo-100 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300",
-  completed: "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300",
-  cancelled: "bg-muted text-muted-foreground",
+const STATUS_TONES: Record<string, BadgeTone> = {
+  initiated: "info",
+  notice_period: "warning",
+  clearance_pending: "warning",
+  fnf_pending: "brand",
+  fnf_processed: "info",
+  completed: "success",
+  cancelled: "neutral",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -48,13 +53,6 @@ const CHECKLIST_STATUS_COLORS: Record<string, string> = {
   completed: "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300",
   waived: "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300",
   na: "bg-muted/50 text-muted-foreground",
-};
-
-const CLEARANCE_STATUS_COLORS: Record<string, string> = {
-  pending: "bg-muted text-muted-foreground",
-  approved: "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300",
-  rejected: "bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-300",
-  waived: "bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300",
 };
 
 export function MyExitPage() {
@@ -145,68 +143,47 @@ export function MyExitPage() {
   const canWithdraw = exit && (exit.status === "initiated" || exit.status === "notice_period");
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-rose-600 dark:text-rose-400" />
-      </div>
-    );
+    return <LoadingState />;
   }
 
   if (!exit) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">My Exit Status</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Track your exit process.</p>
+      <Page>
+        <PageHeader><PageHeaderContent><PageTitle>My Exit Status</PageTitle><PageDescription>Track your exit process.</PageDescription></PageHeaderContent></PageHeader>
+        <div className="surface-card">
+          <EmptyState title="You don't have an active exit request." icon={UserMinus} action={<ButtonLink to="/exits/resign">Submit Resignation</ButtonLink>} />
         </div>
-        <div className="rounded-xl border border-border bg-card p-12 text-center">
-          <UserMinus className="mx-auto h-12 w-12 text-muted-foreground/50 mb-4" />
-          <p className="text-muted-foreground mb-4">You don't have an active exit request.</p>
-          <Link
-            to="/exits/resign"
-            className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-rose-700"
-          >
-            Submit Resignation
-          </Link>
-        </div>
-      </div>
+      </Page>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">My Exit Status</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Track your exit process and pending actions.</p>
-      </div>
+    <Page>
+      <PageHeader><PageHeaderContent><PageTitle>My Exit Status</PageTitle><PageDescription>Track your exit process and pending actions.</PageDescription></PageHeaderContent></PageHeader>
 
       {/* Status Card */}
-      <div className="rounded-xl border border-border bg-card p-6">
+      <div className="surface-card p-5 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-3">
               <h2 className="text-lg font-semibold text-foreground">Exit Request</h2>
-              <span
-                className={cn(
-                  "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
-                  STATUS_COLORS[exit.status],
-                )}
-              >
+              <Badge tone={STATUS_TONES[exit.status] || "neutral"}>
                 {STATUS_LABELS[exit.status] || exit.status}
-              </span>
+              </Badge>
             </div>
             <p className="mt-1 text-sm text-muted-foreground capitalize">
               {exit.exit_type?.replace(/_/g, " ")} &middot; {exit.reason_category?.replace(/_/g, " ")}
             </p>
           </div>
           {canWithdraw && (
-            <button
+            <Button
               onClick={() => setConfirmWithdraw(true)}
-              className="inline-flex items-center gap-1.5 self-start rounded-lg border border-red-200 dark:border-red-900 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40"
+              className="self-start"
+              variant="danger"
             >
               <UserMinus className="h-3.5 w-3.5" />
               Withdraw Resignation
-            </button>
+            </Button>
           )}
         </div>
 
@@ -214,13 +191,13 @@ export function MyExitPage() {
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Resignation Date</p>
             <p className="mt-0.5 text-sm text-foreground">
-              {exit.resignation_date ? formatDate(exit.resignation_date) : "--"}
+              {exit.resignation_date ? formatDate(exit.resignation_date) : "—"}
             </p>
           </div>
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Last Working Date</p>
             <p className="mt-0.5 text-sm text-foreground">
-              {exit.last_working_date ? formatDate(exit.last_working_date) : "--"}
+              {exit.last_working_date ? formatDate(exit.last_working_date) : "—"}
             </p>
           </div>
           <div>
@@ -239,7 +216,7 @@ export function MyExitPage() {
 
       {/* Notice Buyout Card */}
       {exit && exit.status !== "completed" && exit.status !== "cancelled" && (
-        <div className="rounded-xl border border-border bg-card p-6">
+        <div className="surface-card p-5 sm:p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-100 dark:bg-rose-950/40">
@@ -252,7 +229,7 @@ export function MyExitPage() {
             </div>
             <Link
               to="/buyout/calculator"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+              className="button-primary"
             >
               <Calculator className="h-4 w-4" />
               Calculate Buyout
@@ -264,7 +241,7 @@ export function MyExitPage() {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {exit.checklist_summary && (
-          <div className="rounded-xl border border-border bg-card p-5">
+          <div className="surface-card p-5">
             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-3">
               <ClipboardCheck className="h-5 w-5 text-rose-500" />
               Checklist Progress
@@ -275,7 +252,7 @@ export function MyExitPage() {
             </p>
             <div className="mt-2 w-full bg-muted rounded-full h-2">
               <div
-                className="bg-rose-500 h-2 rounded-full transition-all"
+                className="h-2 rounded-full bg-primary transition-[width]"
                 style={{ width: `${exit.checklist_summary.progress}%` }}
               />
             </div>
@@ -283,7 +260,7 @@ export function MyExitPage() {
         )}
 
         {exit.clearance_summary && (
-          <div className="rounded-xl border border-border bg-card p-5">
+          <div className="surface-card p-5">
             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-3">
               <Shield className="h-5 w-5 text-rose-500" />
               Clearance Progress
@@ -294,7 +271,7 @@ export function MyExitPage() {
             </p>
             <div className="mt-2 w-full bg-muted rounded-full h-2">
               <div
-                className="bg-rose-500 h-2 rounded-full transition-all"
+                className="h-2 rounded-full bg-primary transition-[width]"
                 style={{ width: `${exit.clearance_summary.progress}%` }}
               />
             </div>
@@ -302,7 +279,7 @@ export function MyExitPage() {
         )}
 
         {exit.fnf_summary ? (
-          <div className="rounded-xl border border-border bg-card p-5">
+          <div className="surface-card p-5">
             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-3">
               <DollarSign className="h-5 w-5 text-rose-500" />
               Full & Final
@@ -313,7 +290,7 @@ export function MyExitPage() {
             </p>
           </div>
         ) : (
-          <div className="rounded-xl border border-border bg-card p-5">
+          <div className="surface-card p-5">
             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-3">
               <DollarSign className="h-5 w-5 text-muted-foreground/50" />
               Full & Final
@@ -325,7 +302,7 @@ export function MyExitPage() {
 
       {/* Checklist Items */}
       {checklist && checklist.items && checklist.items.length > 0 && (
-        <div className="rounded-xl border border-border bg-card">
+        <div className="surface-card overflow-hidden">
           <div className="border-b border-border px-6 py-4">
             <h2 className="text-lg font-semibold text-foreground">My Checklist</h2>
           </div>
@@ -366,7 +343,7 @@ export function MyExitPage() {
 
       {/* My Documents */}
       {letters.length > 0 && (
-        <div className="rounded-xl border border-border bg-card">
+        <div className="surface-card overflow-hidden">
           <div className="flex items-center gap-2 border-b border-border px-6 py-4">
             <FileSignature className="h-5 w-5 text-rose-500" />
             <h2 className="text-lg font-semibold text-foreground">My Documents</h2>
@@ -379,13 +356,14 @@ export function MyExitPage() {
                     {LETTER_TYPES[l.letter_type] || l.letter_type}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Issued: {l.issued_date ? formatDate(l.issued_date) : "--"}
+                    Issued: {l.issued_date ? formatDate(l.issued_date) : "—"}
                   </p>
                 </div>
-                <button
+                <Button
                   onClick={() => handleDownload(l.id, l.letter_type)}
                   disabled={downloadingId === l.id}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted/50 disabled:opacity-50"
+                  variant="secondary"
+                  className="min-h-10 px-3 text-xs"
                 >
                   {downloadingId === l.id ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -393,7 +371,7 @@ export function MyExitPage() {
                     <Download className="h-3.5 w-3.5" />
                   )}
                   Download
-                </button>
+                </Button>
               </div>
             ))}
           </div>
@@ -401,34 +379,17 @@ export function MyExitPage() {
       )}
 
       {/* Withdraw confirmation */}
-      {confirmWithdraw && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-sm rounded-xl bg-card p-6 shadow-xl">
-            <h3 className="text-lg font-semibold text-foreground">Withdraw Resignation?</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              This cancels your exit request. Your manager and HR will be notified. You can submit a
-              new resignation later if needed.
-            </p>
-            <div className="mt-5 flex justify-end gap-3">
-              <button
-                onClick={() => setConfirmWithdraw(false)}
-                disabled={withdrawing}
-                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/50"
-              >
-                Keep Resignation
-              </button>
-              <button
-                onClick={handleWithdraw}
-                disabled={withdrawing}
-                className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
-              >
-                {withdrawing && <Loader2 className="h-4 w-4 animate-spin" />}
-                Withdraw
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      <ConfirmDialog
+        open={confirmWithdraw}
+        title="Withdraw Resignation?"
+        message="This cancels your exit request. Your manager and HR will be notified. You can submit a new resignation later if needed."
+        confirmLabel="Withdraw"
+        cancelLabel="Keep Resignation"
+        tone="danger"
+        loading={withdrawing}
+        onConfirm={handleWithdraw}
+        onCancel={() => setConfirmWithdraw(false)}
+      />
+    </Page>
   );
 }
